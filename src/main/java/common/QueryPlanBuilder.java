@@ -1,7 +1,9 @@
 package common;
 
 import jdk.jshell.spi.ExecutionControl;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import operator.*;
 
 /**
@@ -29,8 +31,9 @@ public class QueryPlanBuilder {
    * @return the root of the query plan
    * @precondition stmt is a Select having a body that is a PlainSelect
    */
-  @SuppressWarnings("unchecked")
-  public Operator buildPlan(Statement stmt) throws ExecutionControl.NotImplementedException {
-    throw new ExecutionControl.NotImplementedException("");
+  public Operator buildPlan(Statement stmt){
+    PlainSelect select = (PlainSelect) stmt;
+    Table table = (Table) select.getFromItem();
+    return new ScanOperator(table.getName());
   }
 }
