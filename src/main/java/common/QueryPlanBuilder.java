@@ -1,6 +1,6 @@
 package common;
 
-import jdk.jshell.spi.ExecutionControl;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -31,9 +31,10 @@ public class QueryPlanBuilder {
    * @return the root of the query plan
    * @precondition stmt is a Select having a body that is a PlainSelect
    */
-  public Operator buildPlan(Statement stmt){
+  public Operator buildPlan(Statement stmt) {
     PlainSelect select = (PlainSelect) stmt;
     Table table = (Table) select.getFromItem();
+    Expression where = (Expression) select.getWhere();
     return new ScanOperator(table.getName());
   }
 }

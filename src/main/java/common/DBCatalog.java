@@ -78,4 +78,14 @@ public class DBCatalog {
   public File getFileForTable(String tableName) {
     return new File(dbDirectory + "/data/" + tableName);
   }
+
+  /**
+   * Gets the schema for the specified table
+   *
+   * @param tableName table name
+   * @return a list of JSQL columns
+   */
+  public ArrayList<Column> getTableSchema(String tableName) {
+    return tables.get(tableName);
+  }
 }

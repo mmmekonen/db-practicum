@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Implementation-Title: Cornell DB Practicum
+Implementation-Version: 1
+Main-Class: compiler.Compiler
+
