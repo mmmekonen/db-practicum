@@ -48,6 +48,9 @@ public class QueryPlanBuilder {
     PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
     Table table = (Table) plainSelect.getFromItem();
     Expression where = (Expression) plainSelect.getWhere();
-    return new ScanOperator(table.getName());
+    if (where == null) {
+      return new ScanOperator(table.getName());
+    }
+    return new SelectOperator(table.getName(), new ScanOperator(table.getName()), where);
   }
 }
