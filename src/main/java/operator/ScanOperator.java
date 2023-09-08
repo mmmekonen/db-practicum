@@ -9,31 +9,26 @@ import java.util.Scanner;
 
 public class ScanOperator extends Operator {
 
-  private String tableName;
   private File dbFile;
   private ArrayList<Tuple> tuples = new ArrayList<Tuple>();
+  private int index = 0;
 
   // explicit constructor
   public ScanOperator(String tableName) {
 
     // change
-    super(null);
+    super(DBCatalog.getInstance().getTableSchema(tableName));
 
-    this.tableName = tableName;
     DBCatalog dbCatalog = DBCatalog.getInstance();
     this.dbFile = dbCatalog.getFileForTable(tableName);
+    this.index = 0;
 
     Scanner sc;
     try {
       sc = new Scanner(dbFile);
       while (sc.hasNextLine()) {
         String line = sc.nextLine();
-        String[] lineArr = line.split("\\|");
-        ArrayList<Integer> tuple = new ArrayList<Integer>();
-        for (String s : lineArr) {
-          tuple.add(Integer.parseInt(s));
-        }
-        Tuple t = new Tuple(tuple);
+        Tuple t = new Tuple(line);
         this.tuples.add(t);
       }
     } catch (FileNotFoundException e) {
@@ -43,9 +38,8 @@ public class ScanOperator extends Operator {
 
   /** Resets cursor on the operator to the beginning */
   public void reset() {
-    // TODO
     // reset to beginning
-    new ScanOperator(this.tableName);
+    this.index = 0;
   }
 
   /**
@@ -54,8 +48,9 @@ public class ScanOperator extends Operator {
    * @return next Tuple, or null if we are at the end
    */
   public Tuple getNextTuple() {
-    while (this.tuples.size() > 0) {
-      return this.tuples.remove(0);
+    while (this.tuples.size() > this.index) {
+      this.index++;
+      return this.tuples.get(this.index - 1);
     }
     return null;
   }
