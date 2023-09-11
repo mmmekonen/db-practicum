@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="ParserExample" tests="1" skipped="0" failures="0" errors="0" timestamp="2023-09-08T17:45:49" hostname="THINKPAD_X1_EXT" time="0.079">
-  <properties/>
-  <testcase name="parserExampleTest()" classname="ParserExample" time="0.079"/>
-  <system-out><![CDATA[13:45:49.444 [Test worker] ERROR ParserExample - Illegal char <:> at index 2: /C:/Users/chocofacenine/Desktop/2023/CS-4321/db-practicum-repo/build/resources/test/samples/input/queries.sql
-]]></system-out>
-  <system-err><![CDATA[Exception occurred during parsing
-]]></system-err>
-</testsuite>
