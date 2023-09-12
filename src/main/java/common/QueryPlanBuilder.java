@@ -53,17 +53,13 @@ public class QueryPlanBuilder {
     Expression where = (Expression) plainSelect.getWhere();
     ArrayList<SelectItem> selects = (ArrayList<SelectItem>) plainSelect.getSelectItems();
 
-    if (where == null && selects.size() == 0) {
-      return new ScanOperator(table.getName());
-    } else if (where == null && selects.size() > 0) {
+    if (where == null) {
       if (selects.get(0) instanceof AllColumns) {
         return new ScanOperator(table.getName());
       } else {
         return new ProjectionOperator(selects, new ScanOperator(table.getName()));
       }
-    } else if (where != null && selects.size() == 0) {
-      return new SelectOperator(table.getName(), new ScanOperator(table.getName()), where);
-    } else if (where != null && selects.size() > 0) {
+    } else {
       if (selects.get(0) instanceof AllColumns) {
         return new SelectOperator(table.getName(), new ScanOperator(table.getName()), where);
       } else {
@@ -71,6 +67,6 @@ public class QueryPlanBuilder {
             new SelectOperator(table.getName(), new ScanOperator(table.getName()), where));
       }
     }
-    return null;
+
   }
 }
