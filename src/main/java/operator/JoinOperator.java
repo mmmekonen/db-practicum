@@ -9,12 +9,12 @@ import java.util.ArrayList;
 
 public class JoinOperator extends Operator {
 
-    private ScanOperator left;
-    private ScanOperator right;
+    private Operator left;
+    private Operator right;
     private Expression expression;
 
     /** TODO: */
-    public JoinOperator(String tablename, ScanOperator left, ScanOperator right, Expression expression) {
+    public JoinOperator(String tablename, Operator left, Operator right, Expression expression) {
         super(DBCatalog.getInstance().getTableSchema(tablename));
         this.left = left;
         this.right = right;
