@@ -129,6 +129,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
         // TODO Auto-generated method stub
         String name = tableColumn.getColumnName();
         String tableName = tableColumn.getTable().getName();
+        tableName = QueryPlanBuilder.alias.get(tableName) != null ? QueryPlanBuilder.alias.get(tableName) : tableName;
         for (int i = 0; i < columns.size(); i++) {
             String name2 = columns.get(i).getColumnName();
             String tableName2 = columns.get(i).getTable().getName();

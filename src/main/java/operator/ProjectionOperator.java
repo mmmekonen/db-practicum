@@ -1,5 +1,6 @@
 package operator;
 
+import common.QueryPlanBuilder;
 import common.Tuple;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +22,12 @@ public class ProjectionOperator extends Operator {
       SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
       Column expression = (Column) selectExpressionItem.getExpression();
       String columnName = expression.getColumnName();
+      String tableName = expression.getTable().getName();
+      tableName = QueryPlanBuilder.alias.get(tableName) != null ? QueryPlanBuilder.alias.get(tableName) : tableName;
 
       int index = 0;
       for (Column column : child.outputSchema) {
-        if (column.getColumnName().equals(columnName)) {
+        if (column.getColumnName().equals(columnName) && column.getTable().getName().equals(tableName)) {
           this.projectionColumnsIndices.add(index);
         }
         index++;

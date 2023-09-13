@@ -1,7 +1,10 @@
 package common;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -36,6 +39,9 @@ import operator.*;
  * 2 student instructions, Section 2.1
  */
 public class QueryPlanBuilder {
+
+  public static HashMap<String, String> alias = null;
+
   public QueryPlanBuilder() {
   }
 
@@ -52,6 +58,11 @@ public class QueryPlanBuilder {
     Table table = (Table) plainSelect.getFromItem();
     Expression where = (Expression) plainSelect.getWhere();
     ArrayList<SelectItem> selects = (ArrayList<SelectItem>) plainSelect.getSelectItems();
+
+    if (table.getAlias() != null) {
+      alias = new HashMap<String, String>();
+      alias.put(table.getAlias().getName(), table.getName());
+    }
 
     if (where == null) {
       if (selects.get(0) instanceof AllColumns) {
