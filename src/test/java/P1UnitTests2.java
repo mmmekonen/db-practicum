@@ -28,8 +28,7 @@ public class P1UnitTests2 {
     String path = Objects.requireNonNull(classLoader.getResource("samples/input")).getPath();
     DBCatalog.getInstance().setDataDirectory(path + "/db");
 
-    String queriesFile =
-        Objects.requireNonNull(classLoader.getResource("samples/input/queries2.sql")).getPath();
+    String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries2.sql")).getPath();
     // for windows machine
     // if (queriesFile.contains(":")) {
     // queriesFile = queriesFile.substring(3);
@@ -49,12 +48,11 @@ public class P1UnitTests2 {
 
     Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
 
-    Tuple[] expectedTuples =
-        new Tuple[] {
-          new Tuple(new ArrayList<>(List.of(4, 100, 50))),
-          new Tuple(new ArrayList<>(List.of(5, 100, 500))),
-          new Tuple(new ArrayList<>(List.of(6, 300, 400)))
-        };
+    Tuple[] expectedTuples = new Tuple[] {
+        new Tuple(new ArrayList<>(List.of(4, 100, 50))),
+        new Tuple(new ArrayList<>(List.of(5, 100, 500))),
+        new Tuple(new ArrayList<>(List.of(6, 300, 400)))
+    };
 
     for (int i = 0; i < expectedSize; i++) {
       Tuple expectedTuple = expectedTuples[i];
@@ -73,12 +71,11 @@ public class P1UnitTests2 {
 
     Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
 
-    Tuple[] expectedTuples =
-        new Tuple[] {
-          new Tuple(new ArrayList<>(List.of(3, 100, 105))),
-          new Tuple(new ArrayList<>(List.of(5, 100, 500))),
-          new Tuple(new ArrayList<>(List.of(6, 300, 400)))
-        };
+    Tuple[] expectedTuples = new Tuple[] {
+        new Tuple(new ArrayList<>(List.of(3, 100, 105))),
+        new Tuple(new ArrayList<>(List.of(5, 100, 500))),
+        new Tuple(new ArrayList<>(List.of(6, 300, 400)))
+    };
 
     for (int i = 0; i < expectedSize; i++) {
       Tuple expectedTuple = expectedTuples[i];
@@ -97,12 +94,11 @@ public class P1UnitTests2 {
 
     Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
 
-    Tuple[] expectedTuples =
-        new Tuple[] {
-          new Tuple(new ArrayList<>(List.of(4, 100))),
-          new Tuple(new ArrayList<>(List.of(5, 100))),
-          new Tuple(new ArrayList<>(List.of(6, 300)))
-        };
+    Tuple[] expectedTuples = new Tuple[] {
+        new Tuple(new ArrayList<>(List.of(4, 100))),
+        new Tuple(new ArrayList<>(List.of(5, 100))),
+        new Tuple(new ArrayList<>(List.of(6, 300)))
+    };
 
     for (int i = 0; i < expectedSize; i++) {
       Tuple expectedTuple = expectedTuples[i];
@@ -121,15 +117,14 @@ public class P1UnitTests2 {
 
     Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
 
-    Tuple[] expectedTuples =
-        new Tuple[] {
-          new Tuple(new ArrayList<>(List.of(1, 200))),
-          new Tuple(new ArrayList<>(List.of(2, 200))),
-          new Tuple(new ArrayList<>(List.of(3, 100))),
-          new Tuple(new ArrayList<>(List.of(4, 100))),
-          new Tuple(new ArrayList<>(List.of(5, 100))),
-          new Tuple(new ArrayList<>(List.of(6, 300)))
-        };
+    Tuple[] expectedTuples = new Tuple[] {
+        new Tuple(new ArrayList<>(List.of(1, 200))),
+        new Tuple(new ArrayList<>(List.of(2, 200))),
+        new Tuple(new ArrayList<>(List.of(3, 100))),
+        new Tuple(new ArrayList<>(List.of(4, 100))),
+        new Tuple(new ArrayList<>(List.of(5, 100))),
+        new Tuple(new ArrayList<>(List.of(6, 300)))
+    };
 
     for (int i = 0; i < expectedSize; i++) {
       Tuple expectedTuple = expectedTuples[i];
@@ -148,15 +143,112 @@ public class P1UnitTests2 {
 
     Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
 
-    Tuple[] expectedTuples =
-        new Tuple[] {
-          new Tuple(new ArrayList<>(List.of(50, 200, 1))),
-          new Tuple(new ArrayList<>(List.of(200, 200, 2))),
-          new Tuple(new ArrayList<>(List.of(105, 100, 3))),
-          new Tuple(new ArrayList<>(List.of(50, 100, 4))),
-          new Tuple(new ArrayList<>(List.of(500, 100, 5))),
-          new Tuple(new ArrayList<>(List.of(400, 300, 6)))
-        };
+    Tuple[] expectedTuples = new Tuple[] {
+        new Tuple(new ArrayList<>(List.of(50, 200, 1))),
+        new Tuple(new ArrayList<>(List.of(200, 200, 2))),
+        new Tuple(new ArrayList<>(List.of(105, 100, 3))),
+        new Tuple(new ArrayList<>(List.of(50, 100, 4))),
+        new Tuple(new ArrayList<>(List.of(500, 100, 5))),
+        new Tuple(new ArrayList<>(List.of(400, 300, 6)))
+    };
+
+    for (int i = 0; i < expectedSize; i++) {
+      Tuple expectedTuple = expectedTuples[i];
+      Tuple actualTuple = tuples.get(i);
+      Assertions.assertEquals(expectedTuple, actualTuple, "Unexpected tuple at index " + i);
+    }
+  }
+
+  @Test
+  public void testQuery6() throws ExecutionControl.NotImplementedException {
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(5));
+
+    List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
+
+    int expectedSize = 3;
+
+    Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
+
+    Tuple[] expectedTuples = new Tuple[] {
+        new Tuple(new ArrayList<>(List.of(4, 100, 50))),
+        new Tuple(new ArrayList<>(List.of(5, 100, 500))),
+        new Tuple(new ArrayList<>(List.of(6, 300, 400)))
+    };
+
+    for (int i = 0; i < expectedSize; i++) {
+      Tuple expectedTuple = expectedTuples[i];
+      Tuple actualTuple = tuples.get(i);
+      Assertions.assertEquals(expectedTuple, actualTuple, "Unexpected tuple at index " + i);
+    }
+  }
+
+  @Test
+  public void testQuery7() throws ExecutionControl.NotImplementedException {
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(6));
+
+    List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
+
+    int expectedSize = 3;
+
+    Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
+
+    Tuple[] expectedTuples = new Tuple[] {
+        new Tuple(new ArrayList<>(List.of(4, 100))),
+        new Tuple(new ArrayList<>(List.of(5, 100))),
+        new Tuple(new ArrayList<>(List.of(6, 300)))
+    };
+
+    for (int i = 0; i < expectedSize; i++) {
+      Tuple expectedTuple = expectedTuples[i];
+      Tuple actualTuple = tuples.get(i);
+      Assertions.assertEquals(expectedTuple, actualTuple, "Unexpected tuple at index " + i);
+    }
+  }
+
+  @Test
+  public void testQuery8() throws ExecutionControl.NotImplementedException {
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(7));
+
+    List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
+
+    int expectedSize = 6;
+
+    Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
+
+    Tuple[] expectedTuples = new Tuple[] {
+        new Tuple(new ArrayList<>(List.of(1, 200))),
+        new Tuple(new ArrayList<>(List.of(2, 200))),
+        new Tuple(new ArrayList<>(List.of(3, 100))),
+        new Tuple(new ArrayList<>(List.of(4, 100))),
+        new Tuple(new ArrayList<>(List.of(5, 100))),
+        new Tuple(new ArrayList<>(List.of(6, 300)))
+    };
+
+    for (int i = 0; i < expectedSize; i++) {
+      Tuple expectedTuple = expectedTuples[i];
+      Tuple actualTuple = tuples.get(i);
+      Assertions.assertEquals(expectedTuple, actualTuple, "Unexpected tuple at index " + i);
+    }
+  }
+
+  @Test
+  public void testQuery9() throws ExecutionControl.NotImplementedException {
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(8));
+
+    List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
+
+    int expectedSize = 6;
+
+    Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
+
+    Tuple[] expectedTuples = new Tuple[] {
+        new Tuple(new ArrayList<>(List.of(50, 200, 1))),
+        new Tuple(new ArrayList<>(List.of(200, 200, 2))),
+        new Tuple(new ArrayList<>(List.of(105, 100, 3))),
+        new Tuple(new ArrayList<>(List.of(50, 100, 4))),
+        new Tuple(new ArrayList<>(List.of(500, 100, 5))),
+        new Tuple(new ArrayList<>(List.of(400, 300, 6)))
+    };
 
     for (int i = 0; i < expectedSize; i++) {
       Tuple expectedTuple = expectedTuples[i];

@@ -1,6 +1,7 @@
 package operator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import common.SortComparator;
@@ -21,15 +22,22 @@ public class SortOperator extends Operator {
 
         // gives the index in the tuple by order preference (ie. indexOrders[i] = the
         // index in child.outputSchema that is i-th in the final order)
-        ArrayList<Integer> indexOrders = new ArrayList<>(child.outputSchema.size());
+        HashMap<Integer, Integer> indexOrders = new HashMap<>();
         int position = 0;
         while (position < orderbyElements.size()) {
-            indexOrders.set(position, child.outputSchema.indexOf(orderbyElements.get(position)));
-            position++;
+            Column column = orderbyElements.get(position);
+            for (int i = 0; i < child.outputSchema.size(); i++) {
+                if (child.outputSchema.get(i).getColumnName().equals(column.getColumnName())) {
+                    indexOrders.put(position, i);
+                    position++;
+                    break;
+                }
+            }
         }
+
         for (int i = 0; i < child.outputSchema.size(); i++) {
-            if (indexOrders.get(i) == null) {
-                indexOrders.set(i, position);
+            if (!indexOrders.containsValue(i)) {
+                indexOrders.put(position, i);
                 position++;
             }
         }
