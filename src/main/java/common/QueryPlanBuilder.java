@@ -49,7 +49,7 @@ import operator.*;
  */
 public class QueryPlanBuilder {
 
-  public static HashMap<String, String> alias = null;
+  public static HashMap<String, String> alias = new HashMap<String, String>();
 
   public QueryPlanBuilder() {
   }
@@ -96,7 +96,6 @@ public class QueryPlanBuilder {
     Operator rootOperator;
 
     if (table.getAlias() != null) {
-      alias = new HashMap<String, String>();
       alias.put(table.getAlias().getName(), table.getName());
     }
 
