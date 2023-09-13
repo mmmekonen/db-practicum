@@ -1,13 +1,23 @@
 package common;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.Distinct;
+import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import java.util.List;
+import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.OrderByElement;
+import net.sf.jsqlparser.schema.Column;
 import operator.*;
 
 /**
@@ -52,21 +62,77 @@ public class QueryPlanBuilder {
     Table table = (Table) plainSelect.getFromItem();
     Expression where = (Expression) plainSelect.getWhere();
     ArrayList<SelectItem> selects = (ArrayList<SelectItem>) plainSelect.getSelectItems();
+    // Get the order by items
+    List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
+    // Get the distint keyword
+    Distinct distint = plainSelect.getDistinct();
+    // get all aliases
+
+    // get all of the joins operators from the statement
+    // List<Join> joins = plainSelect.getJoins();
+
+    // if (where == null) {
+    // if (selects.get(0) instanceof AllColumns) {
+    // return new ScanOperator(table.getName());
+    // } else {
+    // return new ProjectionOperator(selects, new ScanOperator(table.getName()));
+    // }
+    // } else {
+    // if (selects.get(0) instanceof AllColumns) {
+    // return new SelectOperator(table.getName(), new ScanOperator(table.getName()),
+    // where);
+    // } else {
+    // return new ProjectionOperator(selects,
+    // new SelectOperator(table.getName(), new ScanOperator(table.getName()),
+    // where));
+    // }
+    // }
+
+    Operator rootOperator;
 
     if (where == null) {
-      if (selects.get(0) instanceof AllColumns) {
-        return new ScanOperator(table.getName());
-      } else {
-        return new ProjectionOperator(selects, new ScanOperator(table.getName()));
-      }
+      rootOperator = new ScanOperator(table.getName());
     } else {
-      if (selects.get(0) instanceof AllColumns) {
-        return new SelectOperator(table.getName(), new ScanOperator(table.getName()), where);
-      } else {
-        return new ProjectionOperator(selects,
-            new SelectOperator(table.getName(), new ScanOperator(table.getName()), where));
+      rootOperator = new SelectOperator(table.getName(), new ScanOperator(table.getName()), where);
+    }
+
+    // if (joins != null) {
+    // for (Join join : joins) {
+    // Table joinTable = (Table) join.getRightItem();
+    // Expression joinWhere = (Expression) join.getOnExpression();
+    // rootOperator = new JoinOperator(table.getName(), (ScanOperator) rootOperator,
+    // new ScanOperator(joinTable.getName()), joinWhere);
+    // }
+    // }
+
+    // if (selects.get(0) instanceof AllColumns) {
+    // return rootOperator;
+    // } else {
+    // return new ProjectionOperator(selects, rootOperator);
+    // }
+
+    if (!(selects.get(0) instanceof AllColumns)) {
+      rootOperator = new ProjectionOperator(selects, rootOperator);
+    }
+
+    List<Column> columns = new ArrayList<>();
+    if (orderByElements != null) {
+      for (OrderByElement orderByElement : orderByElements) {
+        // get the column from the orderByElement
+        Column column = (Column) orderByElement.getExpression();
+        columns.add(column);
       }
     }
+
+    if (orderByElements != null) {
+      System.out.print(orderByElements.size());
+      rootOperator = new SortOperator(rootOperator, columns);
+    }
+    if (distint != null) {
+      rootOperator = new DuplicateEliminationOperator(rootOperator);
+    }
+
+    return rootOperator;
 
   }
 }
