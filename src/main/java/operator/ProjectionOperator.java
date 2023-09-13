@@ -23,12 +23,18 @@ public class ProjectionOperator extends Operator {
       String columnName = expression.getColumnName();
 
       int index = 0;
+
+      ArrayList<Column> newOutputSchema = new ArrayList<>();
+
       for (Column column : child.outputSchema) {
         if (column.getColumnName().equals(columnName)) {
           this.projectionColumnsIndices.add(index);
+          newOutputSchema.add(column);
         }
         index++;
       }
+
+      super.outputSchema = newOutputSchema;
     }
   }
 
