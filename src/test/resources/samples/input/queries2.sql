@@ -7,3 +7,6 @@ SELECT * FROM Sailors S WHERE S.A >= 4;
 SELECT S.A, S.B FROM Sailors S WHERE S.A >= 4;
 SELECT S.A, S.B FROM Sailors S;
 SELECT S.C, S.B, S.A FROM Sailors S WHERE S.A >= 0;
+SELECT DISTINCT Reserves.G FROM Reserves;
+SELECT * FROM Sailors S ORDER BY S.B;
+SELECT * FROM Sailors S, Reserves R WHERE S.A = R.G;

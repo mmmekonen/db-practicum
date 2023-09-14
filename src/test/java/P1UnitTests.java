@@ -31,9 +31,9 @@ public class P1UnitTests {
 
     String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
     // for windows machine
-    if (queriesFile.contains(":")) {
-      queriesFile = queriesFile.substring(3);
-    }
+    // if (queriesFile.contains(":")) {
+    // queriesFile = queriesFile.substring(3);
+    // }
     statements = CCJSqlParserUtil.parseStatements(Files.readString(Path.of(queriesFile)));
     queryPlanBuilder = new QueryPlanBuilder();
     statementList = statements.getStatements();
