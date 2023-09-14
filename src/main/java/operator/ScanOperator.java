@@ -10,6 +10,7 @@ import java.util.Scanner;
 public class ScanOperator extends Operator {
 
   private File dbFile;
+  private Scanner scanner;
   private ArrayList<Tuple> tuples = new ArrayList<Tuple>();
   private int index = 0;
 
@@ -21,16 +22,9 @@ public class ScanOperator extends Operator {
 
     DBCatalog dbCatalog = DBCatalog.getInstance();
     this.dbFile = dbCatalog.getFileForTable(tableName);
-    this.index = 0;
 
-    Scanner sc;
     try {
-      sc = new Scanner(dbFile);
-      while (sc.hasNextLine()) {
-        String line = sc.nextLine();
-        Tuple t = new Tuple(line);
-        this.tuples.add(t);
-      }
+      this.scanner = new Scanner(dbFile);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
@@ -39,7 +33,11 @@ public class ScanOperator extends Operator {
   /** Resets cursor on the operator to the beginning */
   public void reset() {
     // reset to beginning
-    this.index = 0;
+    try {
+      this.scanner = new Scanner(this.dbFile);
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -48,9 +46,10 @@ public class ScanOperator extends Operator {
    * @return next Tuple, or null if we are at the end
    */
   public Tuple getNextTuple() {
-    while (this.tuples.size() > this.index) {
-      this.index++;
-      return this.tuples.get(this.index - 1);
+    while (this.scanner.hasNextLine()) {
+      String line = this.scanner.nextLine();
+      Tuple t = new Tuple(line);
+      return t;
     }
     return null;
   }
