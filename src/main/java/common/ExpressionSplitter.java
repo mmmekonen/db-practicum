@@ -20,31 +20,33 @@ public class ExpressionSplitter implements ExpressionVisitor {
 
     private HashMap<Set<String>, Expression> selectionConditions;
     private HashMap<Set<String>, Expression> joinConditions;
+    private HashMap<Set<String>, Expression> conditions;
 
 
 
     public ExpressionSplitter() {
         this.selectionConditions = new HashMap<>();
         this.joinConditions = new HashMap<>();
+        this.conditions = new HashMap<>();
 
     }
 
+    public Expression getConditions(String s) {
+        HashSet<String> h = new HashSet();
+        h.add(s);
+        return conditions.get(h);
+    }
+
+    public Expression getConditions(HashSet<String> h) {
+        return conditions.get(h);
+    }
     private void concatHelper(Expression e, Set<String> t) {
-        if(t.size() == 1) {
-            if (selectionConditions.containsKey(t)) {
+            if (conditions.containsKey(t)) {
                 Expression newExpression = new AndExpression()
-                        .withLeftExpression(selectionConditions.get(t))
+                        .withLeftExpression(conditions.get(t))
                         .withRightExpression(e);
-                selectionConditions.put(t, newExpression);
-            } else selectionConditions.put(t, e);
-        } else {
-            if (joinConditions.containsKey(t)) {
-                Expression newExpression = new AndExpression()
-                        .withLeftExpression(joinConditions.get(t))
-                        .withRightExpression(e);
-                joinConditions.put(t, newExpression);
-            } else joinConditions.put(t, e);
-        }
+                conditions.put(t, newExpression);
+            } else conditions.put(t, e);
 
     }
 

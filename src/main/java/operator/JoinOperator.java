@@ -31,9 +31,18 @@ public class JoinOperator extends Operator {
         Tuple leftTuple = left.getNextTuple();
         Tuple rightTuple = right.getNextTuple();
 
-        ArrayList combined = leftTuple.getAllElements();
-        combined.addAll(rightTuple.getAllElements());
-        Tuple tuple = new Tuple(combined);
+        Tuple tuple;
+
+        if(rightTuple != null && leftTuple != null) {
+            ArrayList combined = leftTuple.getAllElements();
+            combined.addAll(rightTuple.getAllElements());
+            tuple = new Tuple(combined);
+        } else if (leftTuple != null) {
+            tuple = leftTuple;
+        } else {
+            tuple = rightTuple;
+        }
+
 
         ArrayList schema = left.outputSchema;
         schema.addAll(right.outputSchema);
@@ -49,8 +58,11 @@ public class JoinOperator extends Operator {
             }
 
             SelectExpressionVisitor visitor = new SelectExpressionVisitor(tuple, schema);
-            expression.accept(visitor);
-            if (visitor.conditionSatisfied()) return tuple;
+            if(expression != null) {
+                expression.accept(visitor);
+                if (visitor.conditionSatisfied()) return tuple;
+            } else return tuple;
+
         }
 
         return null;

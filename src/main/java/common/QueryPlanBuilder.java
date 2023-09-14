@@ -16,6 +16,8 @@ import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
+
+import java.util.HashSet;
 import java.util.List;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
@@ -71,8 +73,10 @@ public class QueryPlanBuilder {
     List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
     // Get the distint keyword
     Distinct distint = plainSelect.getDistinct();
+    List<Join> joins = plainSelect.getJoins();
     // get all aliases
 
+    /*
     // get all of the joins operators from the statement
     // List<Join> joins = plainSelect.getJoins();
 
@@ -91,7 +95,29 @@ public class QueryPlanBuilder {
     // new SelectOperator(table.getName(), new ScanOperator(table.getName()),
     // where));
     // }
-    // }
+    // } */
+
+
+    if(joins == null) return makeSingleOperator(table, where, selects, orderByElements, distint);
+    else {
+      ExpressionSplitter e = new ExpressionSplitter();
+      where.accept(e);
+
+      Operator left = makeSingleOperator(table, e.getConditions(table.getName()), selects, orderByElements, distint);
+      Operator right = makeSingleOperator((Table) joins.get(0).getRightItem(), e.getConditions(joins.get(0).toString()), selects, orderByElements, distint);
+
+      HashSet h = new HashSet();
+      h.add(table.getName());
+      h.add(joins.get(0).getRightItem().toString());
+      return new JoinOperator(table.getName(), left, right, e.getConditions(h));
+
+    }
+
+
+  }
+
+  private Operator makeSingleOperator(Table table, Expression where, ArrayList selects,
+                                      List<OrderByElement> orderByElements, Distinct distint) {
 
     Operator rootOperator;
 
@@ -105,6 +131,7 @@ public class QueryPlanBuilder {
       rootOperator = new SelectOperator(table.getName(), new ScanOperator(table.getName()), where);
     }
 
+    /*
     // if (joins != null) {
     // for (Join join : joins) {
     // Table joinTable = (Table) join.getRightItem();
@@ -118,7 +145,7 @@ public class QueryPlanBuilder {
     // return rootOperator;
     // } else {
     // return new ProjectionOperator(selects, rootOperator);
-    // }
+    // } */
 
     if (!(selects.get(0) instanceof AllColumns)) {
       rootOperator = new ProjectionOperator(selects, rootOperator);
@@ -141,7 +168,7 @@ public class QueryPlanBuilder {
       rootOperator = new DuplicateEliminationOperator(rootOperator);
     }
 
-    return rootOperator;
 
+    return rootOperator;
   }
 }
