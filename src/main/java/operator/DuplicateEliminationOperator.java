@@ -9,7 +9,7 @@ public class DuplicateEliminationOperator extends Operator {
   Tuple prevTuple = null;
 
   public DuplicateEliminationOperator(Operator child) {
-    super(null);
+    super(child.outputSchema);
     this.child = child;
   }
 
@@ -22,11 +22,11 @@ public class DuplicateEliminationOperator extends Operator {
   public Tuple getNextTuple() {
     currTuple = child.getNextTuple();
     while (currTuple != null) {
-      if (currTuple.equals(prevTuple)) {
-        currTuple = child.getNextTuple();
+      if (!currTuple.equals(prevTuple)) {
+        prevTuple = currTuple;
+        return currTuple;
       }
-      prevTuple = currTuple;
-      return currTuple;
+      currTuple = child.getNextTuple();
     }
     return null;
   }
