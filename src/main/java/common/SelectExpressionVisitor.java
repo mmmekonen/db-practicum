@@ -87,19 +87,38 @@ import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sf.jsqlparser.expression.operators.relational.SimilarToExpression;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
-/** TODO: */
+/**
+ * A class to evaluate the WHERE clause of queries. Given a tuple and its column
+ * schema, it uses a visitor pattern to evaluate the accepted Expression on the
+ * current tuple. The final result can be accessed through the
+ * conditionSatisfied function.
+ */
 public class SelectExpressionVisitor implements ExpressionVisitor {
 
+    // the final condition
     private boolean condition;
+
+    // the current tuple the expression is being evaluated on
     private Tuple tuple;
+
+    // stack contianing the current values to use in the expression
     private Stack<Long> stack;
+
+    // the columns corresponding to each tuple position
     private ArrayList<Column> columns;
 
-    /** TODO: */
+    /**
+     * Creates an expression visitor using a Tuple and an ArrayList of Columns.
+     *
+     * @param tuple  a Tuple of integers.
+     * @param schema ArrayList of columns which correspond to the respective tuple
+     *               values.
+     */
     public SelectExpressionVisitor(Tuple tuple, ArrayList<Column> schema) {
         this.condition = true;
         this.tuple = tuple;
@@ -107,14 +126,18 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
         this.columns = schema;
     }
 
-    /** TODO: */
+    /**
+     * Returns a boolean on whether the predicate was satisfied by the tuple.
+     * 
+     * @return True if the expression evalutes to true for the current tuple,
+     *         otherwise false.
+     */
     public boolean conditionSatisfied() {
         return condition;
     }
 
     @Override
     public void visit(AndExpression andExpression) {
-        // TODO Auto-generated method stub
         andExpression.getLeftExpression().accept(this);
         boolean left = condition;
 
@@ -126,13 +149,15 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     @Override
     public void visit(Column tableColumn) {
-        // TODO Auto-generated method stub
         String name = tableColumn.getColumnName();
         String tableName = tableColumn.getTable().getName();
-        tableName = QueryPlanBuilder.alias.get(tableName) != null ? QueryPlanBuilder.alias.get(tableName) : tableName;
         for (int i = 0; i < columns.size(); i++) {
             String name2 = columns.get(i).getColumnName();
-            String tableName2 = columns.get(i).getTable().getName();
+
+            Table t = columns.get(i).getTable();
+            String tableName2 = t.getAlias() != null ? t.getAlias().getName() : t.getName();
+
+            // check if the column in the tuple is the same as the one in the expression
             if (name.equals(name2) && tableName.equals(tableName2)) {
                 stack.push((long) tuple.getElementAtIndex(i));
                 return;
@@ -142,13 +167,11 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     @Override
     public void visit(LongValue longValue) {
-        // TODO Auto-generated method stub
         stack.push(longValue.getValue());
     }
 
     @Override
     public void visit(EqualsTo equalsTo) {
-        // TODO Auto-generated method stub
         equalsTo.getLeftExpression().accept(this);
         equalsTo.getRightExpression().accept(this);
 
@@ -160,7 +183,6 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     @Override
     public void visit(NotEqualsTo notEqualsTo) {
-        // TODO Auto-generated method stub
         notEqualsTo.getLeftExpression().accept(this);
         notEqualsTo.getRightExpression().accept(this);
 
@@ -172,7 +194,6 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     @Override
     public void visit(GreaterThan greaterThan) {
-        // TODO Auto-generated method stub
         greaterThan.getLeftExpression().accept(this);
         greaterThan.getRightExpression().accept(this);
 
@@ -184,9 +205,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     @Override
     public void visit(GreaterThanEquals greaterThanEquals) {
-        // TODO Auto-generated method stub
         greaterThanEquals.getLeftExpression().accept(this);
-        ;
         greaterThanEquals.getRightExpression().accept(this);
 
         long right = stack.pop();
@@ -197,7 +216,6 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     @Override
     public void visit(MinorThan minorThan) {
-        // TODO Auto-generated method stub
         minorThan.getLeftExpression().accept(this);
         minorThan.getRightExpression().accept(this);
         long right = stack.pop();
@@ -208,7 +226,6 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     @Override
     public void visit(MinorThanEquals minorThanEquals) {
-        // TODO Auto-generated method stub
         minorThanEquals.getLeftExpression().accept(this);
         minorThanEquals.getRightExpression().accept(this);
 

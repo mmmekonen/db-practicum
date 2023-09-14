@@ -5,17 +5,28 @@ import common.SelectExpressionVisitor;
 import common.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 
-/** TODO: */
+/**
+ * A class to represent a select operator on a relation. Takes a tuple from its
+ * child operator and returns it if it satisfies the respective predicate in the
+ * WHERE clause.
+ */
 public class SelectOperator extends Operator {
 
+  // the operator's child operator
   private ScanOperator child;
+
+  // the expression this operator applies to each tuple
   private Expression expression;
 
-  /** TODO: */
-  public SelectOperator(String tablename, ScanOperator child, Expression expression) {
-    // change
-    super(DBCatalog.getInstance().getTableSchema(tablename));
-
+  /**
+   * Creates a select operator using an Operator as its child and an Expression to
+   * evaluate each tuple by.
+   *
+   * @param child      The select operator's child operator.
+   * @param expression Expression from the WHERE clause of the query.
+   */
+  public SelectOperator(ScanOperator child, Expression expression) {
+    super(child.outputSchema);
     this.child = child;
     this.expression = expression;
   }

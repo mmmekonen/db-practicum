@@ -5,7 +5,7 @@ import common.Tuple;
 import java.util.ArrayList;
 import java.util.List;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
@@ -23,14 +23,15 @@ public class ProjectionOperator extends Operator {
       Column expression = (Column) selectExpressionItem.getExpression();
       String columnName = expression.getColumnName();
       String tableName = expression.getTable().getName();
-      tableName = QueryPlanBuilder.alias.get(tableName) != null ? QueryPlanBuilder.alias.get(tableName) : tableName;
 
       int index = 0;
 
       ArrayList<Column> newOutputSchema = new ArrayList<>();
 
       for (Column column : child.outputSchema) {
-        if (column.getColumnName().equals(columnName) && column.getTable().getName().equals(tableName)) {
+        Table t = column.getTable();
+        String tableName2 = t.getAlias() != null ? t.getAlias().getName() : t.getName();
+        if (column.getColumnName().equals(columnName) && tableName2.equals(tableName)) {
           this.projectionColumnsIndices.add(index);
           newOutputSchema.add(column);
         }

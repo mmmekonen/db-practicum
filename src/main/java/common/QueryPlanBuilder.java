@@ -51,8 +51,6 @@ import operator.*;
  */
 public class QueryPlanBuilder {
 
-  public static HashMap<String, String> alias = new HashMap<String, String>();
-
   public QueryPlanBuilder() {
   }
 
@@ -77,34 +75,37 @@ public class QueryPlanBuilder {
     // get all aliases
 
     /*
-    // get all of the joins operators from the statement
-    // List<Join> joins = plainSelect.getJoins();
+     * // get all of the joins operators from the statement
+     * // List<Join> joins = plainSelect.getJoins();
+     * 
+     * // if (where == null) {
+     * // if (selects.get(0) instanceof AllColumns) {
+     * // return new ScanOperator(table.getName());
+     * // } else {
+     * // return new ProjectionOperator(selects, new ScanOperator(table.getName()));
+     * // }
+     * // } else {
+     * // if (selects.get(0) instanceof AllColumns) {
+     * // return new SelectOperator(table.getName(), new
+     * ScanOperator(table.getName()),
+     * // where);
+     * // } else {
+     * // return new ProjectionOperator(selects,
+     * // new SelectOperator(table.getName(), new ScanOperator(table.getName()),
+     * // where));
+     * // }
+     * // }
+     */
 
-    // if (where == null) {
-    // if (selects.get(0) instanceof AllColumns) {
-    // return new ScanOperator(table.getName());
-    // } else {
-    // return new ProjectionOperator(selects, new ScanOperator(table.getName()));
-    // }
-    // } else {
-    // if (selects.get(0) instanceof AllColumns) {
-    // return new SelectOperator(table.getName(), new ScanOperator(table.getName()),
-    // where);
-    // } else {
-    // return new ProjectionOperator(selects,
-    // new SelectOperator(table.getName(), new ScanOperator(table.getName()),
-    // where));
-    // }
-    // } */
-
-
-    if(joins == null) return makeSingleOperator(table, where, selects, orderByElements, distint);
+    if (joins == null)
+      return makeSingleOperator(table, where, selects, orderByElements, distint);
     else {
       ExpressionSplitter e = new ExpressionSplitter();
       where.accept(e);
 
       Operator left = makeSingleOperator(table, e.getConditions(table.getName()), selects, orderByElements, distint);
-      Operator right = makeSingleOperator((Table) joins.get(0).getRightItem(), e.getConditions(joins.get(0).toString()), selects, orderByElements, distint);
+      Operator right = makeSingleOperator((Table) joins.get(0).getRightItem(), e.getConditions(joins.get(0).toString()),
+          selects, orderByElements, distint);
 
       HashSet h = new HashSet();
       h.add(table.getName());
@@ -113,45 +114,42 @@ public class QueryPlanBuilder {
 
     }
 
-
   }
 
-  private Operator makeSingleOperator(Table table, Expression where, ArrayList selects,
-                                      List<OrderByElement> orderByElements, Distinct distint) {
+  private Operator makeSingleOperator(Table table, Expression where, ArrayList<SelectItem> selects,
+      List<OrderByElement> orderByElements, Distinct distint) {
 
     Operator rootOperator;
 
-    if (table.getAlias() != null) {
-      alias.put(table.getAlias().getName(), table.getName());
-    }
-
     if (where == null) {
-      rootOperator = new ScanOperator(table.getName());
+      rootOperator = new ScanOperator(table.getName(), table.getAlias());
     } else {
-      rootOperator = new SelectOperator(table.getName(), new ScanOperator(table.getName()), where);
+      rootOperator = new SelectOperator(new ScanOperator(table.getName(), table.getAlias()), where);
     }
 
     /*
-    // if (joins != null) {
-    // for (Join join : joins) {
-    // Table joinTable = (Table) join.getRightItem();
-    // Expression joinWhere = (Expression) join.getOnExpression();
-    // rootOperator = new JoinOperator(table.getName(), (ScanOperator) rootOperator,
-    // new ScanOperator(joinTable.getName()), joinWhere);
-    // }
-    // }
-
-    // if (selects.get(0) instanceof AllColumns) {
-    // return rootOperator;
-    // } else {
-    // return new ProjectionOperator(selects, rootOperator);
-    // } */
+     * // if (joins != null) {
+     * // for (Join join : joins) {
+     * // Table joinTable = (Table) join.getRightItem();
+     * // Expression joinWhere = (Expression) join.getOnExpression();
+     * // rootOperator = new JoinOperator(table.getName(), (ScanOperator)
+     * rootOperator,
+     * // new ScanOperator(joinTable.getName()), joinWhere);
+     * // }
+     * // }
+     * 
+     * // if (selects.get(0) instanceof AllColumns) {
+     * // return rootOperator;
+     * // } else {
+     * // return new ProjectionOperator(selects, rootOperator);
+     * // }
+     */
 
     if (!(selects.get(0) instanceof AllColumns)) {
       rootOperator = new ProjectionOperator(selects, rootOperator);
     }
 
-    List<Column> columns = new ArrayList<>();
+    ArrayList<Column> columns = new ArrayList<>();
     if (orderByElements != null) {
       for (OrderByElement orderByElement : orderByElements) {
         // get the column from the orderByElement
@@ -161,13 +159,11 @@ public class QueryPlanBuilder {
     }
 
     if (orderByElements != null) {
-      System.out.print(orderByElements.size());
       rootOperator = new SortOperator(rootOperator, columns);
     }
     if (distint != null) {
       rootOperator = new DuplicateEliminationOperator(rootOperator);
     }
-
 
     return rootOperator;
   }
