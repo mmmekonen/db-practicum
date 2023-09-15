@@ -158,7 +158,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
             String tableName2 = t.getAlias() != null ? t.getAlias().getName() : t.getName();
 
             // check if the column in the tuple is the same as the one in the expression
-            if (name.equals(name2) && tableName.equals(tableName2)) {
+            if (name.equals(name2) /*&& tableName.equals(tableName2)*/) {
                 stack.push((long) tuple.getElementAtIndex(i));
                 return;
             }
@@ -177,6 +177,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
         long right = stack.pop();
         long left = stack.pop();
+
 
         condition = left == right;
     }
@@ -221,6 +222,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
         long right = stack.pop();
         long left = stack.pop();
 
+
         condition = left < right;
     }
 
@@ -228,7 +230,6 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
     public void visit(MinorThanEquals minorThanEquals) {
         minorThanEquals.getLeftExpression().accept(this);
         minorThanEquals.getRightExpression().accept(this);
-
         long right = stack.pop();
         long left = stack.pop();
 
