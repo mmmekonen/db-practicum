@@ -13,7 +13,7 @@ import net.sf.jsqlparser.expression.Expression;
 public class SelectOperator extends Operator {
 
   // the operator's child operator
-  private ScanOperator child;
+  private Operator child;
 
   // the expression this operator applies to each tuple
   private Expression expression;
@@ -25,7 +25,7 @@ public class SelectOperator extends Operator {
    * @param child      The select operator's child operator.
    * @param expression Expression from the WHERE clause of the query.
    */
-  public SelectOperator(ScanOperator child, Expression expression) {
+  public SelectOperator(Operator child, Expression expression) {
     super(child.outputSchema);
     this.child = child;
     this.expression = expression;

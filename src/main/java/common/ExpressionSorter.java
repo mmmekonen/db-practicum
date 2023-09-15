@@ -7,6 +7,7 @@ import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.Join;
@@ -19,13 +20,16 @@ public class ExpressionSorter implements ExpressionVisitor {
 
     private boolean isSingle;
     private int depth;
-    private HashSet<String> tables;
+    private HashSet<Table> tables;
+    private Table latestTable;
 
 
     public ExpressionSorter() {
         this.isSingle = true;
         this.depth = 0;
-        this.tables = new HashSet<String>();
+        this.tables = new HashSet<Table>();
+        this.latestTable = null;
+
 
     }
 
@@ -38,17 +42,17 @@ public class ExpressionSorter implements ExpressionVisitor {
         return depth;
     }
 
-    public void checkTableName(String t) {
+    public void checkTable(Table t) {
         tables.add(t);
         isSingle = tables.size() == 1;
     }
 
-    public String getTable() throws Exception {
-        if(isSingle) return (String) tables.toArray()[0];
-        else throw new Exception("Expression references multiple tables");
+    public Table getTable() {
+        if (isSingle) return latestTable;
+        else return null;
     }
 
-    public Set<String> getTables() {
+    public Set<Table> getTables() {
         return tables;
     }
 
@@ -65,8 +69,8 @@ public class ExpressionSorter implements ExpressionVisitor {
     @Override
     public void visit(Column tableColumn) {
         // TODO Auto-generated method stub
-        String tableName = tableColumn.getTable().getName();
-        checkTableName(tableName);
+        checkTable(tableColumn.getTable());
+        latestTable = tableColumn.getTable();
     }
 
     @Override

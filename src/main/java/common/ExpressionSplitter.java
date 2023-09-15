@@ -7,6 +7,7 @@ import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.Join;
@@ -18,29 +19,19 @@ import java.util.*;
 
 public class ExpressionSplitter implements ExpressionVisitor {
 
-    private HashMap<Set<String>, Expression> selectionConditions;
-    private HashMap<Set<String>, Expression> joinConditions;
-    private HashMap<Set<String>, Expression> conditions;
+    private HashMap<Table, Expression> conditions;
 
 
 
     public ExpressionSplitter() {
-        this.selectionConditions = new HashMap<>();
-        this.joinConditions = new HashMap<>();
         this.conditions = new HashMap<>();
-
     }
 
-    public Expression getConditions(String s) {
-        HashSet<String> h = new HashSet();
-        h.add(s);
-        return conditions.get(h);
+    public Expression getConditions(Table t) {
+        return conditions.get(t);
     }
 
-    public Expression getConditions(HashSet<String> h) {
-        return conditions.get(h);
-    }
-    private void concatHelper(Expression e, Set<String> t) {
+    private void concatHelper(Expression e, Table t) {
             if (conditions.containsKey(t)) {
                 Expression newExpression = new AndExpression()
                         .withLeftExpression(conditions.get(t))
@@ -58,7 +49,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
         ExpressionSorter visitor = new ExpressionSorter();
         andExpression.accept(visitor);
 
-        if(visitor.onSingleTable()) concatHelper(andExpression, visitor.getTables());
+        if(visitor.onSingleTable()) concatHelper(andExpression, visitor.getTable());
         else {
             andExpression.getLeftExpression().accept(this);
             andExpression.getRightExpression().accept(this);
@@ -83,7 +74,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
         ExpressionSorter visitor = new ExpressionSorter();
         equalsTo.accept(visitor);
 
-        concatHelper(equalsTo, visitor.getTables());
+        concatHelper(equalsTo, visitor.getTable());
     }
 
     @Override
@@ -92,7 +83,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
         ExpressionSorter visitor = new ExpressionSorter();
         notEqualsTo.accept(visitor);
 
-        concatHelper(notEqualsTo, visitor.getTables());
+        concatHelper(notEqualsTo, visitor.getTable());
     }
 
     @Override
@@ -101,7 +92,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
         ExpressionSorter visitor = new ExpressionSorter();
         greaterThan.accept(visitor);
 
-        concatHelper(greaterThan, visitor.getTables());
+        concatHelper(greaterThan, visitor.getTable());
     }
 
     @Override
@@ -110,7 +101,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
         ExpressionSorter visitor = new ExpressionSorter();
         greaterThanEquals.accept(visitor);
 
-        concatHelper(greaterThanEquals, visitor.getTables());
+        concatHelper(greaterThanEquals, visitor.getTable());
 
     }
 
@@ -120,7 +111,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
         ExpressionSorter visitor = new ExpressionSorter();
         minorThan.accept(visitor);
 
-        concatHelper(minorThan, visitor.getTables());
+        concatHelper(minorThan, visitor.getTable());
     }
 
     @Override
@@ -129,7 +120,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
         ExpressionSorter visitor = new ExpressionSorter();
         minorThanEquals.accept(visitor);
 
-        concatHelper(minorThanEquals, visitor.getTables());
+        concatHelper(minorThanEquals, visitor.getTable());
     }
 
     // unused operators

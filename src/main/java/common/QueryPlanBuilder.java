@@ -1,8 +1,7 @@
 package common;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
@@ -17,8 +16,6 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
-import java.util.HashSet;
-import java.util.List;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.schema.Column;
@@ -69,86 +66,35 @@ public class QueryPlanBuilder {
     ArrayList<SelectItem> selects = (ArrayList<SelectItem>) plainSelect.getSelectItems();
     // Get the order by items
     List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
-    // Get the distint keyword
-    Distinct distint = plainSelect.getDistinct();
+    // Get the distinct keyword
+    Distinct distinct = plainSelect.getDistinct();
     List<Join> joins = plainSelect.getJoins();
-    // get all aliases
 
-    /*
-     * // get all of the joins operators from the statement
-     * // List<Join> joins = plainSelect.getJoins();
-     * 
-     * // if (where == null) {
-     * // if (selects.get(0) instanceof AllColumns) {
-     * // return new ScanOperator(table.getName());
-     * // } else {
-     * // return new ProjectionOperator(selects, new ScanOperator(table.getName()));
-     * // }
-     * // } else {
-     * // if (selects.get(0) instanceof AllColumns) {
-     * // return new SelectOperator(table.getName(), new
-     * ScanOperator(table.getName()),
-     * // where);
-     * // } else {
-     * // return new ProjectionOperator(selects,
-     * // new SelectOperator(table.getName(), new ScanOperator(table.getName()),
-     * // where));
-     * // }
-     * // }
-     */
-
-    if (joins == null)
-      return makeSingleOperator(table, where, selects, orderByElements, distint);
-    else {
-      ExpressionSplitter e = new ExpressionSplitter();
-      where.accept(e);
-
-      Operator left = makeSingleOperator(table, e.getConditions(table.getName()), selects, orderByElements, distint);
-      Operator right = makeSingleOperator((Table) joins.get(0).getRightItem(), e.getConditions(joins.get(0).toString()),
-          selects, orderByElements, distint);
-
-      HashSet h = new HashSet();
-      h.add(table.getName());
-      h.add(joins.get(0).getRightItem().toString());
-      return new JoinOperator(table.getName(), left, right, e.getConditions(h));
-
-    }
+    Operator rootOperator;
+    if (joins == null) rootOperator = selectHelper(table, where);
+    else rootOperator = joinHelper(table, joins, where);
+    rootOperator = projectionHelper(rootOperator, selects);
+    rootOperator = distinctHelper(rootOperator, distinct);
+    rootOperator = sortHelper(rootOperator, orderByElements);
+    return rootOperator;
 
   }
 
-  private Operator makeSingleOperator(Table table, Expression where, ArrayList<SelectItem> selects,
-      List<OrderByElement> orderByElements, Distinct distint) {
-
-    Operator rootOperator;
-
+  private Operator selectHelper(Table table, Expression where) {
     if (where == null) {
-      rootOperator = new ScanOperator(table.getName(), table.getAlias());
+      return new ScanOperator(table.getName(), table.getAlias());
     } else {
-      rootOperator = new SelectOperator(new ScanOperator(table.getName(), table.getAlias()), where);
+      return new SelectOperator(new ScanOperator(table.getName(), table.getAlias()), where);
     }
+  }
 
-    /*
-     * // if (joins != null) {
-     * // for (Join join : joins) {
-     * // Table joinTable = (Table) join.getRightItem();
-     * // Expression joinWhere = (Expression) join.getOnExpression();
-     * // rootOperator = new JoinOperator(table.getName(), (ScanOperator)
-     * rootOperator,
-     * // new ScanOperator(joinTable.getName()), joinWhere);
-     * // }
-     * // }
-     * 
-     * // if (selects.get(0) instanceof AllColumns) {
-     * // return rootOperator;
-     * // } else {
-     * // return new ProjectionOperator(selects, rootOperator);
-     * // }
-     */
-
+  private Operator projectionHelper(Operator child, ArrayList selects) {
     if (!(selects.get(0) instanceof AllColumns)) {
-      rootOperator = new ProjectionOperator(selects, rootOperator);
-    }
+      return new ProjectionOperator(selects, child);
+    } else return child;
+  }
 
+  private Operator sortHelper(Operator child, List<OrderByElement> orderByElements) {
     ArrayList<Column> columns = new ArrayList<>();
     if (orderByElements != null) {
       for (OrderByElement orderByElement : orderByElements) {
@@ -156,15 +102,32 @@ public class QueryPlanBuilder {
         Column column = (Column) orderByElement.getExpression();
         columns.add(column);
       }
-    }
-
-    if (orderByElements != null) {
-      rootOperator = new SortOperator(rootOperator, columns);
-    }
-    if (distint != null) {
-      rootOperator = new DuplicateEliminationOperator(rootOperator);
-    }
-
-    return rootOperator;
+      return new SortOperator(child, columns);
+    } else return child;
   }
+
+  private Operator joinHelper(Table original, List<Join> joins, Expression where) {
+
+    ExpressionSplitter e = new ExpressionSplitter();
+    where.accept(e);
+
+    Operator root = selectHelper(original, e.getConditions(original));
+    ArrayList schema = DBCatalog.getInstance().getTableSchema(original.getName());
+
+    for(int i = 0; i < joins.size(); i++) {
+      Table joinTable = (Table) joins.get(i).getRightItem();
+      schema.addAll(DBCatalog.getInstance().getTableSchema(joinTable.getName()));
+
+      root = new JoinOperator(schema, root, selectHelper(joinTable, e.getConditions(joinTable)), where);
+    }
+
+    return root;
+  }
+
+  private Operator distinctHelper(Operator child, Distinct distinct) {
+    if (distinct != null) {
+      return new DuplicateEliminationOperator(child);
+    } else return child;
+  }
+
 }

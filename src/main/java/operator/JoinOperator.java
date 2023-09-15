@@ -4,6 +4,8 @@ import common.DBCatalog;
 import common.SelectExpressionVisitor;
 import common.Tuple;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 
 import java.util.ArrayList;
 
@@ -14,10 +16,11 @@ public class JoinOperator extends Operator {
     private Expression expression;
 
     /** TODO: */
-    public JoinOperator(String tablename, Operator left, Operator right, Expression expression) {
-        super(DBCatalog.getInstance().getTableSchema(tablename));
-        this.left = left;
-        this.right = right;
+    public JoinOperator(ArrayList<Column> schema, Operator left_op, Operator right_op, Expression expression)
+    {
+        super(schema);
+        this.left = left_op;
+        this.right = right_op;
         this.expression = expression;
     }
 
