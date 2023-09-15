@@ -29,12 +29,17 @@ public class SelectOperator extends Operator {
     this.expression = expression;
   }
 
-  @Override
+  /**
+   * Resets the cursor to the beginning of the operator
+   */
   public void reset() {
     child.reset();
   }
 
-  @Override
+  /**
+   * Iterates over the child operator until it finds a tuple that matches the conditions specified in the expression
+   * @return The next tuple that matches the expression
+   */
   public Tuple getNextTuple() {
     Tuple tuple = child.getNextTuple();
     SelectExpressionVisitor visitor = new SelectExpressionVisitor(tuple, child.outputSchema);
