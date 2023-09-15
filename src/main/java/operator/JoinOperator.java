@@ -1,11 +1,8 @@
 package operator;
 
-import common.DBCatalog;
 import common.SelectExpressionVisitor;
 import common.Tuple;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
 
 import java.util.ArrayList;
 
@@ -18,7 +15,13 @@ public class JoinOperator extends Operator {
     private Tuple rightTuple;
 
 
-    /** TODO: */
+    /**Joins two operators together according to an expression, producing a single operator that returns the next valid
+     * combination of its children's tuples
+     * @param left_op One of the operators to be joined
+     * @param right_op One of the operators to be joine
+     * @param expression An expression that dictates which combinations of tuples from the children operators are valid
+     * @return a JoinOperator object
+     * */
     public JoinOperator(Operator left_op, Operator right_op, Expression expression)
     {
         super(null);
@@ -31,29 +34,28 @@ public class JoinOperator extends Operator {
         this.rightTuple = right.getNextTuple();
     }
 
+    /** Resets cursor on the operator to the beginning */
+    //Resets both child operators, which is equivalent to resetting the whole thing
     public void reset() {
         left.reset();
         right.reset();
     }
 
-
+    /**
+     * Iterates through combinations of outputs from the children operators until it finds one that is valid, then
+     * returns it as a combined tuple
+     * @return The next valid tuple created as a join of the two children operators
+     */
     public Tuple getNextTuple() {
 
-
         if(leftTuple == null || rightTuple == null) return null;
-
         Tuple tuple;
-
-
-
-
         boolean satisfied = false;
 
         while(!satisfied && leftTuple != null) {
             ArrayList combined = leftTuple.getAllElements();
             combined.addAll(rightTuple.getAllElements());
             tuple = new Tuple(combined);
-
 
             SelectExpressionVisitor visitor = new SelectExpressionVisitor(tuple, outputSchema);
             expression.accept(visitor);
@@ -64,32 +66,14 @@ public class JoinOperator extends Operator {
             }
 
             advance();
-
-
         }
-
-
-        /*while(leftTuple != null) {
-
-            if(rightTuple == null) {
-                leftTuple = left.getNextTuple();
-                right.reset();
-                rightTuple = right.getNextTuple();
-            } else {
-                rightTuple = right.getNextTuple();
-            }
-
-            SelectExpressionVisitor visitor = new SelectExpressionVisitor(tuple, schema);
-            if(expression != null) {
-                expression.accept(visitor);
-                if (visitor.conditionSatisfied()) return tuple;
-            } else return tuple;
-
-        }*/
 
         return null;
     }
 
+    /**
+     * Helper function that increments the children operators over all possible combinations
+     */
     private void advance() {
         rightTuple = right.getNextTuple();
         if(rightTuple == null) {
@@ -97,8 +81,6 @@ public class JoinOperator extends Operator {
             rightTuple = right.getNextTuple();
             leftTuple = left.getNextTuple();
         }
-        //System.out.println(leftTuple.toString() + "       " + rightTuple.toString());
     }
-
 
 }
