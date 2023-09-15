@@ -18,7 +18,7 @@ public class JoinOperator extends Operator {
     public JoinOperator(Operator left_op, Operator right_op, Expression expression) {
         super(null);
         this.outputSchema = left_op.getOutputSchema();
-        this.outputSchema.addAll(right_op.outputSchema);
+        this.outputSchema.addAll(right_op.getOutputSchema());
         this.left = left_op;
         this.right = right_op;
         this.expression = expression;
