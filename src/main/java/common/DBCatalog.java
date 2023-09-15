@@ -85,12 +85,17 @@ public class DBCatalog {
   }
 
   /**
-   * Gets the schema for the specified table
+   * Returns of copy of the schema for the specified table
    *
    * @param tableName table name
    * @return a list of JSQL columns
    */
   public ArrayList<Column> getTableSchema(String tableName) {
-    return tables.get(tableName);
+    ArrayList<Column> schema = new ArrayList<>();
+    for (Column c : tables.get(tableName)) {
+      schema.add(new Column(new Table(null, tableName), c.getColumnName()));
+    }
+    return schema;
+    // return tables.get(tableName);
   }
 }

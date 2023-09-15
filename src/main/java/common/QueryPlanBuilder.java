@@ -71,10 +71,12 @@ public class QueryPlanBuilder {
     List<Join> joins = plainSelect.getJoins();
 
     Operator rootOperator;
-    if (joins == null) rootOperator = selectHelper(table, where);
-    else rootOperator = joinHelper(table, joins, where);
+    if (joins == null)
+      rootOperator = selectHelper(table, where);
+    else
+      rootOperator = joinHelper(table, joins, where);
     rootOperator = projectionHelper(rootOperator, selects);
-    rootOperator = sortHelper(rootOperator, orderByElements);
+    rootOperator = sortHelper(rootOperator, orderByElements, distinct);
     rootOperator = distinctHelper(rootOperator, distinct);
     return rootOperator;
 
@@ -91,10 +93,11 @@ public class QueryPlanBuilder {
   private Operator projectionHelper(Operator child, ArrayList selects) {
     if (!(selects.get(0) instanceof AllColumns)) {
       return new ProjectionOperator(selects, child);
-    } else return child;
+    } else
+      return child;
   }
 
-  private Operator sortHelper(Operator child, List<OrderByElement> orderByElements) {
+  private Operator sortHelper(Operator child, List<OrderByElement> orderByElements, Distinct distinct) {
     ArrayList<Column> columns = new ArrayList<>();
     if (orderByElements != null) {
       for (OrderByElement orderByElement : orderByElements) {
@@ -103,7 +106,10 @@ public class QueryPlanBuilder {
         columns.add(column);
       }
       return new SortOperator(child, columns);
-    } else return child;
+    } else if (distinct != null) {
+      return new SortOperator(child, new ArrayList<Column>(0));
+    } else
+      return child;
   }
 
   private Operator joinHelper(Table original, List<Join> joins, Expression where) {
@@ -114,7 +120,7 @@ public class QueryPlanBuilder {
     Operator root = selectHelper(original, e.getConditions(original));
     ArrayList schema = DBCatalog.getInstance().getTableSchema(original.getName());
 
-    for(int i = 0; i < joins.size(); i++) {
+    for (int i = 0; i < joins.size(); i++) {
       Table joinTable = (Table) joins.get(i).getRightItem();
       schema.addAll(DBCatalog.getInstance().getTableSchema(joinTable.getName()));
 
@@ -127,7 +133,8 @@ public class QueryPlanBuilder {
   private Operator distinctHelper(Operator child, Distinct distinct) {
     if (distinct != null) {
       return new DuplicateEliminationOperator(child);
-    } else return child;
+    } else
+      return child;
   }
 
 }
