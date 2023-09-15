@@ -54,6 +54,7 @@ public class QueryPlanBuilder {
    * @precondition stmt is a Select having a body that is a PlainSelect
    */
   public Operator buildPlan(Statement stmt) {
+
     Select select = (Select) stmt;
     PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
     Table table = (Table) plainSelect.getFromItem();
@@ -77,6 +78,12 @@ public class QueryPlanBuilder {
 
   }
 
+  /**
+   * Helper function to create a SelectOperator object iff necessary, or a ScanOperator if that would suffice
+   * @param table The table specified in stmnt
+   * @param where The conditions specified in stmnt
+   * @return An operator that returns the next tuple in the table that matches the specified conditions
+   */
   private Operator selectHelper(Table table, Expression where) {
     if (where == null) {
       return new ScanOperator(table.getName(), table.getAlias());
@@ -85,6 +92,12 @@ public class QueryPlanBuilder {
     }
   }
 
+  /**
+   * Helper function that creates a ProjectionOperator object iff projection is required by the statement
+   * @param child A child from whose tuples this operator will project
+   * @param selects The conditions for projection
+   * @return An operator that returns a projection of the next tuple in the table
+   */
   private Operator projectionHelper(Operator child, ArrayList<SelectItem> selects) {
     if (!(selects.get(0) instanceof AllColumns)) {
       return new ProjectionOperator(selects, child);
@@ -92,6 +105,14 @@ public class QueryPlanBuilder {
       return child;
   }
 
+  /**
+   * Helper function that creates a SortOperator object to sort the table by a set of columns, or sorts them according
+   * to the schema if the statement calls for distinct values (as this depends on a sorted table)
+   * @param child A child whose tuples will be sorted
+   * @param orderByElements The elements by which the tuples will be sorted
+   * @param distinct If this value is not null, the table will be sorted according to its schema
+   * @return An operator that sorts the table according to the statement
+   */
   private Operator sortHelper(Operator child, List<OrderByElement> orderByElements, Distinct distinct) {
     ArrayList<Column> columns = new ArrayList<>();
     if (orderByElements != null) {
@@ -107,6 +128,13 @@ public class QueryPlanBuilder {
       return child;
   }
 
+  /**
+   * A helper function that creates nested JoinOperators that join together all tables specified in the statement
+   * @param original The first table specified in the statement
+   * @param joins The tables to be joined onto the original table
+   * @param where An expression that specifies the conditions by which to join the tables together
+   * @return A JoinOperator that returns the next tuple in the joined tables
+   */
   private Operator joinHelper(Table original, List<Join> joins, Expression where) {
 
     ExpressionSplitter e = new ExpressionSplitter();
@@ -123,6 +151,12 @@ public class QueryPlanBuilder {
     return root;
   }
 
+  /**
+   * A helper function that creates a DuplicateEliminationOperator if the statement calls for distinct functions
+   * @param child An operator whose duplicate values are to be eliminated
+   * @param distinct Iff this value is not null, duplicate values in the table will be eliminated
+   * @return A DuplicateEliminationOperator that returns distinct values from the table
+   */
   private Operator distinctHelper(Operator child, Distinct distinct) {
     if (distinct != null) {
       return new DuplicateEliminationOperator(child);
