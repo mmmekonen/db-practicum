@@ -2,22 +2,38 @@ package operator;
 
 import common.Tuple;
 
+/**
+ * A class to represent a duplicate elimination operator on a relation. Eliminates duplicate tuples
+ * from the relation.
+ */
 public class DuplicateEliminationOperator extends Operator {
 
   Operator child;
   Tuple currTuple = null;
   Tuple prevTuple = null;
 
+  /**
+   * Creates a duplicate elimination operator using an Operator.
+   *
+   * @param child The scan operator's child operator.
+   */
   public DuplicateEliminationOperator(Operator child) {
     super(child.outputSchema);
     this.child = child;
   }
 
+  /** Resets cursor on the operator to the beginning */
   @Override
   public void reset() {
     child.reset();
   }
 
+  /**
+   * Iterates through the tuples from the child operator and returns the next tuple that is not a
+   * duplicate.
+   *
+   * @return The next tuple that is not a duplicate.
+   */
   @Override
   public Tuple getNextTuple() {
     currTuple = child.getNextTuple();
@@ -30,5 +46,4 @@ public class DuplicateEliminationOperator extends Operator {
     }
     return null;
   }
-
 }
