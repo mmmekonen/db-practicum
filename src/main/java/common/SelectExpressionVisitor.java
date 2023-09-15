@@ -137,6 +137,10 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
         return condition;
     }
 
+    /**
+     * Visits and evaluates each part of the expression
+     * @param andExpression The expression to be visited
+     */
     @Override
     public void visit(AndExpression andExpression) {
         andExpression.getLeftExpression().accept(this);
@@ -148,6 +152,10 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
         condition = left && right;
     }
 
+    /**
+     * Visits a column and selects relevant elements
+     * @param tableColumn The column to be visited
+     */
     @Override
     public void visit(Column tableColumn) {
         String name = tableColumn.getColumnName();
@@ -165,11 +173,19 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
         }
     }
 
+    /**
+     * Visits a LongValue and pushes it onto the stack
+     * @param longValue The LongValue to be visited
+     */
     @Override
     public void visit(LongValue longValue) {
         stack.push(longValue.getValue());
     }
 
+    /**
+     * Visits and evaluates all parts of the expression
+     * @param equalsTo The expression to be visited
+     */
     @Override
     public void visit(EqualsTo equalsTo) {
         equalsTo.getLeftExpression().accept(this);
@@ -181,6 +197,10 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
         condition = left == right;
     }
 
+    /**
+     * Visits and evaluates all parts of the expression
+     * @param notEqualsTo The expression to be visited
+     */
     @Override
     public void visit(NotEqualsTo notEqualsTo) {
         notEqualsTo.getLeftExpression().accept(this);
@@ -192,6 +212,10 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
         condition = left != right;
     }
 
+    /**
+     * Visits and evaluates all parts of the expression
+     * @param greaterThan The expression to be visited
+     */
     @Override
     public void visit(GreaterThan greaterThan) {
         greaterThan.getLeftExpression().accept(this);
@@ -203,6 +227,10 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
         condition = left > right;
     }
 
+    /**
+     * Visits and evaluates all parts of the expression
+     * @param greaterThanEquals The expression to be visitex
+     */
     @Override
     public void visit(GreaterThanEquals greaterThanEquals) {
         greaterThanEquals.getLeftExpression().accept(this);
@@ -214,6 +242,10 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
         condition = left >= right;
     }
 
+    /**
+     * Visits and evaluates all parts of the expression
+     * @param minorThan The expression to be visitex
+     */
     @Override
     public void visit(MinorThan minorThan) {
         minorThan.getLeftExpression().accept(this);
@@ -224,6 +256,10 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
         condition = left < right;
     }
 
+    /**
+     * Visits and evaluates all parts of the expression
+     * @param minorThanEquals The expression to be visitex
+     */
     @Override
     public void visit(MinorThanEquals minorThanEquals) {
         minorThanEquals.getLeftExpression().accept(this);

@@ -18,14 +18,28 @@ public class ExpressionSplitter implements ExpressionVisitor {
 
     private HashMap<Table, Expression> conditions;
 
+    /**
+     * Creates an empty ExpressionSplitter object that keeps track of the expressions it visits using a hashmap
+     */
     public ExpressionSplitter() {
         this.conditions = new HashMap<>();
     }
 
+    /**
+     * Returns an expression on the provided table
+     * @param t A table with an associated expression
+     * @return An expression that references a table t
+     */
     public Expression getConditions(Table t) {
         return conditions.get(t);
     }
 
+    /**
+     * A helper function to add an expression to the associated hashmap entry. If a hashmap entry already exists, this
+     * function combines the two using a conjunction.
+     * @param e An expression to be tracked
+     * @param t The table which e references
+     */
     private void concatHelper(Expression e, Table t) {
         if (conditions.containsKey(t)) {
             Expression newExpression = new AndExpression()
@@ -37,11 +51,14 @@ public class ExpressionSplitter implements ExpressionVisitor {
 
     }
 
-    /** TODO: */
 
+    /**
+     * Adds the expression to the appropriate hashmap entry iff it only references one table, and visits its
+     * sub-expressions if it does not
+     * @param andExpression The expression to be evaluated
+     */
     @Override
     public void visit(AndExpression andExpression) {
-        // TODO Auto-generated method stub
         ExpressionSorter visitor = new ExpressionSorter();
         andExpression.accept(visitor);
 
@@ -54,47 +71,64 @@ public class ExpressionSplitter implements ExpressionVisitor {
 
     }
 
+    //Not used
     @Override
     public void visit(Column tableColumn) {
-        // TODO Auto-generated method stub
         // not important
     }
 
+    //Not used
     @Override
     public void visit(LongValue longValue) {
         // not important
     }
 
+    /**
+     * Adds the expression to the appropriate hashmap entry iff it only references one table, and visits its
+     * sub-expressions if it does not
+     * @param equalsTo The expression to be evaluated
+     */
     @Override
     public void visit(EqualsTo equalsTo) {
-        // TODO Auto-generated method stub
         ExpressionSorter visitor = new ExpressionSorter();
         equalsTo.accept(visitor);
 
         concatHelper(equalsTo, visitor.getTable());
     }
 
+    /**
+     * Adds the expression to the appropriate hashmap entry iff it only references one table, and visits its
+     * sub-expressions if it does not
+     * @param notEqualsTo The expression to be evaluated
+     */
     @Override
     public void visit(NotEqualsTo notEqualsTo) {
-        // TODO Auto-generated method stub
         ExpressionSorter visitor = new ExpressionSorter();
         notEqualsTo.accept(visitor);
 
         concatHelper(notEqualsTo, visitor.getTable());
     }
 
+    /**
+     * Adds the expression to the appropriate hashmap entry iff it only references one table, and visits its
+     * sub-expressions if it does not
+     * @param greaterThan The expression to be evaluated
+     */
     @Override
     public void visit(GreaterThan greaterThan) {
-        // TODO Auto-generated method stub
         ExpressionSorter visitor = new ExpressionSorter();
         greaterThan.accept(visitor);
 
         concatHelper(greaterThan, visitor.getTable());
     }
 
+    /**
+     * Adds the expression to the appropriate hashmap entry iff it only references one table, and visits its
+     * sub-expressions if it does not
+     * @param greaterThanEquals The expression to be evaluated
+     */
     @Override
     public void visit(GreaterThanEquals greaterThanEquals) {
-        // TODO Auto-generated method stub
         ExpressionSorter visitor = new ExpressionSorter();
         greaterThanEquals.accept(visitor);
 
@@ -102,18 +136,26 @@ public class ExpressionSplitter implements ExpressionVisitor {
 
     }
 
+    /**
+     * Adds the expression to the appropriate hashmap entry iff it only references one table, and visits its
+     * sub-expressions if it does not
+     * @param minorThan The expression to be evaluated
+     */
     @Override
     public void visit(MinorThan minorThan) {
-        // TODO Auto-generated method stub
         ExpressionSorter visitor = new ExpressionSorter();
         minorThan.accept(visitor);
 
         concatHelper(minorThan, visitor.getTable());
     }
 
+    /**
+     * Adds the expression to the appropriate hashmap entry iff it only references one table, and visits its
+     * sub-expressions if it does not
+     * @param minorThanEquals The expression to be evaluated
+     */
     @Override
     public void visit(MinorThanEquals minorThanEquals) {
-        // TODO Auto-generated method stub
         ExpressionSorter visitor = new ExpressionSorter();
         minorThanEquals.accept(visitor);
 

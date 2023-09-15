@@ -15,41 +15,38 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 
 public class ExpressionSorter implements ExpressionVisitor {
 
-  private boolean isSingle;
-  private int depth;
   private HashSet<Table> tables;
   private Table latestTable;
 
+  /**
+   * Creates an empty ExpressionSorter
+   */
   public ExpressionSorter() {
-    this.isSingle = true;
-    this.depth = 0;
     this.tables = new HashSet<Table>();
     this.latestTable = null;
   }
 
-  /** TODO: */
+  /**
+   * The ExpressionSorter will keep track of how many tables it references, and can return this boolean
+   * @return true iff the expression references a single table
+   */
   public boolean onSingleTable() {
-    return isSingle;
+    return tables.size() == 1;
   }
 
-  public int depth(Expression e) {
-    return depth;
-  }
-
-  public void checkTable(Table t) {
-    tables.add(t);
-    isSingle = tables.size() == 1;
-  }
-
+  /**
+   * If the expression only references one table, this will return that table, otherwise it will return null
+   * @return null or a table
+   */
   public Table getTable() {
-    if (isSingle) return latestTable;
+    if (onSingleTable()) return latestTable;
     else return null;
   }
 
-  public Set<Table> getTables() {
-    return tables;
-  }
-
+  /**
+   * Visits all parts of the expression
+   * @param andExpression The expression to be visited
+   */
   @Override
   public void visit(AndExpression andExpression) {
     // TODO Auto-generated method stub
@@ -58,56 +55,79 @@ public class ExpressionSorter implements ExpressionVisitor {
     andExpression.getRightExpression().accept(this);
   }
 
+  /**
+   * Adds the table from which the column originates to the set of tables tracked by the object
+   * @param tableColumn The column to be visited
+   */
   @Override
   public void visit(Column tableColumn) {
     // TODO Auto-generated method stub
-    checkTable(tableColumn.getTable());
+    tables.add(tableColumn.getTable());
     latestTable = tableColumn.getTable();
   }
 
+  //not used
   @Override
   public void visit(LongValue longValue) {
     // :)
   }
 
+  /**
+   * Visits all parts of the expression
+   * @param equalsTo The expression to be visited
+   */
   @Override
   public void visit(EqualsTo equalsTo) {
-    // TODO Auto-generated method stub
     equalsTo.getLeftExpression().accept(this);
     equalsTo.getRightExpression().accept(this);
   }
 
+  /**
+   * Visits all parts of the expression
+   * @param notEqualsTo The expression to be visited
+   */
   @Override
   public void visit(NotEqualsTo notEqualsTo) {
-    // TODO Auto-generated method stub
     notEqualsTo.getLeftExpression().accept(this);
     notEqualsTo.getRightExpression().accept(this);
   }
 
+  /**
+   * Visits all parts of the expression
+   * @param greaterThan The expression to be visited
+   */
   @Override
   public void visit(GreaterThan greaterThan) {
-    // TODO Auto-generated method stub
     greaterThan.getLeftExpression().accept(this);
     greaterThan.getRightExpression().accept(this);
   }
 
+  /**
+   * Visits all parts of the expression
+   * @param greaterThanEquals The expression to be visited
+   */
   @Override
   public void visit(GreaterThanEquals greaterThanEquals) {
-    // TODO Auto-generated method stub
     greaterThanEquals.getLeftExpression().accept(this);
     greaterThanEquals.getRightExpression().accept(this);
   }
 
+  /**
+   * Visits all parts of the expression
+   * @param minorThan The expression to be visited
+   */
   @Override
   public void visit(MinorThan minorThan) {
-    // TODO Auto-generated method stub
     minorThan.getLeftExpression().accept(this);
     minorThan.getRightExpression().accept(this);
   }
 
+  /**
+   * Visits all parts of the expression
+   * @param minorThanEquals The expression to be visited
+   */
   @Override
   public void visit(MinorThanEquals minorThanEquals) {
-    // TODO Auto-generated method stub
     minorThanEquals.getLeftExpression().accept(this);
     minorThanEquals.getRightExpression().accept(this);
   }

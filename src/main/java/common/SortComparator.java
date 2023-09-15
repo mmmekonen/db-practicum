@@ -21,6 +21,12 @@ public class SortComparator implements Comparator<Tuple> {
     this.sortOrder = sortOrder;
   }
 
+  /**
+   * Compares two tuples element-by-element
+   * @param o1 One of the tuples to be compared
+   * @param o2 One of the tuples to be compared
+   * @return
+   */
   @Override
   public int compare(Tuple o1, Tuple o2) {
     for (int i = 0; i < this.sortOrder.size(); i++) {
