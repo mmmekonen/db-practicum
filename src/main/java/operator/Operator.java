@@ -24,6 +24,16 @@ public abstract class Operator {
     return outputSchema;
   }
 
+  /**
+   * A function to create a copy of the operator's schema, preventing operators from modifying each other's schema
+   * @return This operator's schema
+   */
+  public ArrayList<Column> copyOutputSchema() {
+    ArrayList<Column> schema = new ArrayList<>();
+    schema.addAll(outputSchema);
+    return schema;
+  }
+
   /** Resets cursor on the operator to the beginning */
   public abstract void reset();
 

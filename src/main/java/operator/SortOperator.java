@@ -71,7 +71,7 @@ public class SortOperator extends Operator {
     this.outputSchema = schema;
   }
 
-  /*
+  /**
    * Resets cursor on the operator to the beginning
    */
   @Override
@@ -79,7 +79,7 @@ public class SortOperator extends Operator {
     this.index = 0;
   }
 
-  /*
+  /**
    * Get next tuple from operator
    *
    * @return next Tuple, or null if we are at the end

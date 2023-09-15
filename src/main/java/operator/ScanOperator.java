@@ -7,7 +7,7 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 import net.sf.jsqlparser.expression.Alias;
 
-/*
+/**
  * A class to represent the a scan operator on a table. ScanOperators scan each tuple in a file and
  * return them. The file is specified by the table name. The output schema is the schema of the
  * table.
@@ -18,7 +18,7 @@ public class ScanOperator extends Operator {
   private Scanner scanner;
 
   // explicit constructor
-  /*
+  /**
    * Creates a scan operator using a table name and an alias. For each tuple in
    * the table, the
    * scan operator returns a tuple with the same schema as the table.
