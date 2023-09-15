@@ -16,23 +16,19 @@ public class JoinOperator extends Operator {
     private Expression expression;
     private Tuple leftTuple;
     private Tuple rightTuple;
-    private ArrayList schema;
 
 
     /** TODO: */
-    public JoinOperator(ArrayList<Column> schema, Operator left_op, Operator right_op, Expression expression)
+    public JoinOperator(Operator left_op, Operator right_op, Expression expression)
     {
         super(null);
         this.outputSchema = left_op.getOutputSchema();
-        this.outputSchema.addAll(right_op.outputSchema);
+        this.outputSchema.addAll(right_op.getOutputSchema());
         this.left = left_op;
         this.right = right_op;
         this.expression = expression;
         this.leftTuple = left.getNextTuple();
         this.rightTuple = right.getNextTuple();
-        this.schema = schema;
-        System.out.println(outputSchema);
-
     }
 
     public void reset() {
@@ -57,7 +53,6 @@ public class JoinOperator extends Operator {
             ArrayList combined = leftTuple.getAllElements();
             combined.addAll(rightTuple.getAllElements());
             tuple = new Tuple(combined);
-            //System.out.println(tuple.toString());
 
 
             SelectExpressionVisitor visitor = new SelectExpressionVisitor(tuple, outputSchema);

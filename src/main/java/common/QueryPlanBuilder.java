@@ -118,13 +118,11 @@ public class QueryPlanBuilder {
     where.accept(e);
 
     Operator root = selectHelper(original, e.getConditions(original));
-    ArrayList schema = DBCatalog.getInstance().getTableSchema(original.getName());
 
     for (int i = 0; i < joins.size(); i++) {
       Table joinTable = (Table) joins.get(i).getRightItem();
-      schema.addAll(DBCatalog.getInstance().getTableSchema(joinTable.getName()));
 
-      root = new JoinOperator(schema, root, selectHelper(joinTable, e.getConditions(joinTable)), where);
+      root = new JoinOperator(root, selectHelper(joinTable, e.getConditions(joinTable)), where);
     }
 
     return root;
