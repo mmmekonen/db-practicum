@@ -11,3 +11,4 @@ SELECT DISTINCT Reserves.G FROM Reserves;
 SELECT * FROM Sailors S ORDER BY S.B;
 SELECT * FROM Sailors S, Reserves R WHERE S.A = R.G;
 SELECT DISTINCT Sailors.A, Reserves.G, Boats.D, Sailors.C FROM Sailors, Reserves, Boats WHERE Sailors.A = Reserves.G AND Boats.D > Sailors.C;
+SELECT * FROM Sailors, Boats WHERE Sailors.A = Boats.F;
