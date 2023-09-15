@@ -94,9 +94,10 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 
 /**
  * A class to evaluate the WHERE clause of queries. Given a tuple and its column
- * schema, it uses a visitor pattern to evaluate the accepted Expression on the
- * current tuple. The final result can be accessed through the
- * conditionSatisfied function.
+ * schema, it uses a
+ * visitor pattern to evaluate the accepted Expression on the current tuple. The
+ * final result can be
+ * accessed through the conditionSatisfied function.
  */
 public class SelectExpressionVisitor implements ExpressionVisitor {
 
@@ -128,7 +129,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     /**
      * Returns a boolean on whether the predicate was satisfied by the tuple.
-     * 
+     *
      * @return True if the expression evalutes to true for the current tuple,
      *         otherwise false.
      */
