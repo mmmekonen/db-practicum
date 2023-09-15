@@ -220,8 +220,6 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
         long right = stack.pop();
         long left = stack.pop();
 
-        System.out.println(left + " " + right);
-
         condition = left < right;
     }
 
