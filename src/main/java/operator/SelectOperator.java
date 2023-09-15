@@ -1,6 +1,5 @@
 package operator;
 
-import common.DBCatalog;
 import common.SelectExpressionVisitor;
 import common.Tuple;
 import net.sf.jsqlparser.expression.Expression;

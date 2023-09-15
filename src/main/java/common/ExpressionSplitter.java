@@ -10,18 +10,13 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
-import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import operator.JoinOperator;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class ExpressionSplitter implements ExpressionVisitor {
 
     private HashMap<Table, Expression> conditions;
-
-
 
     public ExpressionSplitter() {
         this.conditions = new HashMap<>();
@@ -32,12 +27,13 @@ public class ExpressionSplitter implements ExpressionVisitor {
     }
 
     private void concatHelper(Expression e, Table t) {
-            if (conditions.containsKey(t)) {
-                Expression newExpression = new AndExpression()
-                        .withLeftExpression(conditions.get(t))
-                        .withRightExpression(e);
-                conditions.put(t, newExpression);
-            } else conditions.put(t, e);
+        if (conditions.containsKey(t)) {
+            Expression newExpression = new AndExpression()
+                    .withLeftExpression(conditions.get(t))
+                    .withRightExpression(e);
+            conditions.put(t, newExpression);
+        } else
+            conditions.put(t, e);
 
     }
 
@@ -49,7 +45,8 @@ public class ExpressionSplitter implements ExpressionVisitor {
         ExpressionSorter visitor = new ExpressionSorter();
         andExpression.accept(visitor);
 
-        if(visitor.onSingleTable()) concatHelper(andExpression, visitor.getTable());
+        if (visitor.onSingleTable())
+            concatHelper(andExpression, visitor.getTable());
         else {
             andExpression.getLeftExpression().accept(this);
             andExpression.getRightExpression().accept(this);
@@ -60,12 +57,12 @@ public class ExpressionSplitter implements ExpressionVisitor {
     @Override
     public void visit(Column tableColumn) {
         // TODO Auto-generated method stub
-       //not important
+        // not important
     }
 
     @Override
     public void visit(LongValue longValue) {
-        //not important
+        // not important
     }
 
     @Override

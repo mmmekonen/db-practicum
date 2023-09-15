@@ -14,7 +14,6 @@ public class JoinOperator extends Operator {
     private Tuple leftTuple;
     private Tuple rightTuple;
 
-
     /**Joins two operators together according to an expression, producing a single operator that returns the next valid
      * combination of its children's tuples
      * @param left_op One of the operators to be joined
@@ -50,10 +49,11 @@ public class JoinOperator extends Operator {
 
         if(leftTuple == null || rightTuple == null) return null;
         Tuple tuple;
+
         boolean satisfied = false;
 
-        while(!satisfied && leftTuple != null) {
-            ArrayList combined = leftTuple.getAllElements();
+        while (!satisfied && leftTuple != null) {
+            ArrayList<Integer> combined = leftTuple.getAllElements();
             combined.addAll(rightTuple.getAllElements());
             tuple = new Tuple(combined);
 
@@ -76,7 +76,7 @@ public class JoinOperator extends Operator {
      */
     private void advance() {
         rightTuple = right.getNextTuple();
-        if(rightTuple == null) {
+        if (rightTuple == null) {
             right.reset();
             rightTuple = right.getNextTuple();
             leftTuple = left.getNextTuple();
