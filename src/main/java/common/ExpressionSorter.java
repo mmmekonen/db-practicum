@@ -10,9 +10,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
-import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import operator.JoinOperator;
 
 import java.util.*;
 
@@ -23,13 +21,11 @@ public class ExpressionSorter implements ExpressionVisitor {
     private HashSet<Table> tables;
     private Table latestTable;
 
-
     public ExpressionSorter() {
         this.isSingle = true;
         this.depth = 0;
         this.tables = new HashSet<Table>();
         this.latestTable = null;
-
 
     }
 
@@ -48,20 +44,20 @@ public class ExpressionSorter implements ExpressionVisitor {
     }
 
     public Table getTable() {
-        if (isSingle) return latestTable;
-        else return null;
+        if (isSingle)
+            return latestTable;
+        else
+            return null;
     }
 
     public Set<Table> getTables() {
         return tables;
     }
 
-
     @Override
     public void visit(AndExpression andExpression) {
         // TODO Auto-generated method stub
         andExpression.getLeftExpression().accept(this);
-
 
         andExpression.getRightExpression().accept(this);
     }
@@ -75,7 +71,7 @@ public class ExpressionSorter implements ExpressionVisitor {
 
     @Override
     public void visit(LongValue longValue) {
-        //:)
+        // :)
     }
 
     @Override

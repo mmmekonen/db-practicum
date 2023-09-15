@@ -1,9 +1,7 @@
 package common;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
-import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -16,9 +14,6 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
-import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.OrderByElement;
-import net.sf.jsqlparser.schema.Column;
 import operator.*;
 
 /**
@@ -90,7 +85,7 @@ public class QueryPlanBuilder {
     }
   }
 
-  private Operator projectionHelper(Operator child, ArrayList selects) {
+  private Operator projectionHelper(Operator child, ArrayList<SelectItem> selects) {
     if (!(selects.get(0) instanceof AllColumns)) {
       return new ProjectionOperator(selects, child);
     } else
@@ -118,13 +113,11 @@ public class QueryPlanBuilder {
     where.accept(e);
 
     Operator root = selectHelper(original, e.getConditions(original));
-    ArrayList schema = DBCatalog.getInstance().getTableSchema(original.getName());
 
     for (int i = 0; i < joins.size(); i++) {
       Table joinTable = (Table) joins.get(i).getRightItem();
-      schema.addAll(DBCatalog.getInstance().getTableSchema(joinTable.getName()));
 
-      root = new JoinOperator(schema, root, selectHelper(joinTable, e.getConditions(joinTable)), where);
+      root = new JoinOperator(root, selectHelper(joinTable, e.getConditions(joinTable)), where);
     }
 
     return root;

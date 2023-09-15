@@ -1,6 +1,5 @@
 package operator;
 
-import common.QueryPlanBuilder;
 import common.Tuple;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,14 +1,11 @@
 package operator;
 
 import common.DBCatalog;
-import common.QueryPlanBuilder;
 import common.Tuple;
 import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.schema.Column;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class ScanOperator extends Operator {
