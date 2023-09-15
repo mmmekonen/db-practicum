@@ -16,16 +16,22 @@ public class JoinOperator extends Operator {
     private Expression expression;
     private Tuple leftTuple;
     private Tuple rightTuple;
+    private ArrayList schema;
+
 
     /** TODO: */
     public JoinOperator(ArrayList<Column> schema, Operator left_op, Operator right_op, Expression expression)
     {
-        super(schema);
+        super(null);
+        this.outputSchema = left_op.getOutputSchema();
+        this.outputSchema.addAll(right_op.outputSchema);
         this.left = left_op;
         this.right = right_op;
         this.expression = expression;
         this.leftTuple = left.getNextTuple();
         this.rightTuple = right.getNextTuple();
+        this.schema = schema;
+        System.out.println(outputSchema);
 
     }
 
@@ -43,8 +49,7 @@ public class JoinOperator extends Operator {
         Tuple tuple;
 
 
-        ArrayList schema = left.outputSchema;
-        schema.addAll(right.outputSchema);
+
 
         boolean satisfied = false;
 
@@ -52,13 +57,14 @@ public class JoinOperator extends Operator {
             ArrayList combined = leftTuple.getAllElements();
             combined.addAll(rightTuple.getAllElements());
             tuple = new Tuple(combined);
+            //System.out.println(tuple.toString());
 
-            SelectExpressionVisitor visitor = new SelectExpressionVisitor(tuple, schema);
+
+            SelectExpressionVisitor visitor = new SelectExpressionVisitor(tuple, outputSchema);
             expression.accept(visitor);
             satisfied = visitor.conditionSatisfied();
             if (satisfied) {
                 advance();
-                System.out.println(tuple);
                 return tuple;
             }
 
@@ -96,6 +102,7 @@ public class JoinOperator extends Operator {
             rightTuple = right.getNextTuple();
             leftTuple = left.getNextTuple();
         }
+        //System.out.println(leftTuple.toString() + "       " + rightTuple.toString());
     }
 
 

@@ -74,8 +74,8 @@ public class QueryPlanBuilder {
     if (joins == null) rootOperator = selectHelper(table, where);
     else rootOperator = joinHelper(table, joins, where);
     rootOperator = projectionHelper(rootOperator, selects);
-    rootOperator = distinctHelper(rootOperator, distinct);
     rootOperator = sortHelper(rootOperator, orderByElements);
+    rootOperator = distinctHelper(rootOperator, distinct);
     return rootOperator;
 
   }
