@@ -139,21 +139,33 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     /**
      * Visits and evaluates each part of the expression
+     * 
      * @param andExpression The expression to be visited
      */
     @Override
     public void visit(AndExpression andExpression) {
-        andExpression.getLeftExpression().accept(this);
-        boolean left = condition;
+        boolean left;
+        boolean right;
+        try {
+            andExpression.getLeftExpression().accept(this);
+            left = condition;
+        } catch (IndexOutOfBoundsException e) {
+            left = true;
+        }
 
-        andExpression.getRightExpression().accept(this);
-        boolean right = condition;
+        try {
+            andExpression.getRightExpression().accept(this);
+            right = condition;
+        } catch (IndexOutOfBoundsException e) {
+            right = true;
+        }
 
         condition = left && right;
     }
 
     /**
      * Visits a column and selects relevant elements
+     * 
      * @param tableColumn The column to be visited
      */
     @Override
@@ -175,6 +187,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     /**
      * Visits a LongValue and pushes it onto the stack
+     * 
      * @param longValue The LongValue to be visited
      */
     @Override
@@ -184,6 +197,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     /**
      * Visits and evaluates all parts of the expression
+     * 
      * @param equalsTo The expression to be visited
      */
     @Override
@@ -199,6 +213,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     /**
      * Visits and evaluates all parts of the expression
+     * 
      * @param notEqualsTo The expression to be visited
      */
     @Override
@@ -214,6 +229,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     /**
      * Visits and evaluates all parts of the expression
+     * 
      * @param greaterThan The expression to be visited
      */
     @Override
@@ -229,6 +245,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     /**
      * Visits and evaluates all parts of the expression
+     * 
      * @param greaterThanEquals The expression to be visitex
      */
     @Override
@@ -244,6 +261,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     /**
      * Visits and evaluates all parts of the expression
+     * 
      * @param minorThan The expression to be visitex
      */
     @Override
@@ -258,6 +276,7 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
 
     /**
      * Visits and evaluates all parts of the expression
+     * 
      * @param minorThanEquals The expression to be visitex
      */
     @Override

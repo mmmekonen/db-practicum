@@ -9,8 +9,10 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
 /**
- * A class to represent a sort operator on a relation. Sorts each tuple in the order of columns in
- * orderbyElements and then in the order of the remaining columns in it's child operator's
+ * A class to represent a sort operator on a relation. Sorts each tuple in the
+ * order of columns in
+ * orderbyElements and then in the order of the remaining columns in it's child
+ * operator's
  * outputSchema.
  */
 public class SortOperator extends Operator {
@@ -24,8 +26,9 @@ public class SortOperator extends Operator {
   /**
    * Creates a sort operator using an Operator and a List of Columns to order by.
    *
-   * @param child The scan operator's child operator.
-   * @param orderbyElements ArrayList of columns to order the tuples from the child by.
+   * @param child           The scan operator's child operator.
+   * @param orderbyElements ArrayList of columns to order the tuples from the
+   *                        child by.
    */
   public SortOperator(Operator child, List<Column> orderbyElements) {
     super(null);
@@ -66,7 +69,6 @@ public class SortOperator extends Operator {
     for (int i = 0; i < child.outputSchema.size(); i++) {
       schema.add(child.outputSchema.get(indexOrders.get(i)));
     }
-
     // set outputSchema
     this.outputSchema = schema;
   }
