@@ -14,7 +14,12 @@ public class JoinOperator extends Operator {
     private Tuple leftTuple;
     private Tuple rightTuple;
 
-    /** TODO: */
+    /**
+     * Creates a JoinOperator object that concatenates two other operators together
+     * @param left_op One operator to be joined
+     * @param right_op Another operator to be joined
+     * @param expression An expression that dictates what combinations of tuples are valid
+     */
     public JoinOperator(Operator left_op, Operator right_op, Expression expression) {
         super(null);
         this.outputSchema = left_op.getOutputSchema();
@@ -26,11 +31,16 @@ public class JoinOperator extends Operator {
         this.rightTuple = right.getNextTuple();
     }
 
+    /** Resets cursor on the operator to the beginning */
     public void reset() {
         left.reset();
         right.reset();
     }
 
+    /**
+     * Returns the next valid combination of tuples from the child operators
+     * @return next Tuple, or null if we are at the end
+     */
     public Tuple getNextTuple() {
 
         if (leftTuple == null || rightTuple == null)
@@ -59,6 +69,9 @@ public class JoinOperator extends Operator {
         return null;
     }
 
+    /**
+     * Helper function to increment the operator
+     */
     private void advance() {
         rightTuple = right.getNextTuple();
         if (rightTuple == null) {
