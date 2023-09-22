@@ -1,10 +1,11 @@
 import common.DBCatalog;
 import common.QueryPlanBuilder;
-import common.Tuple;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -22,12 +23,14 @@ public class P1UnitTests {
   private static List<Statement> statementList;
   private static QueryPlanBuilder queryPlanBuilder;
   private static Statements statements;
+  private static String expectedPath;
 
   @BeforeAll
   static void setupBeforeAllTests() throws IOException, JSQLParserException {
     ClassLoader classLoader = P1UnitTests.class.getClassLoader();
     String path = Objects.requireNonNull(classLoader.getResource("samples/input")).getPath();
     DBCatalog.getInstance().setDataDirectory(path + "/db");
+    expectedPath = Objects.requireNonNull(classLoader.getResource("samples/expected")).getPath();
 
     String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
     // for windows machine
@@ -43,25 +46,18 @@ public class P1UnitTests {
   public void testQuery1() throws ExecutionControl.NotImplementedException {
     Operator plan = queryPlanBuilder.buildPlan(statementList.get(0));
 
-    List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
 
-    int expectedSize = 6;
+    byte[] output = outputStream.toByteArray();
 
-    Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
-
-    Tuple[] expectedTuples = new Tuple[] {
-        new Tuple(new ArrayList<>(List.of(1, 200, 50))),
-        new Tuple(new ArrayList<>(List.of(2, 200, 200))),
-        new Tuple(new ArrayList<>(List.of(3, 100, 105))),
-        new Tuple(new ArrayList<>(List.of(4, 100, 50))),
-        new Tuple(new ArrayList<>(List.of(5, 100, 500))),
-        new Tuple(new ArrayList<>(List.of(6, 300, 400)))
-    };
-
-    for (int i = 0; i < expectedSize; i++) {
-      Tuple expectedTuple = expectedTuples[i];
-      Tuple actualTuple = tuples.get(i);
-      Assertions.assertEquals(expectedTuple, actualTuple, "Unexpected tuple at index " + i);
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query1"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -69,25 +65,18 @@ public class P1UnitTests {
   public void testQuery2() throws ExecutionControl.NotImplementedException {
     Operator plan = queryPlanBuilder.buildPlan(statementList.get(1));
 
-    List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
 
-    int expectedSize = 6;
+    byte[] output = outputStream.toByteArray();
 
-    Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
-
-    Tuple[] expectedTuples = new Tuple[] {
-        new Tuple(new ArrayList<>(List.of(1))),
-        new Tuple(new ArrayList<>(List.of(2))),
-        new Tuple(new ArrayList<>(List.of(3))),
-        new Tuple(new ArrayList<>(List.of(4))),
-        new Tuple(new ArrayList<>(List.of(5))),
-        new Tuple(new ArrayList<>(List.of(6)))
-    };
-
-    for (int i = 0; i < expectedSize; i++) {
-      Tuple expectedTuple = expectedTuples[i];
-      Tuple actualTuple = tuples.get(i);
-      Assertions.assertEquals(expectedTuple, actualTuple, "Unexpected tuple at index " + i);
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query2"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -95,25 +84,18 @@ public class P1UnitTests {
   public void testQuery3() throws ExecutionControl.NotImplementedException {
     Operator plan = queryPlanBuilder.buildPlan(statementList.get(2));
 
-    List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
 
-    int expectedSize = 6;
+    byte[] output = outputStream.toByteArray();
 
-    Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
-
-    Tuple[] expectedTuples = new Tuple[] {
-        new Tuple(new ArrayList<>(List.of(1))),
-        new Tuple(new ArrayList<>(List.of(2))),
-        new Tuple(new ArrayList<>(List.of(3))),
-        new Tuple(new ArrayList<>(List.of(4))),
-        new Tuple(new ArrayList<>(List.of(5))),
-        new Tuple(new ArrayList<>(List.of(6)))
-    };
-
-    for (int i = 0; i < expectedSize; i++) {
-      Tuple expectedTuple = expectedTuples[i];
-      Tuple actualTuple = tuples.get(i);
-      Assertions.assertEquals(expectedTuple, actualTuple, "Unexpected tuple at index " + i);
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query3"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -121,21 +103,18 @@ public class P1UnitTests {
   public void testQuery4() throws ExecutionControl.NotImplementedException {
     Operator plan = queryPlanBuilder.buildPlan(statementList.get(3));
 
-    List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
 
-    int expectedSize = 2;
+    byte[] output = outputStream.toByteArray();
 
-    Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
-
-    Tuple[] expectedTuples = new Tuple[] {
-        new Tuple(new ArrayList<>(Arrays.asList(1, 200, 50))),
-        new Tuple(new ArrayList<>(Arrays.asList(2, 200, 200)))
-    };
-
-    for (int i = 0; i < expectedSize; i++) {
-      Tuple expectedTuple = expectedTuples[i];
-      Tuple actualTuple = tuples.get(i);
-      Assertions.assertEquals(expectedTuple, actualTuple, "Unexpected tuple at index " + i);
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query4"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -143,60 +122,37 @@ public class P1UnitTests {
   public void testQuery5() throws ExecutionControl.NotImplementedException {
     Operator plan = queryPlanBuilder.buildPlan(statementList.get(4));
 
-    List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
 
-    int expectedSize = 6;
+    byte[] output = outputStream.toByteArray();
 
-    Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
-
-    Tuple[] expectedTuples = new Tuple[] {
-        new Tuple(new ArrayList<>(Arrays.asList(1, 200, 50, 1, 101))),
-        new Tuple(new ArrayList<>(Arrays.asList(1, 200, 50, 1, 102))),
-        new Tuple(new ArrayList<>(Arrays.asList(1, 200, 50, 1, 103))),
-        new Tuple(new ArrayList<>(Arrays.asList(2, 200, 200, 2, 101))),
-        new Tuple(new ArrayList<>(Arrays.asList(3, 100, 105, 3, 102))),
-        new Tuple(new ArrayList<>(Arrays.asList(4, 100, 50, 4, 104)))
-    };
-
-    for (int i = 0; i < expectedSize; i++) {
-      Tuple expectedTuple = expectedTuples[i];
-      Tuple actualTuple = tuples.get(i);
-      Assertions.assertEquals(expectedTuple, actualTuple, "Unexpected tuple at index " + i);
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query5"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
   @Test
   public void testQuery6() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(
-        statementList.get(5)); // Assuming statementList index 5 corresponds to query 6
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(5));
 
-    List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
 
-    int expectedSize = 15; // Total number of combinations given the values
+    byte[] output = outputStream.toByteArray();
 
-    Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
-
-    Tuple[] expectedTuples = new Tuple[] {
-        new Tuple(new ArrayList<>(List.of(1, 200, 50, 2, 200, 200))),
-        new Tuple(new ArrayList<>(List.of(1, 200, 50, 3, 100, 105))),
-        new Tuple(new ArrayList<>(List.of(1, 200, 50, 4, 100, 50))),
-        new Tuple(new ArrayList<>(List.of(1, 200, 50, 5, 100, 500))),
-        new Tuple(new ArrayList<>(List.of(1, 200, 50, 6, 300, 400))),
-        new Tuple(new ArrayList<>(List.of(2, 200, 200, 3, 100, 105))),
-        new Tuple(new ArrayList<>(List.of(2, 200, 200, 4, 100, 50))),
-        new Tuple(new ArrayList<>(List.of(2, 200, 200, 5, 100, 500))),
-        new Tuple(new ArrayList<>(List.of(2, 200, 200, 6, 300, 400))),
-        new Tuple(new ArrayList<>(List.of(3, 100, 105, 4, 100, 50))),
-        new Tuple(new ArrayList<>(List.of(3, 100, 105, 5, 100, 500))),
-        new Tuple(new ArrayList<>(List.of(3, 100, 105, 6, 300, 400))),
-        new Tuple(new ArrayList<>(List.of(4, 100, 50, 5, 100, 500))),
-        new Tuple(new ArrayList<>(List.of(4, 100, 50, 6, 300, 400))),
-        new Tuple(new ArrayList<>(List.of(5, 100, 500, 6, 300, 400)))
-    };
-
-    for (int i = 0; i < expectedSize; i++) {
-      Tuple actualTuple = tuples.get(i);
-      Assertions.assertEquals(expectedTuples[i], actualTuple, "Unexpected tuple at index " + i);
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query6"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -204,23 +160,18 @@ public class P1UnitTests {
   public void testQuery7() throws ExecutionControl.NotImplementedException {
     Operator plan = queryPlanBuilder.buildPlan(statementList.get(6));
 
-    List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
 
-    int expectedSize = 4;
+    byte[] output = outputStream.toByteArray();
 
-    Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
-
-    Tuple[] expectedTuples = new Tuple[] {
-        new Tuple(new ArrayList<>(Arrays.asList(1))),
-        new Tuple(new ArrayList<>(Arrays.asList(2))),
-        new Tuple(new ArrayList<>(Arrays.asList(3))),
-        new Tuple(new ArrayList<>(Arrays.asList(4)))
-    };
-
-    for (int i = 0; i < expectedSize; i++) {
-      Tuple expectedTuple = expectedTuples[i];
-      Tuple actualTuple = tuples.get(i);
-      Assertions.assertEquals(expectedTuple, actualTuple, "Unexpected tuple at index " + i);
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query7"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -228,25 +179,151 @@ public class P1UnitTests {
   public void testQuery8() throws ExecutionControl.NotImplementedException {
     Operator plan = queryPlanBuilder.buildPlan(statementList.get(7));
 
-    List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
 
-    int expectedSize = 6;
+    byte[] output = outputStream.toByteArray();
 
-    Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query8"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
-    Tuple[] expectedTuples = new Tuple[] {
-        new Tuple(new ArrayList<>(Arrays.asList(3, 100, 105))),
-        new Tuple(new ArrayList<>(Arrays.asList(4, 100, 50))),
-        new Tuple(new ArrayList<>(Arrays.asList(5, 100, 500))),
-        new Tuple(new ArrayList<>(Arrays.asList(1, 200, 50))),
-        new Tuple(new ArrayList<>(Arrays.asList(2, 200, 200))),
-        new Tuple(new ArrayList<>(Arrays.asList(6, 300, 400)))
-    };
+  @Test
+  public void testQuery9() throws ExecutionControl.NotImplementedException {
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(8));
 
-    for (int i = 0; i < expectedSize; i++) {
-      Tuple expectedTuple = expectedTuples[i];
-      Tuple actualTuple = tuples.get(i);
-      Assertions.assertEquals(expectedTuple, actualTuple, "Unexpected tuple at index " + i);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
+
+    byte[] output = outputStream.toByteArray();
+
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query9"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testQuery10() throws ExecutionControl.NotImplementedException {
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(9));
+
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
+
+    byte[] output = outputStream.toByteArray();
+
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query10"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testQuery11() throws ExecutionControl.NotImplementedException {
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(10));
+
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
+
+    byte[] output = outputStream.toByteArray();
+
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query11"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testQuery12() throws ExecutionControl.NotImplementedException {
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(11));
+
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
+
+    byte[] output = outputStream.toByteArray();
+
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query12"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testQuery13() throws ExecutionControl.NotImplementedException {
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(12));
+
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
+
+    byte[] output = outputStream.toByteArray();
+
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query13"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testQuery14() throws ExecutionControl.NotImplementedException {
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(13));
+
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
+
+    byte[] output = outputStream.toByteArray();
+
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query14"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testQuery15() throws ExecutionControl.NotImplementedException {
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(14));
+
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    plan.dump(new PrintStream(outputStream));
+
+    byte[] output = outputStream.toByteArray();
+
+    byte[] expected;
+    try {
+      expected = Files.readAllBytes(Path.of(expectedPath + "/query15"));
+      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 }
