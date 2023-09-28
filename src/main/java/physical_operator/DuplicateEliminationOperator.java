@@ -1,9 +1,10 @@
-package operator;
+package physical_operator;
 
 import common.Tuple;
 
 /**
- * A class to represent a duplicate elimination operator on a relation. Eliminates duplicate tuples
+ * A class to represent a duplicate elimination operator on a relation.
+ * Eliminates duplicate tuples
  * from the relation.
  */
 public class DuplicateEliminationOperator extends Operator {
@@ -29,7 +30,8 @@ public class DuplicateEliminationOperator extends Operator {
   }
 
   /**
-   * Iterates through the tuples from the child operator and returns the next tuple that is not a
+   * Iterates through the tuples from the child operator and returns the next
+   * tuple that is not a
    * duplicate.
    *
    * @return The next tuple that is not a duplicate.

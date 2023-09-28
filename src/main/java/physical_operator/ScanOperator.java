@@ -1,4 +1,4 @@
-package operator;
+package physical_operator;
 
 import common.DBCatalog;
 import common.Tuple;
@@ -8,8 +8,10 @@ import java.util.Scanner;
 import net.sf.jsqlparser.expression.Alias;
 
 /**
- * A class to represent the a scan operator on a table. ScanOperators scan each tuple in a file and
- * return them. The file is specified by the table name. The output schema is the schema of the
+ * A class to represent the a scan operator on a table. ScanOperators scan each
+ * tuple in a file and
+ * return them. The file is specified by the table name. The output schema is
+ * the schema of the
  * table.
  */
 public class ScanOperator extends Operator {

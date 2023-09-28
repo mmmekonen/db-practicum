@@ -1,11 +1,12 @@
-package operator;
+package physical_operator;
 
 import common.SelectExpressionVisitor;
 import common.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 
 /**
- * A class to represent a select operator on a relation. Takes a tuple from its child operator and
+ * A class to represent a select operator on a relation. Takes a tuple from its
+ * child operator and
  * returns it if it satisfies the respective predicate in the WHERE clause.
  */
 public class SelectOperator extends Operator {
@@ -17,10 +18,11 @@ public class SelectOperator extends Operator {
   private Expression expression;
 
   /**
-   * Creates a select operator using an Operator as its child and an Expression to evaluate each
+   * Creates a select operator using an Operator as its child and an Expression to
+   * evaluate each
    * tuple by.
    *
-   * @param child The select operator's child operator.
+   * @param child      The select operator's child operator.
    * @param expression Expression from the WHERE clause of the query.
    */
   public SelectOperator(Operator child, Expression expression) {
@@ -37,7 +39,9 @@ public class SelectOperator extends Operator {
   }
 
   /**
-   * Iterates over the child operator until it finds a tuple that matches the conditions specified in the expression
+   * Iterates over the child operator until it finds a tuple that matches the
+   * conditions specified in the expression
+   * 
    * @return The next tuple that matches the expression
    */
   public Tuple getNextTuple() {

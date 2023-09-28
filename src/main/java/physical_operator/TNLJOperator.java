@@ -1,4 +1,4 @@
-package operator;
+package physical_operator;
 
 import java.util.ArrayList;
 
@@ -6,7 +6,7 @@ import common.SelectExpressionVisitor;
 import common.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 
-public class JoinOperator extends Operator {
+public class TNLJOperator extends Operator {
 
     private Operator left;
     private Operator right;
@@ -15,12 +15,15 @@ public class JoinOperator extends Operator {
     private Tuple rightTuple;
 
     /**
-     * Creates a JoinOperator object that concatenates two other operators together
-     * @param left_op One operator to be joined
-     * @param right_op Another operator to be joined
-     * @param expression An expression that dictates what combinations of tuples are valid
+     * Creates a TNLJOperator object that concatenates two other operators together
+     * using a tuple-nested loop join
+     * 
+     * @param left_op    One operator to be joined
+     * @param right_op   Another operator to be joined
+     * @param expression An expression that dictates what combinations of tuples are
+     *                   valid
      */
-    public JoinOperator(Operator left_op, Operator right_op, Expression expression) {
+    public TNLJOperator(Operator left_op, Operator right_op, Expression expression) {
         super(null);
         this.outputSchema = left_op.getOutputSchema();
         this.outputSchema.addAll(right_op.getOutputSchema());
@@ -39,6 +42,7 @@ public class JoinOperator extends Operator {
 
     /**
      * Returns the next valid combination of tuples from the child operators
+     * 
      * @return next Tuple, or null if we are at the end
      */
     public Tuple getNextTuple() {
