@@ -1,7 +1,6 @@
 import common.DBCatalog;
 import common.QueryPlanBuilder;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,36 +25,34 @@ public class P2UnitTests {
   private static QueryPlanBuilder queryPlanBuilder;
   private static Statements statements;
   private static String expectedPath;
-  private static String outputDir = "samples/output";
-  private static String outputPath;
+  private static File outputDir;
 
   @BeforeAll
   static void setupBeforeAllTests() throws IOException, JSQLParserException {
     ClassLoader classLoader = P2UnitTests.class.getClassLoader();
     String path = Objects.requireNonNull(classLoader.getResource("samples/input")).getPath();
     DBCatalog.getInstance().setDataDirectory(path + "/db");
-    expectedPath = Objects.requireNonNull(classLoader.getResource("samples/expected")).getPath();
+    expectedPath = "src/test/resources/samples/expected";
 
     String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
     // for windows machine
     // if (queriesFile.contains(":")) {
     // queriesFile = queriesFile.substring(3);
     // }
-    // if (expectedPath.contains(":")) {
-    // expectedPath = expectedPath.substring(3);
-    // }
 
     statements = CCJSqlParserUtil.parseStatements(Files.readString(Path.of(queriesFile)));
     queryPlanBuilder = new QueryPlanBuilder();
     statementList = statements.getStatements();
 
-    outputPath = Objects.requireNonNull(classLoader.getResource(outputDir)).getPath();
-    for (File file : (new File(outputPath).listFiles()))
+    // outputPath =
+    // Objects.requireNonNull(classLoader.getResource(outputDir)).getPath();
+    outputDir = new File("src/test/resources/samples/output");
+    for (File file : (outputDir.listFiles()))
       file.delete(); // clean output directory
   }
 
   private void testHelper(Operator plan, int queryNum) {
-    File outfile = new File(outputPath + "/query" + queryNum);
+    File outfile = new File(outputDir, "/query" + queryNum);
     try {
       plan.dump(new PrintStream(outfile));
     } catch (FileNotFoundException e) {
@@ -66,7 +63,7 @@ public class P2UnitTests {
     byte[] output;
     try {
       expected = Files.readAllBytes(Path.of(expectedPath + "/query" + queryNum));
-      output = Files.readAllBytes(Path.of(outputDir + "/query" + queryNum));
+      output = Files.readAllBytes(outfile.toPath());
       Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
       Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
     } catch (IOException e) {
