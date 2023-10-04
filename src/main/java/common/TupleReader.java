@@ -1,5 +1,6 @@
 package common;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -20,7 +21,13 @@ public class TupleReader {
     this.fileChannel = fileInputStream.getChannel();
     this.buffer = ByteBuffer.allocate(PAGE_SIZE);
     readPageHeader();
+  }
 
+  public TupleReader(File file) throws IOException {
+    this.fileInputStream = new FileInputStream(file);
+    this.fileChannel = fileInputStream.getChannel();
+    this.buffer = ByteBuffer.allocate(PAGE_SIZE);
+    readPageHeader();
   }
 
   private boolean readPageHeader() throws IOException {
