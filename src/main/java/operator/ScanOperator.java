@@ -2,20 +2,23 @@ package operator;
 
 import common.DBCatalog;
 import common.Tuple;
+import common.TupleReader;
+
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
+import java.io.IOException;
 import net.sf.jsqlparser.expression.Alias;
 
 /**
- * A class to represent the a scan operator on a table. ScanOperators scan each tuple in a file and
- * return them. The file is specified by the table name. The output schema is the schema of the
+ * A class to represent the a scan operator on a table. ScanOperators scan each
+ * tuple in a file and
+ * return them. The file is specified by the table name. The output schema is
+ * the schema of the
  * table.
  */
 public class ScanOperator extends Operator {
 
   private File dbFile;
-  private Scanner scanner;
+  private TupleReader reader;
 
   // explicit constructor
   /**
@@ -34,8 +37,8 @@ public class ScanOperator extends Operator {
     this.dbFile = dbCatalog.getFileForTable(tableName);
 
     try {
-      this.scanner = new Scanner(dbFile);
-    } catch (FileNotFoundException e) {
+      this.reader = new TupleReader(dbFile);
+    } catch (IOException e) {
       e.printStackTrace();
     }
 
@@ -48,8 +51,9 @@ public class ScanOperator extends Operator {
   public void reset() {
     // reset to beginning
     try {
-      this.scanner = new Scanner(this.dbFile);
-    } catch (FileNotFoundException e) {
+      reader.close();
+      reader = new TupleReader(dbFile);
+    } catch (IOException e) {
       e.printStackTrace();
     }
   }
@@ -60,11 +64,12 @@ public class ScanOperator extends Operator {
    * @return next Tuple, or null if we are at the end
    */
   public Tuple getNextTuple() {
-    while (this.scanner.hasNextLine()) {
-      String line = this.scanner.nextLine();
-      Tuple t = new Tuple(line);
+    try {
+      Tuple t = reader.readNextTuple();
       return t;
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
     }
-    return null;
   }
 }

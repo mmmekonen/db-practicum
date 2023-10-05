@@ -3,7 +3,6 @@ package compiler;
 import common.DBCatalog;
 import common.QueryPlanBuilder;
 import java.io.File;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -13,7 +12,8 @@ import operator.Operator;
 import org.apache.logging.log4j.*;
 
 /**
- * Top level harness class; reads queries from an input file one at a time, processes them and sends
+ * Top level harness class; reads queries from an input file one at a time,
+ * processes them and sends
  * output to file or to System depending on flag.
  */
 public class Compiler {
@@ -27,10 +27,13 @@ public class Compiler {
   // to System.out
 
   /**
-   * Reads statements from queriesFile one at a time, builds query plan and evaluates, dumping
+   * Reads statements from queriesFile one at a time, builds query plan and
+   * evaluates, dumping
    * results to files or console as desired.
    *
-   * <p>If dumping to files result of ith query is in file named queryi, indexed stating at 1.
+   * <p>
+   * If dumping to files result of ith query is in file named queryi, indexed
+   * stating at 1.
    */
   public static void main(String[] args) {
 
@@ -43,7 +46,8 @@ public class Compiler {
       QueryPlanBuilder queryPlanBuilder = new QueryPlanBuilder();
 
       if (outputToFiles) {
-        for (File file : (new File(outputDir).listFiles())) file.delete(); // clean output directory
+        for (File file : (new File(outputDir).listFiles()))
+          file.delete(); // clean output directory
       }
 
       int counter = 1; // for numbering output files
@@ -56,10 +60,12 @@ public class Compiler {
 
           if (outputToFiles) {
             File outfile = new File(outputDir + "/query" + counter);
-            plan.dump(new PrintStream(outfile));
-          } else {
-            plan.dump(System.out);
-          }
+            long timeElapsed = System.currentTimeMillis();
+            plan.dump(outfile);
+            timeElapsed = System.currentTimeMillis() - timeElapsed;
+          } // else {
+            // plan.dump(System.out);
+            // }
         } catch (Exception e) {
           logger.error(e.getMessage());
         }
