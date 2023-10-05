@@ -3,7 +3,6 @@ package compiler;
 import common.DBCatalog;
 import common.QueryPlanBuilder;
 import java.io.File;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
