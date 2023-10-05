@@ -60,7 +60,9 @@ public class Compiler {
 
           if (outputToFiles) {
             File outfile = new File(outputDir + "/query" + counter);
+            long timeElapsed = System.currentTimeMillis();
             plan.dump(outfile);
+            timeElapsed = System.currentTimeMillis() - timeElapsed;
           } // else {
             // plan.dump(System.out);
             // }
