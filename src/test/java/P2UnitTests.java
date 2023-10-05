@@ -36,9 +36,9 @@ public class P2UnitTests {
 
     String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
     // for windows machine
-    // if (queriesFile.contains(":")) {
-    // queriesFile = queriesFile.substring(3);
-    // }
+    if (queriesFile.contains(":")) {
+      queriesFile = queriesFile.substring(3);
+    }
 
     statements = CCJSqlParserUtil.parseStatements(Files.readString(Path.of(queriesFile)));
     queryPlanBuilder = new QueryPlanBuilder();
@@ -53,11 +53,7 @@ public class P2UnitTests {
 
   private void testHelper(Operator plan, int queryNum) {
     File outfile = new File(outputDir, "/query" + queryNum);
-    try {
-      plan.dump(new PrintStream(outfile));
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
+    plan.dump(outfile);
 
     byte[] expected;
     byte[] output;

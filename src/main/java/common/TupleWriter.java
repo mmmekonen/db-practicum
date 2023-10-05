@@ -23,6 +23,14 @@ public class TupleWriter {
     this.index = 0;
   }
 
+  public TupleWriter(File file) throws IOException {
+    fileOutputStream = new FileOutputStream(file);
+    fileChannel = fileOutputStream.getChannel();
+    this.buffer = ByteBuffer.allocate(PAGE_SIZE); // Assuming each page has at most 4096 bytes
+    this.tuplesWrittenOnPage = 0;
+    this.index = 0;
+  }
+
   public void writeTuple(Tuple tuple) throws IOException {
     int tupleSize = tuple.getAllElements().size();
 
