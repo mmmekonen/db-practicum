@@ -69,8 +69,8 @@ public abstract class Operator {
   }
 
   /**
-   * Iterate through output of operator and send it all to the specified
-   * printStream)
+   * Iterate through output of operator and send it all, in Tupel format, to the
+   * specified printStream.
    *
    * @param printStream stream to receive output, one tuple per line.
    */
@@ -82,10 +82,10 @@ public abstract class Operator {
   }
 
   /**
-   * Iterate through output of operator and send it all to the specified
-   * printStream)
+   * Iterate through output of operator and send it all, in binary format, to the
+   * specified printStream.
    *
-   * @param printStream stream to receive output, one tuple per line.
+   * @param file file to receive output, in binary format.
    */
   public void dump(File file) {
     TupleWriter tw;

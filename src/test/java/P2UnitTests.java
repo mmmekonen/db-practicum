@@ -44,8 +44,6 @@ public class P2UnitTests {
     queryPlanBuilder = new QueryPlanBuilder();
     statementList = statements.getStatements();
 
-    // outputPath =
-    // Objects.requireNonNull(classLoader.getResource(outputDir)).getPath();
     outputDir = new File("src/test/resources/samples/output");
     for (File file : (outputDir.listFiles()))
       file.delete(); // clean output directory
