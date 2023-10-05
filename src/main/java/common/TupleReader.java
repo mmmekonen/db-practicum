@@ -7,6 +7,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 
+/*
+ * Class to read tuples from a binary file, pages at a time
+ */
 public class TupleReader {
   private FileInputStream fileInputStream;
   private FileChannel fileChannel;
@@ -16,6 +19,13 @@ public class TupleReader {
   private static int PAGE_SIZE = 4096;
   private int tuplesRemaining;
 
+  /*
+   * Creates a new tuple reader for the given file
+   * 
+   * @param fileName The name of the file to read from
+   * 
+   * @throws IOException
+   */
   public TupleReader(String fileName) throws IOException {
     this.fileInputStream = new FileInputStream(fileName);
     this.fileChannel = fileInputStream.getChannel();
@@ -23,6 +33,13 @@ public class TupleReader {
     readPageHeader();
   }
 
+  /*
+   * Creates a new tuple reader for the given file
+   * 
+   * @param file The file to read from
+   * 
+   * @throws IOException
+   */
   public TupleReader(File file) throws IOException {
     this.fileInputStream = new FileInputStream(file);
     this.fileChannel = fileInputStream.getChannel();
@@ -30,6 +47,10 @@ public class TupleReader {
     readPageHeader();
   }
 
+  /*
+   * Reads the next page header from the file to get the attributes and number of
+   * tuples
+   */
   private boolean readPageHeader() throws IOException {
     buffer.clear();
     if (fileChannel.read(buffer) != -1) {
@@ -44,14 +65,25 @@ public class TupleReader {
     }
   }
 
+  /*
+   * Returns the number of attributes in the tuples
+   */
   public int getAttributes() {
     return attributes;
   }
 
+  /*
+   * Returns the number of tuples in the file
+   */
   public int getNumTuples() {
     return numTuples;
   }
 
+  /*
+   * Reads the next tuple from the buffer
+   * 
+   * @throws IOException
+   */
   public Tuple readNextTuple() throws IOException {
     // Read the next page header if the current page is exhausted
     if (buffer.remaining() < (attributes * 4)) {
@@ -77,6 +109,11 @@ public class TupleReader {
     return t;
   }
 
+  /*
+   * Closes the file and the file channel
+   * 
+   * @throws IOException
+   */
   public void close() throws IOException {
     fileChannel.close();
     fileInputStream.close();
