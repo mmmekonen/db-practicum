@@ -16,7 +16,7 @@ public class DuplicateEliminationOperator extends Operator {
   /**
    * Creates a duplicate elimination operator using an Operator.
    *
-   * @param child The scan operator's child operator.
+   * @param child The operator's child operator.
    */
   public DuplicateEliminationOperator(Operator child) {
     super(child.outputSchema);

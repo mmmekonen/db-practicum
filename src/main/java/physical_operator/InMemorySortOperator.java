@@ -9,11 +9,9 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
 /**
- * A class to represent a sort operator on a relation. Sorts each tuple in the
- * order of columns in
- * orderbyElements and then in the order of the remaining columns in it's child
- * operator's
- * outputSchema.
+ * A class to represent an in-memory sort operator on a relation. Sorts each
+ * tuple in the order of columns in orderbyElements and then in the order of the
+ * remaining columns in it's child operator's outputSchema.
  */
 public class InMemorySortOperator extends Operator {
 

@@ -6,6 +6,11 @@ import common.SelectExpressionVisitor;
 import common.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 
+/**
+ * A class to represent a tuple-nested loop join. It loops over each tuple in
+ * the inner and outer tables and only returns tuples that satisfy the given
+ * expression.
+ */
 public class TNLJOperator extends Operator {
 
     private Operator left;
@@ -16,12 +21,12 @@ public class TNLJOperator extends Operator {
 
     /**
      * Creates a TNLJOperator object that concatenates two other operators together
-     * using a tuple-nested loop join
+     * using a tuple-nested loop join.
      * 
-     * @param left_op    One operator to be joined
-     * @param right_op   Another operator to be joined
+     * @param left_op    One operator to be joined.
+     * @param right_op   Another operator to be joined.
      * @param expression An expression that dictates what combinations of tuples are
-     *                   valid
+     *                   valid.
      */
     public TNLJOperator(Operator left_op, Operator right_op, Expression expression) {
         super(null);
