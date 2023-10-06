@@ -21,9 +21,9 @@ public class TupleReader {
 
   /*
    * Creates a new tuple reader for the given file
-   * 
+   *
    * @param fileName The name of the file to read from
-   * 
+   *
    * @throws IOException
    */
   public TupleReader(String fileName) throws IOException {
@@ -35,9 +35,9 @@ public class TupleReader {
 
   /*
    * Creates a new tuple reader for the given file
-   * 
+   *
    * @param file The file to read from
-   * 
+   *
    * @throws IOException
    */
   public TupleReader(File file) throws IOException {
@@ -81,7 +81,7 @@ public class TupleReader {
 
   /*
    * Reads the next tuple from the buffer
-   * 
+   *
    * @throws IOException
    */
   public Tuple readNextTuple() throws IOException {
@@ -111,12 +111,11 @@ public class TupleReader {
 
   /*
    * Closes the file and the file channel
-   * 
+   *
    * @throws IOException
    */
   public void close() throws IOException {
     fileChannel.close();
     fileInputStream.close();
   }
-
 }

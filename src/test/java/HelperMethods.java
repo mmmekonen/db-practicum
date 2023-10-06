@@ -1,8 +1,7 @@
 import common.Tuple;
-import physical_operator.Operator;
-
 import java.util.ArrayList;
 import java.util.List;
+import physical_operator.Operator;
 
 public class HelperMethods {
   public static List<Tuple> collectAllTuples(Operator operator) {

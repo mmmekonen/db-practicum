@@ -1,10 +1,10 @@
 package common;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.io.File;
 
 /*
  * Class to write tuples to a binary file, pages at a time
@@ -20,9 +20,9 @@ public class TupleWriter {
 
   /*
    * Creates a new tuple writer for the given file
-   * 
+   *
    * @param fileName The name of the file to write to
-   * 
+   *
    * @throws IOException
    */
   public TupleWriter(String fileName) throws IOException {
@@ -36,9 +36,9 @@ public class TupleWriter {
 
   /*
    * Creates a new tuple writer for the given file
-   * 
+   *
    * @param file The file to write to
-   * 
+   *
    * @throws IOException
    */
   public TupleWriter(File file) throws IOException {
@@ -52,9 +52,9 @@ public class TupleWriter {
   /*
    * Writes the given tuple to the buffer
    * Checks if a new page needs to be created and/or written to disk
-   * 
+   *
    * @param tuple The tuple to be written
-   * 
+   *
    * @throws IOException
    */
   public void writeTuple(Tuple tuple) throws IOException {
@@ -66,7 +66,6 @@ public class TupleWriter {
 
       writePage();
       newPage(tupleSize);
-
     }
 
     for (int i = 0; i < tupleSize; i++) {
@@ -80,7 +79,7 @@ public class TupleWriter {
 
   /*
    * Funtion to create a new page in the buffer and resets all required variables
-   * 
+   *
    * @param tupleSize The size of the tuple to be written
    */
   private void newPage(int tupleSize) {
@@ -97,7 +96,7 @@ public class TupleWriter {
 
   /*
    * Writes the current page to disk
-   * 
+   *
    * @throws IOException
    */
   private void writePage() throws IOException {
@@ -112,15 +111,13 @@ public class TupleWriter {
 
   /*
    * Closes the file and the file channel and writes the last page to disk
-   * 
+   *
    * @throws IOException
    */
   public void close() throws IOException {
-    if (tuplesWrittenOnPage != 0)
-      writePage();
+    if (tuplesWrittenOnPage != 0) writePage();
 
     fileChannel.close();
     fileOutputStream.close();
   }
-
 }

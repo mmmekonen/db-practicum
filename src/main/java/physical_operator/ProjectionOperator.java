@@ -9,10 +9,8 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 /**
- * A class to represent a projection operator on a relation. Projection operator
- * takes in a list of
- * select items and a child operator. It then returns a new operator with the
- * same schema as the
+ * A class to represent a projection operator on a relation. Projection operator takes in a list of
+ * select items and a child operator. It then returns a new operator with the same schema as the
  * child operator, but with only the columns specified in the select items.
  */
 public class ProjectionOperator extends Operator {
@@ -23,7 +21,7 @@ public class ProjectionOperator extends Operator {
    * Creates a projection operator using an Operator and a List of SelectItems.
    *
    * @param selectItems The select items to project on.
-   * @param child       The scan operator's child operator.
+   * @param child The scan operator's child operator.
    */
   public ProjectionOperator(List<SelectItem> selectItems, Operator child) {
     super(child.outputSchema);
@@ -66,8 +64,7 @@ public class ProjectionOperator extends Operator {
   }
 
   /**
-   * Get next tuple from operator Only returns the tuple with the columns
-   * specified in the select
+   * Get next tuple from operator Only returns the tuple with the columns specified in the select
    * items projection
    *
    * @return next Tuple, or null if we are at the end

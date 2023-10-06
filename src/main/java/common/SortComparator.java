@@ -23,6 +23,7 @@ public class SortComparator implements Comparator<Tuple> {
 
   /**
    * Compares two tuples element-by-element
+   *
    * @param o1 One of the tuples to be compared
    * @param o2 One of the tuples to be compared
    * @return
