@@ -8,13 +8,11 @@ import java.nio.file.Path;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
+import org.apache.logging.log4j.*;
 import physical_operator.Operator;
 
-import org.apache.logging.log4j.*;
-
 /**
- * Top level harness class; reads queries from an input file one at a time,
- * processes them and sends
+ * Top level harness class; reads queries from an input file one at a time, processes them and sends
  * output to file or to System depending on flag.
  */
 public class Compiler {
@@ -28,13 +26,10 @@ public class Compiler {
   // to System.out
 
   /**
-   * Reads statements from queriesFile one at a time, builds query plan and
-   * evaluates, dumping
+   * Reads statements from queriesFile one at a time, builds query plan and evaluates, dumping
    * results to files or console as desired.
    *
-   * <p>
-   * If dumping to files result of ith query is in file named queryi, indexed
-   * stating at 1.
+   * <p>If dumping to files result of ith query is in file named queryi, indexed stating at 1.
    */
   public static void main(String[] args) {
 
@@ -47,8 +42,7 @@ public class Compiler {
       QueryPlanBuilder queryPlanBuilder = new QueryPlanBuilder();
 
       if (outputToFiles) {
-        for (File file : (new File(outputDir).listFiles()))
-          file.delete(); // clean output directory
+        for (File file : (new File(outputDir).listFiles())) file.delete(); // clean output directory
       }
 
       int counter = 1; // for numbering output files
@@ -65,8 +59,8 @@ public class Compiler {
             plan.dump(outfile);
             timeElapsed = System.currentTimeMillis() - timeElapsed;
           } // else {
-            // plan.dump(System.out);
-            // }
+          // plan.dump(System.out);
+          // }
         } catch (Exception e) {
           logger.error(e.getMessage());
         }

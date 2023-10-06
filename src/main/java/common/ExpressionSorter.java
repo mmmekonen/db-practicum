@@ -18,16 +18,16 @@ public class ExpressionSorter implements ExpressionVisitor {
   private HashSet<Table> tables;
   private Table latestTable;
 
-  /**
-   * Creates an empty ExpressionSorter
-   */
+  /** Creates an empty ExpressionSorter */
   public ExpressionSorter() {
     this.tables = new HashSet<Table>();
     this.latestTable = null;
   }
 
   /**
-   * The ExpressionSorter will keep track of how many tables it references, and can return this boolean
+   * The ExpressionSorter will keep track of how many tables it references, and can return this
+   * boolean
+   *
    * @return true iff the expression references a single table
    */
   public boolean onSingleTable() {
@@ -35,7 +35,9 @@ public class ExpressionSorter implements ExpressionVisitor {
   }
 
   /**
-   * If the expression only references one table, this will return that table, otherwise it will return null
+   * If the expression only references one table, this will return that table, otherwise it will
+   * return null
+   *
    * @return null or a table
    */
   public Table getTable() {
@@ -45,6 +47,7 @@ public class ExpressionSorter implements ExpressionVisitor {
 
   /**
    * Visits all parts of the expression
+   *
    * @param andExpression The expression to be visited
    */
   @Override
@@ -57,6 +60,7 @@ public class ExpressionSorter implements ExpressionVisitor {
 
   /**
    * Adds the table from which the column originates to the set of tables tracked by the object
+   *
    * @param tableColumn The column to be visited
    */
   @Override
@@ -66,7 +70,7 @@ public class ExpressionSorter implements ExpressionVisitor {
     latestTable = tableColumn.getTable();
   }
 
-  //not used
+  // not used
   @Override
   public void visit(LongValue longValue) {
     // :)
@@ -74,6 +78,7 @@ public class ExpressionSorter implements ExpressionVisitor {
 
   /**
    * Visits all parts of the expression
+   *
    * @param equalsTo The expression to be visited
    */
   @Override
@@ -84,6 +89,7 @@ public class ExpressionSorter implements ExpressionVisitor {
 
   /**
    * Visits all parts of the expression
+   *
    * @param notEqualsTo The expression to be visited
    */
   @Override
@@ -94,6 +100,7 @@ public class ExpressionSorter implements ExpressionVisitor {
 
   /**
    * Visits all parts of the expression
+   *
    * @param greaterThan The expression to be visited
    */
   @Override
@@ -104,6 +111,7 @@ public class ExpressionSorter implements ExpressionVisitor {
 
   /**
    * Visits all parts of the expression
+   *
    * @param greaterThanEquals The expression to be visited
    */
   @Override
@@ -114,6 +122,7 @@ public class ExpressionSorter implements ExpressionVisitor {
 
   /**
    * Visits all parts of the expression
+   *
    * @param minorThan The expression to be visited
    */
   @Override
@@ -124,6 +133,7 @@ public class ExpressionSorter implements ExpressionVisitor {
 
   /**
    * Visits all parts of the expression
+   *
    * @param minorThanEquals The expression to be visited
    */
   @Override

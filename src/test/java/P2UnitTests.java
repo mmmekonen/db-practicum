@@ -1,6 +1,5 @@
 import common.DBCatalog;
 import common.QueryPlanBuilder;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,10 +12,10 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
-import physical_operator.Operator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import physical_operator.Operator;
 
 public class P2UnitTests {
   private static List<Statement> statementList;
@@ -32,10 +31,11 @@ public class P2UnitTests {
     DBCatalog.getInstance().setDataDirectory(path + "/db");
     expectedPath = "src/test/resources/samples/expected";
 
-    String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
+    String queriesFile =
+        Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
     // for windows machine
     // if (queriesFile.contains(":")) {
-    //   queriesFile = queriesFile.substring(3);
+    // queriesFile = queriesFile.substring(3);
     // }
 
     statements = CCJSqlParserUtil.parseStatements(Files.readString(Path.of(queriesFile)));
@@ -43,8 +43,7 @@ public class P2UnitTests {
     statementList = statements.getStatements();
 
     outputDir = new File("src/test/resources/samples/output");
-    for (File file : (outputDir.listFiles()))
-      file.delete(); // clean output directory
+    for (File file : (outputDir.listFiles())) file.delete(); // clean output directory
   }
 
   private void testHelper(Operator plan, int queryNum) {
