@@ -1,4 +1,4 @@
-package operator;
+package physical_operator;
 
 import common.SortComparator;
 import common.Tuple;
@@ -9,13 +9,11 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
 /**
- * A class to represent a sort operator on a relation. Sorts each tuple in the
- * order of columns in
- * orderbyElements and then in the order of the remaining columns in it's child
- * operator's
- * outputSchema.
+ * A class to represent an in-memory sort operator on a relation. Sorts each
+ * tuple in the order of columns in orderbyElements and then in the order of the
+ * remaining columns in it's child operator's outputSchema.
  */
-public class SortOperator extends Operator {
+public class InMemorySortOperator extends Operator {
 
   // all of the tuples from the child
   private List<Tuple> tuples;
@@ -30,7 +28,7 @@ public class SortOperator extends Operator {
    * @param orderbyElements ArrayList of columns to order the tuples from the
    *                        child by.
    */
-  public SortOperator(Operator child, List<Column> orderbyElements) {
+  public InMemorySortOperator(Operator child, List<Column> orderbyElements) {
     super(null);
 
     // get all child tuples

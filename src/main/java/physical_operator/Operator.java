@@ -1,4 +1,4 @@
-package operator;
+package physical_operator;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,7 +69,7 @@ public abstract class Operator {
   }
 
   /**
-   * Iterate through output of operator and send it all, in Tupel format, to the
+   * Iterate through output of operator and send it all, in Tuple format, to the
    * specified printStream.
    *
    * @param printStream stream to receive output, one tuple per line.

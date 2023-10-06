@@ -1,4 +1,4 @@
-package operator;
+package physical_operator;
 
 import common.DBCatalog;
 import common.Tuple;
@@ -27,7 +27,7 @@ public class ScanOperator extends Operator {
    * scan operator returns a tuple with the same schema as the table.
    *
    * @param tableName The name of the table to scan.
-   * @ param alias The alias of the table.
+   * @param alias     The alias of the table.
    */
   public ScanOperator(String tableName, Alias alias) {
 
