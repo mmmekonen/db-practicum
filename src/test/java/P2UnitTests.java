@@ -154,4 +154,5 @@ public class P2UnitTests {
     Operator plan = queryPlanBuilder.buildPlan(statementList.get(14));
     testHelper(plan, 15);
   }
+
 }
