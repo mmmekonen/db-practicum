@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import net.sf.jsqlparser.expression.Expression;
 
 /**
- * A class to represent a tuple-nested loop join. It loops over each tuple in the inner and outer
+ * A class to represent a tuple-nested loop join. It loops over each tuple in
+ * the inner and outer
  * tables and only returns tuples that satisfy the given expression.
  */
 public class TNLJOperator extends Operator {
@@ -18,12 +19,14 @@ public class TNLJOperator extends Operator {
   private Tuple rightTuple;
 
   /**
-   * Creates a TNLJOperator object that concatenates two other operators together using a
+   * Creates a TNLJOperator object that concatenates two other operators together
+   * using a
    * tuple-nested loop join.
    *
-   * @param left_op One operator to be joined.
-   * @param right_op Another operator to be joined.
-   * @param expression An expression that dictates what combinations of tuples are valid.
+   * @param left_op    One operator to be joined.
+   * @param right_op   Another operator to be joined.
+   * @param expression An expression that dictates what combinations of tuples are
+   *                   valid.
    */
   public TNLJOperator(Operator left_op, Operator right_op, Expression expression) {
     super(null);
@@ -49,7 +52,8 @@ public class TNLJOperator extends Operator {
    */
   public Tuple getNextTuple() {
 
-    if (leftTuple == null || rightTuple == null) return null;
+    if (leftTuple == null || rightTuple == null)
+      return null;
 
     Tuple tuple;
 
@@ -60,9 +64,13 @@ public class TNLJOperator extends Operator {
       combined.addAll(rightTuple.getAllElements());
       tuple = new Tuple(combined);
 
-      SelectExpressionVisitor visitor = new SelectExpressionVisitor(tuple, outputSchema);
-      expression.accept(visitor);
-      satisfied = visitor.conditionSatisfied();
+      if (expression != null) {
+        SelectExpressionVisitor visitor = new SelectExpressionVisitor(tuple, outputSchema);
+        expression.accept(visitor);
+        satisfied = visitor.conditionSatisfied();
+      } else {
+        satisfied = true;
+      }
       if (satisfied) {
         advance();
         return tuple;
