@@ -80,4 +80,12 @@ public class Tuple {
 
     return temp.toString().equals(this.toString());
   }
+
+  /**
+   *
+   * @return the number of bytes occupied by a single tuple
+   */
+  public int size() {
+    return tupleArray.size() * 4;
+  }
 }
