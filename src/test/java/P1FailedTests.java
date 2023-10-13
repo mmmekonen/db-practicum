@@ -28,7 +28,7 @@ public class P1FailedTests {
     String path = Objects.requireNonNull(classLoader.getResource("samples/input")).getPath();
     DBCatalog.getInstance().setDataDirectory(path + "/db");
 
-    String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries2.sql")).getPath();
+    String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queriesFailed.sql")).getPath();
     // for windows machine
     // if (queriesFile.contains(":")) {
     // queriesFile = queriesFile.substring(3);
@@ -44,7 +44,7 @@ public class P1FailedTests {
 
     List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
 
-    int expectedSize = 3;
+    int expectedSize = 30;
 
     Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
 
@@ -113,7 +113,7 @@ public class P1FailedTests {
 
     List<Tuple> tuples = HelperMethods.collectAllTuples(plan);
 
-    int expectedSize = 3;
+    int expectedSize = 100;
 
     Assertions.assertEquals(expectedSize, tuples.size(), "Unexpected number of rows.");
 

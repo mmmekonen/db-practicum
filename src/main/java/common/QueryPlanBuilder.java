@@ -145,6 +145,18 @@ public class QueryPlanBuilder {
 
   private Operator joinHelper(Table original, List<Join> joins, Expression where) {
 
+    if (where == null) {
+      Operator root = selectHelper(original, null);
+
+      for (int i = 0; i < joins.size(); i++) {
+        Table joinTable = (Table) joins.get(i).getRightItem();
+
+        root = new JoinOperator(root, selectHelper(joinTable, null), null);
+      }
+
+      return root;
+    }
+
     ExpressionSplitter e = new ExpressionSplitter();
     where.accept(e);
 
