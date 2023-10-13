@@ -40,7 +40,8 @@ public class BNLJOperator extends Operator {
         this.leftTuple = left.getNextTuple();
         this.rightTuple = right.getNextTuple();
         this.buffer = new Tuple[bufferPages * (4096 - 8) / (4 * leftTuple.size())];
-        this.pointer = buffer.length;
+        this.pointer = 0;
+        fillBuffer();
     }
 
     /**
@@ -99,13 +100,13 @@ public class BNLJOperator extends Operator {
 
     /** Helper function to increment the operator */
     private void advance() {
-        rightTuple = right.getNextTuple();
-        if (rightTuple == null) {
-            right.reset();
+        pointer++;
+        if (pointer >= buffer.length) {
+            pointer = 0;
             rightTuple = right.getNextTuple();
-            pointer++;
-            if (pointer >= buffer.length) {
-                pointer = 0;
+            if (rightTuple == null) {
+                right.reset();
+                rightTuple = right.getNextTuple();
                 fillBuffer();
             }
         }
