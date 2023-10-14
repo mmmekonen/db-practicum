@@ -46,13 +46,13 @@ public class QueryPlanBuilder {
   }
 
   /**
-   * Top level method to translate statement to query plan
+   * Method to translate statement to logical query plan
    *
    * @param stmt statement to be translated
    * @return the root of the query plan
    * @precondition stmt is a Select having a body that is a PlainSelect
    */
-  public Operator buildPlan(Statement stmt) {
+  public LogicalOperator logicalPlan(Statement stmt) {
 
     Select select = (Select) stmt;
     PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
@@ -73,13 +73,60 @@ public class QueryPlanBuilder {
     rootOperator = sortHelper(rootOperator, orderByElements, distinct);
     rootOperator = distinctHelper(rootOperator, distinct);
 
-    // make physical plan from logical plan
+    return rootOperator;
+
+    /*
+    // make physical plan from logical plan (moved this part to its own function just in case we want logical plans
+    in the future)
     PhysicalPlanBuilder builder = new PhysicalPlanBuilder();
     rootOperator.accept(builder);
     Operator physicalPlan = builder.getRoot();
 
     return physicalPlan;
+
+     */
   }
+
+  /**
+   * Top level method to create physical plan from logical plan
+   *
+   * @param stmnt statement to be translated
+   * @param join the type of join to be used in the physical plan
+   * @param joinPages the number of pages to be used in a BNLJ buffer
+   * @param sort the type of sort to be used in the physical plan
+   * @param sortPages the number of pages to be used in a sort buffer
+   * @return the root of the query plan
+   * @precondition stmt is a Select having a body that is a PlainSelect
+   */
+  public Operator buildPlan(Statement stmnt, int join, int joinPages, int sort, int sortPages) {
+    LogicalOperator rootOperator = logicalPlan(stmnt);
+
+    PhysicalPlanBuilder builder = new PhysicalPlanBuilder(join, joinPages, sort, sortPages);
+    rootOperator.accept(builder);
+    Operator physicalPlan = builder.getRoot();
+
+    return physicalPlan;
+  }
+
+  /**
+   * Top level method to create physical plan from logical plan, overloaded to default to project 1 implementation
+   * when configuration not specified
+   *
+   * @param stmnt statement to be translated
+   * @return the root of the query plan
+   * @precondition stmt is a Select having a body that is a PlainSelect
+   */
+  public Operator buildPlan(Statement stmnt) {
+    LogicalOperator rootOperator = logicalPlan(stmnt);
+
+    PhysicalPlanBuilder builder = new PhysicalPlanBuilder(0, 0, 0, 0);
+    rootOperator.accept(builder);
+    Operator physicalPlan = builder.getRoot();
+
+    return physicalPlan;
+  }
+
+
 
   /**
    * Helper function to create a Select logical operator object iff necessary, or

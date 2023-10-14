@@ -6,13 +6,7 @@ import logical_operator.Projection;
 import logical_operator.Scan;
 import logical_operator.Select;
 import logical_operator.Sort;
-import physical_operator.DuplicateEliminationOperator;
-import physical_operator.InMemorySortOperator;
-import physical_operator.Operator;
-import physical_operator.ProjectionOperator;
-import physical_operator.ScanOperator;
-import physical_operator.SelectOperator;
-import physical_operator.TNLJOperator;
+import physical_operator.*;
 
 /**
  * A class to translate a logical operators into a relational algebra query plan using physical
@@ -22,11 +16,40 @@ import physical_operator.TNLJOperator;
  */
 public class PhysicalPlanBuilder {
 
+  enum JOIN {
+    TNLJ,
+    BNLJ,
+    SMJ
+  }
+
+  enum SORT {
+    IN_MEMORY,
+    EXTERNAL
+  }
+
   // the root of the physical query plan
   Operator root;
+  JOIN join;
+  SORT sort;
+  int joinBuffer;
+  int sortBuffer;
+
 
   /** Creates a PhysicalPlanBuilder. */
-  public PhysicalPlanBuilder() {}
+  public PhysicalPlanBuilder(int joinType, int joinBuffer, int sortType, int sortBuffer) {
+    if (joinType == 0) this.join = JOIN.TNLJ;
+    if (joinType == 1) this.join = JOIN.BNLJ;
+    if (joinType == 2) this.join = JOIN.SMJ;
+
+    if (sortType == 0) this.sort = SORT.IN_MEMORY;
+    if (sortType == 1) this.sort = SORT.EXTERNAL;
+
+    this.joinBuffer = joinBuffer;
+    this.sortBuffer = sortBuffer;
+  }
+
+
+
 
   /**
    * Returns the root of the physical query plan.
@@ -82,7 +105,10 @@ public class PhysicalPlanBuilder {
     joinOp.getRightChild().accept(this);
     Operator right = root;
 
-    root = new TNLJOperator(left, right, joinOp.getExpression());
+      if (join == JOIN.TNLJ) root = new TNLJOperator(left, right, joinOp.getExpression());
+      if (join == JOIN.BNLJ) root = new BNLJOperator(left, right, joinOp.getExpression(), joinBuffer);
+      if (join == JOIN.SMJ) System.out.println("Not implemented yet");
+
   }
 
   /**
@@ -95,7 +121,9 @@ public class PhysicalPlanBuilder {
     sortOp.getChild().accept(this);
     Operator child = root;
 
-    root = new InMemorySortOperator(child, sortOp.getOrderByElements());
+    if (sort == SORT.IN_MEMORY) root = new InMemorySortOperator(child, sortOp.getOrderByElements());
+    if (sort == SORT.EXTERNAL) System.out.println("Not implemented yet");
+
   }
 
   /**
