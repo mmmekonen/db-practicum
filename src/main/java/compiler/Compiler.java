@@ -12,7 +12,8 @@ import org.apache.logging.log4j.*;
 import physical_operator.Operator;
 
 /**
- * Top level harness class; reads queries from an input file one at a time, processes them and sends
+ * Top level harness class; reads queries from an input file one at a time,
+ * processes them and sends
  * output to file or to System depending on flag.
  */
 public class Compiler {
@@ -20,21 +21,26 @@ public class Compiler {
 
   private static String outputDir;
   private static String inputDir;
+  private static String tempDir;
   private static final boolean outputToFiles = true; // true = output to
 
   // files, false = output
   // to System.out
 
   /**
-   * Reads statements from queriesFile one at a time, builds query plan and evaluates, dumping
+   * Reads statements from queriesFile one at a time, builds query plan and
+   * evaluates, dumping
    * results to files or console as desired.
    *
-   * <p>If dumping to files result of ith query is in file named queryi, indexed stating at 1.
+   * <p>
+   * If dumping to files result of ith query is in file named queryi, indexed
+   * stating at 1.
    */
   public static void main(String[] args) {
 
     inputDir = args[0];
     outputDir = args[1];
+    tempDir = args[2];
     DBCatalog.getInstance().setDataDirectory(inputDir + "/db");
     try {
       String str = Files.readString(Path.of(inputDir + "/queries.sql"));
@@ -42,11 +48,15 @@ public class Compiler {
       QueryPlanBuilder queryPlanBuilder = new QueryPlanBuilder();
 
       if (outputToFiles) {
-        for (File file : (new File(outputDir).listFiles())) file.delete(); // clean output directory
+        for (File file : (new File(outputDir).listFiles()))
+          file.delete(); // clean output directory
       }
 
       int counter = 1; // for numbering output files
       for (Statement statement : statements.getStatements()) {
+        for (File file : (new File(tempDir).listFiles())) {
+          file.delete(); // clean temp directory before each query
+        }
 
         logger.info("Processing query: " + statement);
 
@@ -67,7 +77,9 @@ public class Compiler {
 
         ++counter;
       }
-    } catch (Exception e) {
+    } catch (
+
+    Exception e) {
       System.err.println("Exception occurred in interpreter");
       logger.error(e.getMessage());
     }

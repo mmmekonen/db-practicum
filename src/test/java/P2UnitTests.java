@@ -31,8 +31,7 @@ public class P2UnitTests {
     DBCatalog.getInstance().setDataDirectory(path + "/db");
     expectedPath = "src/test/resources/samples/expected";
 
-    String queriesFile =
-        Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
+    String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
     // for windows machine
     // if (queriesFile.contains(":")) {
     // queriesFile = queriesFile.substring(3);
@@ -43,7 +42,8 @@ public class P2UnitTests {
     statementList = statements.getStatements();
 
     outputDir = new File("src/test/resources/samples/output");
-    for (File file : (outputDir.listFiles())) file.delete(); // clean output directory
+    for (File file : (outputDir.listFiles()))
+      file.delete(); // clean output directory
   }
 
   private void testHelper(Operator plan, int queryNum) {
