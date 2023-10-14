@@ -5,6 +5,8 @@ import common.QueryPlanBuilder;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Scanner;
+
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
@@ -22,6 +24,11 @@ public class Compiler {
   private static String inputDir;
   private static final boolean outputToFiles = true; // true = output to
 
+  private static int joinType;
+  private static int joinBuffer;
+  private static int sortType;
+  private static int sortBuffer;
+
   // files, false = output
   // to System.out
 
@@ -35,6 +42,7 @@ public class Compiler {
 
     inputDir = args[0];
     outputDir = args[1];
+    setConfig();
     DBCatalog.getInstance().setDataDirectory(inputDir + "/db");
     try {
       String str = Files.readString(Path.of(inputDir + "/queries.sql"));
@@ -51,7 +59,7 @@ public class Compiler {
         logger.info("Processing query: " + statement);
 
         try {
-          Operator plan = queryPlanBuilder.buildPlan(statement);
+          Operator plan = queryPlanBuilder.buildPlan(statement, joinType, joinBuffer, sortType, sortBuffer);
 
           if (outputToFiles) {
             File outfile = new File(outputDir + "/query" + counter);
@@ -70,6 +78,21 @@ public class Compiler {
     } catch (Exception e) {
       System.err.println("Exception occurred in interpreter");
       logger.error(e.getMessage());
+    }
+  }
+
+  /**
+   * helper function to read in settings from the plan_builder_config.txt file
+   */
+  private static void setConfig() {
+    try {
+      Scanner s = new Scanner(new File(inputDir + "/db/plan_builder_config.txt"));
+      joinType = s.nextInt();
+      if(joinType == 1) joinBuffer = s.nextInt();
+      sortType = s.nextInt();
+      if(sortType == 1) sortBuffer = s.nextInt();
+    } catch (Exception e) {
+      System.out.println(e + ": Could not find config file");
     }
   }
 }
