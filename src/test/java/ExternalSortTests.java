@@ -27,7 +27,7 @@ public class ExternalSortTests {
     ClassLoader classLoader = ExternalSortTests.class.getClassLoader();
     String path = Objects.requireNonNull(classLoader.getResource("samples")).getPath();
     DBCatalog.getInstance().setDataDirectory(path + "/input/db");
-    DBCatalog.getInstance().setSortDirectory(path + "/temp");
+    DBCatalog.getInstance().setSortDirectory("src/test/resources/samples/temp");
 
     outputDir = new File("src/test/resources/samples/output");
     for (File file : (outputDir.listFiles()))
@@ -55,6 +55,9 @@ public class ExternalSortTests {
 
   @Test
   public void testQuery1() throws ExecutionControl.NotImplementedException {
+    for (File file : outputDir.listFiles()) {
+      file.delete(); // clean temp directory before each query
+    }
     Operator scan = new ScanOperator("Boats", null);
     Operator planInMemory = new InMemorySortOperator(scan, new ArrayList<Column>(0));
     scan.reset();
@@ -65,6 +68,9 @@ public class ExternalSortTests {
 
   @Test
   public void testQuery2() throws ExecutionControl.NotImplementedException {
+    for (File file : outputDir.listFiles()) {
+      file.delete(); // clean temp directory before each query
+    }
     Operator scan = new ScanOperator("Boats", null);
     Operator planInMemory = new InMemorySortOperator(scan, List.of(new Column(new Table(null, "Boats"), "D")));
     scan.reset();

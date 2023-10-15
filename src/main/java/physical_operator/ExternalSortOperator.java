@@ -122,7 +122,7 @@ public class ExternalSortOperator extends Operator {
             buffer.sort(new SortComparator(indexOrders));
             // write buffer
             try {
-                TupleWriter tw = new TupleWriter(directory.toString() + numSortedRuns);
+                TupleWriter tw = new TupleWriter(directory.toString() + "/" + numSortedRuns);
                 for (Tuple t : buffer) {
                     tw.writeTuple(t);
                 }
@@ -172,7 +172,7 @@ public class ExternalSortOperator extends Operator {
             }
 
             try {
-                TupleWriter tw = new TupleWriter(directory.toString() + end);
+                TupleWriter tw = new TupleWriter(directory.toString() + "/" + end);
                 mergeHelper(trRuns, tw);
                 for (TupleReader tr : trRuns) {
                     tr.close();

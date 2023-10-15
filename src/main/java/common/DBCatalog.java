@@ -77,11 +77,7 @@ public class DBCatalog {
 
   /** TODO */
   public void setSortDirectory(String directory) {
-    if (directory.contains(":")) {
-      sortDirectory = directory.substring(3);
-    } else {
-      sortDirectory = directory;
-    }
+    sortDirectory = directory;
   }
 
   /** TODO */
