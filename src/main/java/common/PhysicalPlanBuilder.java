@@ -122,7 +122,7 @@ public class PhysicalPlanBuilder {
     Operator child = root;
 
     if (sort == SORT.IN_MEMORY) root = new InMemorySortOperator(child, sortOp.getOrderByElements());
-    if (sort == SORT.EXTERNAL) System.out.println("Not implemented yet");
+    if (sort == SORT.EXTERNAL) root = new ExternalSortOperator(child, sortOp.getOrderByElements(), sortBuffer);
 
   }
 
