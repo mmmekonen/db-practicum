@@ -165,7 +165,7 @@ public class ExternalSortOperator extends Operator {
             ArrayList<TupleReader> trRuns = new ArrayList<>();
             for (int i = start; i < Math.min(start + numMerges, end); i++) {
                 try {
-                    trRuns.add(new TupleReader(directory.toString() + i));
+                    trRuns.add(new TupleReader(directory.toString() + "/" + i));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -187,7 +187,7 @@ public class ExternalSortOperator extends Operator {
             start = Math.min(start + numMerges, end);
             end++;
         }
-        sortedFile = new File(directory.toString() + start);
+        sortedFile = new File(directory.toString() + "/" + start);
     }
 
     @Override

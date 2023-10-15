@@ -21,13 +21,14 @@ import physical_operator.ScanOperator;
 
 public class ExternalSortTests {
   private static File outputDir;
+  private static String tempDir = "src/test/resources/samples/temp";
 
   @BeforeAll
   static void setupBeforeAllTests() throws IOException, JSQLParserException {
     ClassLoader classLoader = ExternalSortTests.class.getClassLoader();
     String path = Objects.requireNonNull(classLoader.getResource("samples")).getPath();
     DBCatalog.getInstance().setDataDirectory(path + "/input/db");
-    DBCatalog.getInstance().setSortDirectory("src/test/resources/samples/temp");
+    DBCatalog.getInstance().setSortDirectory(tempDir);
 
     outputDir = new File("src/test/resources/samples/output");
     for (File file : (outputDir.listFiles()))
@@ -55,8 +56,14 @@ public class ExternalSortTests {
 
   @Test
   public void testQuery1() throws ExecutionControl.NotImplementedException {
-    for (File file : outputDir.listFiles()) {
-      file.delete(); // clean temp directory before each query
+    // clean temp directory before each query
+    for (File file : (new File(tempDir).listFiles())) {
+      if (file.isDirectory()) {
+        for (File f : file.listFiles()) {
+          f.delete();
+        }
+      }
+      file.delete();
     }
     Operator scan = new ScanOperator("Boats", null);
     Operator planInMemory = new InMemorySortOperator(scan, new ArrayList<Column>(0));
@@ -68,8 +75,14 @@ public class ExternalSortTests {
 
   @Test
   public void testQuery2() throws ExecutionControl.NotImplementedException {
-    for (File file : outputDir.listFiles()) {
-      file.delete(); // clean temp directory before each query
+    // clean temp directory before each query
+    for (File file : (new File(tempDir).listFiles())) {
+      if (file.isDirectory()) {
+        for (File f : file.listFiles()) {
+          f.delete();
+        }
+      }
+      file.delete();
     }
     Operator scan = new ScanOperator("Boats", null);
     Operator planInMemory = new InMemorySortOperator(scan, List.of(new Column(new Table(null, "Boats"), "D")));
