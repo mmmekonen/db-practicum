@@ -12,6 +12,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import physical_operator.ExternalSortOperator;
@@ -54,8 +55,8 @@ public class ExternalSortTests {
     }
   }
 
-  @Test
-  public void testQuery1() throws ExecutionControl.NotImplementedException {
+  @BeforeEach
+  public void clearTempDir() {
     // clean temp directory before each query
     for (File file : (new File(tempDir).listFiles())) {
       if (file.isDirectory()) {
@@ -65,6 +66,10 @@ public class ExternalSortTests {
       }
       file.delete();
     }
+  }
+
+  @Test
+  public void testQuery1() throws ExecutionControl.NotImplementedException {
     Operator scan = new ScanOperator("Boats", null);
     Operator planInMemory = new InMemorySortOperator(scan, new ArrayList<Column>(0));
     scan.reset();
@@ -75,15 +80,6 @@ public class ExternalSortTests {
 
   @Test
   public void testQuery2() throws ExecutionControl.NotImplementedException {
-    // clean temp directory before each query
-    for (File file : (new File(tempDir).listFiles())) {
-      if (file.isDirectory()) {
-        for (File f : file.listFiles()) {
-          f.delete();
-        }
-      }
-      file.delete();
-    }
     Operator scan = new ScanOperator("Boats", null);
     Operator planInMemory = new InMemorySortOperator(scan, List.of(new Column(new Table(null, "Boats"), "D")));
     scan.reset();

@@ -207,6 +207,9 @@ public class ExternalSortOperator extends Operator {
         }
         try {
             Tuple t = readerSortedFile.readNextTuple();
+            if (t == null) {
+                readerSortedFile.close();
+            }
             return t;
         } catch (IOException e) {
             e.printStackTrace();
