@@ -35,6 +35,7 @@ public class ExternalSortOperator extends Operator {
 
         this.child = child;
 
+        indexOrders = new HashMap<>();
         createSortOrder(orderbyElements);
 
         // create directory to work in
@@ -46,7 +47,7 @@ public class ExternalSortOperator extends Operator {
         }
 
         this.currTuple = child.getNextTuple();
-        this.bufferSize = bufferPages * 4096 / (4 * currTuple.size());
+        this.bufferSize = this.currTuple == null ? 0 : bufferPages * 4096 / (4 * currTuple.size());
 
         // sort step
         int numSortedRuns = sortBuffer();
@@ -201,6 +202,9 @@ public class ExternalSortOperator extends Operator {
 
     @Override
     public Tuple getNextTuple() {
+        if (readerSortedFile == null) {
+            return null;
+        }
         try {
             Tuple t = readerSortedFile.readNextTuple();
             return t;
