@@ -46,7 +46,7 @@ public class ExternalSortOperator extends Operator {
         }
 
         this.currTuple = child.getNextTuple();
-        this.bufferSize = bufferPages * (4096 - 8) / (4 * currTuple.size());
+        this.bufferSize = bufferPages * 4096 / (4 * currTuple.size());
 
         // sort step
         int numSortedRuns = sortBuffer();
