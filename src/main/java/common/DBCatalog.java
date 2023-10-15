@@ -81,8 +81,8 @@ public class DBCatalog {
   }
 
   /** TODO */
-  public File getExternalSortFile() {
-    return new File(sortDirectory);
+  public String getSortDirectory() {
+    return sortDirectory;
   }
 
   /**
