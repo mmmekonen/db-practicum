@@ -101,7 +101,7 @@ public class BNLJOperator extends Operator {
     /** Helper function to increment the operator */
     private void advance() {
         pointer++;
-        if (pointer >= buffer.length) {
+        if (pointer >= buffer.length || buffer[pointer] == null) {
             pointer = 0;
             rightTuple = right.getNextTuple();
             if (rightTuple == null) {
