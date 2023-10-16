@@ -17,7 +17,12 @@ import common.TupleWriter;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
-/** TODO */
+/**
+ * A class to represent an external sort operator on a relation. Sorts each
+ * tuple in the order of columns in orderbyElements and then in the order of the
+ * remaining columns in it's child operator's outputSchema. Only uses the
+ * specified amount of buffer space to do the sorting and merging.
+ */
 public class ExternalSortOperator extends Operator {
 
     private Operator child;
@@ -29,7 +34,15 @@ public class ExternalSortOperator extends Operator {
     private TupleReader readerSortedFile;
     public HashMap<Integer, Integer> indexOrders;
 
-    /** TODO */
+    /**
+     * Creates an external sort operator using an Operator, a List of Columns to
+     * order by, and a specified buffer size.
+     *
+     * @param child           The sort operator's child operator.
+     * @param orderbyElements ArrayList of columns to order the tuples from the
+     *                        child by.
+     * @param bufferPages     The amount of main memory space the operator can use.
+     */
     public ExternalSortOperator(Operator child, List<Column> orderbyElements, int bufferPages) {
         super(null);
 
@@ -71,7 +84,11 @@ public class ExternalSortOperator extends Operator {
         this.outputSchema = schema;
     }
 
-    /** TODO */
+    /**
+     * Determines the order to sort the tuples by.
+     * 
+     * @param orderbyElements A List of Columns to sort by first.
+     */
     private void createSortOrder(List<Column> orderbyElements) {
         // gives the index in the tuple by order preference (ie. indexOrders[i] = the
         // index in child.outputSchema that is i-th in the final order)
@@ -99,8 +116,9 @@ public class ExternalSortOperator extends Operator {
     }
 
     /**
-     * TODO
-     * Populates the buffer array with tuples from the outer table
+     * Populates the buffer array with tuples from the child.
+     * 
+     * @return whether or not the buffer was able to be filled.
      */
     private boolean fillBuffer() {
         buffer = new ArrayList<Tuple>(bufferSize);
@@ -115,7 +133,11 @@ public class ExternalSortOperator extends Operator {
         return notEmpty;
     }
 
-    /** TODO */
+    /**
+     * Sorts the current buffer using the sort order previously processed.
+     * 
+     * @return the number of sorted runs created.
+     */
     private int sortBuffer() {
         int numSortedRuns = 0;
         while (fillBuffer()) {
@@ -136,8 +158,11 @@ public class ExternalSortOperator extends Operator {
     }
 
     /**
-     * TOOD
+     * Compares the tuples from each TupleReader and writes them to a temporary file
+     * in the desired sort order.
      * 
+     * @param runs a List of TupleReaders for each sorted run.
+     * @param tw   the TupleWriter that writes to the temporary file.
      * @throws IOException
      */
     private void mergeHelper(List<TupleReader> runs, TupleWriter tw) throws IOException {
@@ -155,7 +180,12 @@ public class ExternalSortOperator extends Operator {
         }
     }
 
-    /** TODO */
+    /**
+     * Combines each of the sorted runs into one file using multiple passes.
+     * 
+     * @param numMerges     the number of tuples that can be merged at once.
+     * @param numSortedRuns the number of sorted runs created by the sorting step.
+     */
     private void merge(int numMerges, int numSortedRuns) {
         int start = 0;
         int end = numSortedRuns;
@@ -216,5 +246,4 @@ public class ExternalSortOperator extends Operator {
             return null;
         }
     }
-
 }

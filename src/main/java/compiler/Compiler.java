@@ -6,7 +6,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Scanner;
-
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
@@ -82,6 +81,7 @@ public class Compiler {
             long timeElapsed = System.currentTimeMillis();
             plan.dump(outfile);
             timeElapsed = System.currentTimeMillis() - timeElapsed;
+            logger.info("Query processing time: " + timeElapsed + "ms");
           } // else {
           // plan.dump(System.out);
           // }
@@ -91,17 +91,13 @@ public class Compiler {
 
         ++counter;
       }
-    } catch (
-
-    Exception e) {
+    } catch (Exception e) {
       System.err.println("Exception occurred in interpreter");
       logger.error(e.getMessage());
     }
   }
 
-  /**
-   * helper function to read in settings from the plan_builder_config.txt file
-   */
+  /** helper function to read in settings from the plan_builder_config.txt file */
   private static void setConfig() {
     try {
       Scanner s = new Scanner(new File(inputDir + "/db/plan_builder_config.txt"));

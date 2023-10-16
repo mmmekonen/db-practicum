@@ -23,11 +23,19 @@ public class P2UnitTests {
   private static Statements statements;
   private static String expectedPath;
   private static File outputDir;
+  private static String tempDir = "src/test/resources/samples/temp";
+
 
   @BeforeAll
   static void setupBeforeAllTests() throws IOException, JSQLParserException {
+
     ClassLoader classLoader = P2UnitTests.class.getClassLoader();
     String path = Objects.requireNonNull(classLoader.getResource("samples/input")).getPath();
+
+    DBCatalog.getInstance().setDataDirectory(path + "/input/db");
+    DBCatalog.getInstance().setSortDirectory(tempDir);
+
+
     DBCatalog.getInstance().setDataDirectory(path + "/db");
     expectedPath = "src/test/resources/samples/expected";
 

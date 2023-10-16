@@ -75,12 +75,20 @@ public class DBCatalog {
     }
   }
 
-  /** TODO */
+  /**
+   * Sets the temporary directory used by external sort.
+   *
+   * @param directory: The temporary directory.
+   */
   public void setSortDirectory(String directory) {
     sortDirectory = directory;
   }
 
-  /** TODO */
+  /**
+   * Gets the path of the temporary directory used by external sort.
+   *
+   * @return string of the directory's path.
+   */
   public String getSortDirectory() {
     return sortDirectory;
   }

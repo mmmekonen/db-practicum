@@ -25,7 +25,8 @@ public class SortComparator implements Comparator<Tuple> {
   }
 
   /**
-   * Compares two tuples element-by-element
+   * Compares two tuples element-by-element. If one of the tuples are null, the
+   * other tuple is considered to be smaller. If both are null, they are equal.
    *
    * @param o1 One of the tuples to be compared
    * @param o2 One of the tuples to be compared
