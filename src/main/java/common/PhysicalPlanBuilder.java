@@ -6,12 +6,26 @@ import logical_operator.Projection;
 import logical_operator.Scan;
 import logical_operator.Select;
 import logical_operator.Sort;
+import net.sf.jsqlparser.expression.ExpressionVisitor;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import physical_operator.*;
+import net.sf.jsqlparser.expression.Expression;
+
+import java.util.ArrayList;
+import common.SortComparator;
+import java.util.HashMap;
+import java.util.List;
 
 /**
- * A class to translate a logical operators into a relational algebra query plan using physical
- * operators. This class uses the visitor pattern to traverse the logical query plan and replaces
- * each logical operator with its corresponding physical operator. The physical operators used
+ * A class to translate a logical operators into a relational algebra query plan
+ * using physical
+ * operators. This class uses the visitor pattern to traverse the logical query
+ * plan and replaces
+ * each logical operator with its corresponding physical operator. The physical
+ * operators used
  * depends on the values in the config file.
  */
 public class PhysicalPlanBuilder {
@@ -34,22 +48,27 @@ public class PhysicalPlanBuilder {
   int joinBuffer;
   int sortBuffer;
 
-
   /** Creates a PhysicalPlanBuilder. */
   public PhysicalPlanBuilder(int joinType, int joinBuffer, int sortType, int sortBuffer) {
-    if (joinType == 0) this.join = JOIN.TNLJ;
-    if (joinType == 1) this.join = JOIN.BNLJ;
-    if (joinType == 2) this.join = JOIN.SMJ;
 
-    if (sortType == 0) this.sort = SORT.IN_MEMORY;
-    if (sortType == 1) this.sort = SORT.EXTERNAL;
+    System.out.print("Join Type: " + joinType);
+    System.out.println(", Sort Type: " + joinType);
+
+    if (joinType == 0)
+      this.join = JOIN.TNLJ;
+    if (joinType == 1)
+      this.join = JOIN.BNLJ;
+    if (joinType == 0)
+      this.join = JOIN.SMJ;
+
+    if (sortType == 0)
+      this.sort = SORT.IN_MEMORY;
+    if (sortType == 1)
+      this.sort = SORT.EXTERNAL;
 
     this.joinBuffer = joinBuffer;
     this.sortBuffer = sortBuffer;
   }
-
-
-
 
   /**
    * Returns the root of the physical query plan.
@@ -94,25 +113,79 @@ public class PhysicalPlanBuilder {
   }
 
   /**
-   * Replaces the logical Join operator with a physical operator, being either a TNLJ, BNLJ, or SMJ.
+   * Replaces the logical Join operator with a physical operator, being either a
+   * TNLJ, BNLJ, or SMJ.
    *
    * @param joinOp a logical Join operator.
    */
   public void visit(Join joinOp) {
     joinOp.getLeftChild().accept(this);
     Operator left = root;
-
     joinOp.getRightChild().accept(this);
     Operator right = root;
 
-      if (join == JOIN.TNLJ) root = new TNLJOperator(left, right, joinOp.getExpression());
-      if (join == JOIN.BNLJ) root = new BNLJOperator(left, right, joinOp.getExpression(), joinBuffer);
-      if (join == JOIN.SMJ) System.out.println("Not implemented yet");
+    if (join == JOIN.TNLJ) {
+      System.out.println("TNLJ");
+      root = new TNLJOperator(left, right, joinOp.getExpression());
+    }
+    if (join == JOIN.BNLJ) {
+      System.out.println("BNLJ");
+      root = new BNLJOperator(left, right, joinOp.getExpression(), joinBuffer);
+    }
+    if (join == JOIN.SMJ) {
+      System.out.println("SMJ");
 
+      ArrayList<Integer> leftOrder = new ArrayList<>();
+      ArrayList<Integer> rightOrder = new ArrayList<>();
+      ArrayList<Column> rightOrderCols = new ArrayList<>();
+      ArrayList<Column> leftOrderCols = new ArrayList<>();
+
+      ExpressionVisitor visitorL = new OrderByElementExtractor(left.getOutputSchema());
+      joinOp.getExpression().accept(visitorL);
+      leftOrder = ((OrderByElementExtractor) visitorL).getOrderByElements();
+      leftOrderCols = ((OrderByElementExtractor) visitorL).getOrderByElementsColumns();
+
+      ExpressionVisitor visitorR = new OrderByElementExtractor(right.getOutputSchema());
+      joinOp.getExpression().accept(visitorR);
+      rightOrder = ((OrderByElementExtractor) visitorR).getOrderByElements();
+      rightOrderCols = ((OrderByElementExtractor) visitorR).getOrderByElementsColumns();
+
+      // System.out.println("");
+
+      // System.out.println(joinOp.getExpression().toString());
+      // System.out.println(leftOrder);
+      // System.out.println(rightOrder);
+      // System.out.println(leftOrderCols);
+      // System.out.println(rightOrderCols);
+      // System.out.println(right);
+      // System.out.println(left);
+      // System.out.println(left.outputSchema);
+      // System.out.println(right.outputSchema);
+
+      // System.out.println("");
+
+      if (sort == SORT.IN_MEMORY) {
+        // if (left.outputSchema != null)
+        left = new InMemorySortOperator(left, leftOrderCols);
+        // if (right.outputSchema != null)
+        right = new InMemorySortOperator(right, rightOrderCols);
+      }
+      if (sort == SORT.EXTERNAL) {
+        // if (left.outputSchema != null)
+        left = new ExternalSortOperator(left, leftOrderCols, sortBuffer);
+        // if (right.outputSchema != null)
+        right = new ExternalSortOperator(right, rightOrderCols, sortBuffer);
+      }
+
+      root = new SMJOperator(joinOp.getExpression(), left, right, leftOrder, rightOrder);
+
+      // System.out.println("");
+    }
   }
 
   /**
-   * Replaces the logical Sort operator with a physical operator for either an in-memory sort or an
+   * Replaces the logical Sort operator with a physical operator for either an
+   * in-memory sort or an
    * external sort.
    *
    * @param sortOp a logical Sort operator.
@@ -121,8 +194,10 @@ public class PhysicalPlanBuilder {
     sortOp.getChild().accept(this);
     Operator child = root;
 
-    if (sort == SORT.IN_MEMORY) root = new InMemorySortOperator(child, sortOp.getOrderByElements());
-    if (sort == SORT.EXTERNAL) root = new ExternalSortOperator(child, sortOp.getOrderByElements(), sortBuffer);
+    if (sort == SORT.IN_MEMORY)
+      root = new InMemorySortOperator(child, sortOp.getOrderByElements());
+    if (sort == SORT.EXTERNAL)
+      root = new ExternalSortOperator(child, sortOp.getOrderByElements(), sortBuffer);
 
   }
 

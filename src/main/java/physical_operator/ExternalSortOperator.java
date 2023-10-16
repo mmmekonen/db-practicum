@@ -27,7 +27,7 @@ public class ExternalSortOperator extends Operator {
     private File directory;
     private File sortedFile;
     private TupleReader readerSortedFile;
-    private HashMap<Integer, Integer> indexOrders;
+    public HashMap<Integer, Integer> indexOrders;
 
     /** TODO */
     public ExternalSortOperator(Operator child, List<Column> orderbyElements, int bufferPages) {

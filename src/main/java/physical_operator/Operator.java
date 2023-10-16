@@ -20,7 +20,7 @@ import net.sf.jsqlparser.schema.Column;
  */
 public abstract class Operator {
 
-  protected ArrayList<Column> outputSchema;
+  public ArrayList<Column> outputSchema;
 
   public Operator(ArrayList<Column> outputSchema) {
     this.outputSchema = outputSchema;
