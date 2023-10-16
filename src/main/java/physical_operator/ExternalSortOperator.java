@@ -35,6 +35,7 @@ public class ExternalSortOperator extends Operator {
 
         this.child = child;
 
+        indexOrders = new HashMap<>();
         createSortOrder(orderbyElements);
 
         // create directory to work in
@@ -46,7 +47,7 @@ public class ExternalSortOperator extends Operator {
         }
 
         this.currTuple = child.getNextTuple();
-        this.bufferSize = bufferPages * 4096 / (4 * currTuple.size());
+        this.bufferSize = this.currTuple == null ? 0 : bufferPages * 4096 / (4 * currTuple.size());
 
         // sort step
         int numSortedRuns = sortBuffer();
@@ -121,7 +122,7 @@ public class ExternalSortOperator extends Operator {
             buffer.sort(new SortComparator(indexOrders));
             // write buffer
             try {
-                TupleWriter tw = new TupleWriter(directory.toString() + numSortedRuns);
+                TupleWriter tw = new TupleWriter(directory.toString() + "/" + numSortedRuns);
                 for (Tuple t : buffer) {
                     tw.writeTuple(t);
                 }
@@ -164,14 +165,14 @@ public class ExternalSortOperator extends Operator {
             ArrayList<TupleReader> trRuns = new ArrayList<>();
             for (int i = start; i < Math.min(start + numMerges, end); i++) {
                 try {
-                    trRuns.add(new TupleReader(directory.toString() + i));
+                    trRuns.add(new TupleReader(directory.toString() + "/" + i));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
 
             try {
-                TupleWriter tw = new TupleWriter(directory.toString() + end);
+                TupleWriter tw = new TupleWriter(directory.toString() + "/" + end);
                 mergeHelper(trRuns, tw);
                 for (TupleReader tr : trRuns) {
                     tr.close();
@@ -186,7 +187,7 @@ public class ExternalSortOperator extends Operator {
             start = Math.min(start + numMerges, end);
             end++;
         }
-        sortedFile = new File(directory.toString() + start);
+        sortedFile = new File(directory.toString() + "/" + start);
     }
 
     @Override
@@ -201,8 +202,14 @@ public class ExternalSortOperator extends Operator {
 
     @Override
     public Tuple getNextTuple() {
+        if (readerSortedFile == null) {
+            return null;
+        }
         try {
             Tuple t = readerSortedFile.readNextTuple();
+            if (t == null) {
+                readerSortedFile.close();
+            }
             return t;
         } catch (IOException e) {
             e.printStackTrace();

@@ -62,8 +62,14 @@ public class Compiler {
 
       int counter = 1; // for numbering output files
       for (Statement statement : statements.getStatements()) {
+        // clean temp directory before each query
         for (File file : (new File(tempDir).listFiles())) {
-          file.delete(); // clean temp directory before each query
+          if (file.isDirectory()) {
+            for (File f : file.listFiles()) {
+              f.delete();
+            }
+          }
+          file.delete();
         }
 
         logger.info("Processing query: " + statement);
