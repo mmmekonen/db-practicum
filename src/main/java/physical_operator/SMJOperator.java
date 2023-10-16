@@ -120,8 +120,8 @@ public class SMJOperator extends Operator {
   /**
    * Merges two tuples
    * 
-   * @param left
-   * @param right
+   * @param leftTup
+   * @param rightTup
    * @return
    */
   public ArrayList<Integer> mergeTuples(Tuple leftTup, Tuple rightTup) {

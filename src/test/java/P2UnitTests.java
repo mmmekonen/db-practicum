@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+
+import common.Tuple;
+import common.TupleReader;
 import jdk.jshell.spi.ExecutionControl;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -32,11 +36,10 @@ public class P2UnitTests {
     ClassLoader classLoader = P2UnitTests.class.getClassLoader();
     String path = Objects.requireNonNull(classLoader.getResource("samples/input")).getPath();
 
-    DBCatalog.getInstance().setDataDirectory(path + "/input/db");
+    DBCatalog.getInstance().setDataDirectory(path + "/db");
     DBCatalog.getInstance().setSortDirectory(tempDir);
 
 
-    DBCatalog.getInstance().setDataDirectory(path + "/db");
     expectedPath = "src/test/resources/samples/expected";
 
     String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
@@ -65,8 +68,26 @@ public class P2UnitTests {
       output = Files.readAllBytes(outfile.toPath());
       Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
       Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+      /*TupleReader e = new TupleReader(expectedPath + "/query" + queryNum);
+      TupleReader o = new TupleReader(outfile.toPath().toString());
+      Tuple t = e.readNextTuple();
+      HashSet<Tuple> hs = new HashSet();
+      System.out.println(1);
+      while (t != null) {
+        hs.add(t);
+        t = e.readNextTuple();
+      }
+      e.close();
+      t = o.readNextTuple();
+      System.out.println(2);
+      while(t != null) {
+        Assertions.assertTrue(hs.contains(t));
+        t = o.readNextTuple();
+      }
+      o.close();*/
     } catch (IOException e) {
       e.printStackTrace();
+      System.out.println("hi");
     }
   }
 

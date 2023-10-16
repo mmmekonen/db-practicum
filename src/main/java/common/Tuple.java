@@ -88,4 +88,13 @@ public class Tuple {
   public int size() {
     return tupleArray.size() * 4;
   }
+
+  /**
+   *
+   * @return a unique hashcode for each tuple
+   */
+  @Override
+  public int hashCode() {
+    return this.toString().hashCode();
+  }
 }
