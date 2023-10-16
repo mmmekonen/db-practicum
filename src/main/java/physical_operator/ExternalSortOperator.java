@@ -32,7 +32,7 @@ public class ExternalSortOperator extends Operator {
     private File directory;
     private File sortedFile;
     private TupleReader readerSortedFile;
-    private HashMap<Integer, Integer> indexOrders;
+    public HashMap<Integer, Integer> indexOrders;
 
     /**
      * Creates an external sort operator using an Operator, a List of Columns to
