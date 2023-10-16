@@ -42,7 +42,7 @@ import physical_operator.Operator;
  */
 public class QueryPlanBuilder {
 
-  int defaultJoin = 1;
+  int defaultJoin = 0;
   int defaultJoinBuffer = 5;
   int defaultSort = 0;
   int defaultSortBuffer = 3;

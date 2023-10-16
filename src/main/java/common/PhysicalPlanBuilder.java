@@ -51,14 +51,14 @@ public class PhysicalPlanBuilder {
   /** Creates a PhysicalPlanBuilder. */
   public PhysicalPlanBuilder(int joinType, int joinBuffer, int sortType, int sortBuffer) {
 
-    System.out.print("Join Type: " + joinType);
-    System.out.println(", Sort Type: " + joinType);
+    //System.out.print("Join Type: " + joinType);
+    //System.out.println(", Sort Type: " + joinType);
 
     if (joinType == 0)
       this.join = JOIN.TNLJ;
     if (joinType == 1)
       this.join = JOIN.BNLJ;
-    if (joinType == 0)
+    if (joinType == 2) //DO NOT FUCK WITH THIS! JUST EDIT THE CONFIG FILE OR THE DEFAULTJOIN FIELD IN QUERYPLANBUILDER!
       this.join = JOIN.SMJ;
 
     if (sortType == 0)
@@ -125,15 +125,14 @@ public class PhysicalPlanBuilder {
     Operator right = root;
 
     if (join == JOIN.TNLJ) {
-      System.out.println("TNLJ");
+      //System.out.println("TNLJ");
       root = new TNLJOperator(left, right, joinOp.getExpression());
     }
     if (join == JOIN.BNLJ) {
-      System.out.println("BNLJ");
+      //System.out.println("BNLJ");
       root = new BNLJOperator(left, right, joinOp.getExpression(), joinBuffer);
     }
     if (join == JOIN.SMJ) {
-      System.out.println("SMJ");
 
       ArrayList<Integer> leftOrder = new ArrayList<>();
       ArrayList<Integer> rightOrder = new ArrayList<>();
