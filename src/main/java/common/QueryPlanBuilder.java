@@ -42,6 +42,11 @@ import physical_operator.Operator;
  */
 public class QueryPlanBuilder {
 
+  int defaultJoin = 0;
+  int defaultJoinBuffer = 5;
+  int defaultSort = 0;
+  int defaultSortBuffer = 3;
+
   public QueryPlanBuilder() {
   }
 
@@ -109,7 +114,7 @@ public class QueryPlanBuilder {
   }
 
   /**
-   * Top level method to create physical plan from logical plan, overloaded to default to project 1 implementation
+   * Top level method to create physical plan from logical plan, overloaded to default to hardcoded settings
    * when configuration not specified
    *
    * @param stmnt statement to be translated
@@ -119,7 +124,8 @@ public class QueryPlanBuilder {
   public Operator buildPlan(Statement stmnt) {
     LogicalOperator rootOperator = logicalPlan(stmnt);
 
-    PhysicalPlanBuilder builder = new PhysicalPlanBuilder(0, 0, 0, 0);
+    PhysicalPlanBuilder builder = new PhysicalPlanBuilder(defaultJoin, defaultJoinBuffer, defaultSort,
+            defaultSortBuffer);
     rootOperator.accept(builder);
     Operator physicalPlan = builder.getRoot();
 
