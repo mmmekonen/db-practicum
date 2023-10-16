@@ -28,6 +28,8 @@ public class SMJOperator extends Operator {
   public SMJOperator(Expression expression, Operator left, Operator right, ArrayList<Integer> leftSortOrder,
       ArrayList<Integer> rightSortOrder) {
     super(null);
+    this.outputSchema = left.getOutputSchema();
+    this.outputSchema.addAll(right.getOutputSchema());
     this.left = left;
     this.right = right;
     this.leftTuple = left.getNextTuple();
