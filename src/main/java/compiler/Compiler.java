@@ -100,7 +100,7 @@ public class Compiler {
   /** helper function to read in settings from the plan_builder_config.txt file */
   private static void setConfig() {
     try {
-      Scanner s = new Scanner(new File(inputDir + "/db/plan_builder_config.txt"));
+      Scanner s = new Scanner(new File(inputDir + "/plan_builder_config.txt"));
       joinType = s.nextInt();
       if (joinType == 1)
         joinBuffer = s.nextInt();
