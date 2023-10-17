@@ -103,18 +103,35 @@ public class OrderByElementExtractor implements ExpressionVisitor {
   private final ArrayList<Column> orderByElementsColumns = new ArrayList<>();
   private HashMap<Table, Expression> conditions;
 
+  /**
+   * basic constructor for this class
+   * @param schema the schema of the table is referenced by the statement this visitor operates on
+   */
   public OrderByElementExtractor(ArrayList<Column> schema) {
     this.schema = schema;
   }
 
+  /**
+   *
+   * @return the indices of the columns by which the table is to be ordered
+   */
   public ArrayList<Integer> getOrderByElements() {
     return orderByElements;
   }
 
+  /**
+   *
+   * @return the columns by which the table is to be ordered
+   */
   public ArrayList<Column> getOrderByElementsColumns() {
     return orderByElementsColumns;
   }
 
+
+  /**
+   * visitor method to harvest the name and index of a column
+   * @param column The column being visited
+   */
   @Override
   public void visit(Column column) {
     String columnName = column.getColumnName();
@@ -129,6 +146,12 @@ public class OrderByElementExtractor implements ExpressionVisitor {
     }
   }
 
+  /**
+   * Function to get the index of a column, given its name, by iterating over the volumns and checking each one
+   * @param columns an arraylist of columns to be checked against
+   * @param columnName the name of the column whose index is desired
+   * @return
+   */
   public int getColumnIndex(ArrayList<Column> columns, String columnName) {
     for (int i = 0; i < columns.size(); i++) {
       if (columns.get(i).getColumnName().equals(columnName)) {
@@ -138,6 +161,11 @@ public class OrderByElementExtractor implements ExpressionVisitor {
     return -1;
   }
 
+  /**
+   * Helper function to create a conjunction a sub-expression and the expression held in the visitor
+   * @param e The expression to be concatenated
+   * @param t The table referenced by said expression
+   */
   private void concatHelper(Expression e, Table t) {
     if (conditions.containsKey(t)) {
       Expression newExpression = new AndExpression().withLeftExpression(conditions.get(t)).withRightExpression(e);

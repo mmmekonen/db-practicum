@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-/*
+/**
  * Class to write tuples to a binary file, pages at a time
  */
 
@@ -18,7 +18,7 @@ public class TupleWriter {
   private int tuplesWrittenOnPage;
   private int index;
 
-  /*
+  /**
    * Creates a new tuple writer for the given file
    *
    * @param fileName The name of the file to write to
@@ -34,7 +34,7 @@ public class TupleWriter {
     this.index = 0;
   }
 
-  /*
+  /**
    * Creates a new tuple writer for the given file
    *
    * @param file The file to write to
@@ -49,7 +49,7 @@ public class TupleWriter {
     this.index = 0;
   }
 
-  /*
+  /**
    * Writes the given tuple to the buffer
    * Checks if a new page needs to be created and/or written to disk
    *
@@ -77,7 +77,7 @@ public class TupleWriter {
     buffer.putInt(4, this.tuplesWrittenOnPage);
   }
 
-  /*
+  /**
    * Funtion to create a new page in the buffer and resets all required variables
    *
    * @param tupleSize The size of the tuple to be written
@@ -94,7 +94,7 @@ public class TupleWriter {
     index = 8;
   }
 
-  /*
+  /**
    * Writes the current page to disk
    *
    * @throws IOException
@@ -109,7 +109,7 @@ public class TupleWriter {
     buffer.clear();
   }
 
-  /*
+  /**
    * Closes the file and the file channel and writes the last page to disk
    *
    * @throws IOException

@@ -91,7 +91,7 @@ public class Tuple {
 
   /**
    *
-   * @return a unique hashcode for each tuple
+   * @return a unique hashcode for each tuple, based on the hashcode for its corresponding string
    */
   @Override
   public int hashCode() {
