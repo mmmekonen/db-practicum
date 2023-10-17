@@ -128,3 +128,5 @@ To check if your code style complies, type the following:
 In case the previous step fails, you can auto-format your code as follows:
 
 `$ ./gradlew goJF`
+
+## The README requirements can be found in INSTRUCTIONS.md
