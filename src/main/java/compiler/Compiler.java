@@ -20,10 +20,14 @@ import physical_operator.Operator;
 public class Compiler {
   private static final Logger logger = LogManager.getLogger();
 
+  private static String configFile;
   private static String outputDir;
   private static String inputDir;
   private static String tempDir;
   private static final boolean outputToFiles = true; // true = output to
+
+  private static int buildIndexes;
+  private static int evalQueries;
 
   private static int joinType;
   private static int joinBuffer;
@@ -44,9 +48,8 @@ public class Compiler {
    */
   public static void main(String[] args) {
 
-    inputDir = args[0];
-    outputDir = args[1];
-    tempDir = args[2];
+    configFile = args[0];
+    readConfigFile();
     setConfig();
     DBCatalog.getInstance().setDataDirectory(inputDir + "/db");
     try {
@@ -94,6 +97,20 @@ public class Compiler {
     } catch (Exception e) {
       System.err.println("Exception occurred in interpreter");
       logger.error(e.getMessage());
+    }
+  }
+
+  /** TODO */
+  private static void readConfigFile() {
+    try {
+      Scanner s = new Scanner(new File(configFile));
+      inputDir = s.nextLine();
+      outputDir = s.nextLine();
+      tempDir = s.nextLine();
+      buildIndexes = s.nextInt();
+      evalQueries = s.nextInt();
+    } catch (Exception e) {
+      System.out.println(e + ": Could not find config file");
     }
   }
 
