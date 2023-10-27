@@ -8,6 +8,8 @@ import java.util.ArrayList;
 public class Tuple {
 
   ArrayList<Integer> tupleArray;
+  int pid;
+  int tid;
 
   /**
    * Creates a tuple using string representation of the tuple. Delimiter between the columns is a
@@ -96,5 +98,21 @@ public class Tuple {
   @Override
   public int hashCode() {
     return this.toString().hashCode();
+  }
+
+  public int getPID() {
+    return pid;
+  }
+
+  public int getTID() {
+    return tid;
+  }
+
+  public void setPID(int pid) {
+    this.pid = pid;
+  }
+
+  public void setTID(int tid) {
+    this.tid = tid;
   }
 }

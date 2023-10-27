@@ -18,6 +18,8 @@ public class TupleReader {
   private int attributes;
   private static int PAGE_SIZE = 4096;
   private int tuplesRemaining;
+  private int currentPID;
+  private int currentTID;
 
   /**
    * Creates a new tuple reader for the given file
@@ -30,6 +32,8 @@ public class TupleReader {
     this.fileInputStream = new FileInputStream(fileName);
     this.fileChannel = fileInputStream.getChannel();
     this.buffer = ByteBuffer.allocate(PAGE_SIZE);
+    this.currentPID = -1;
+    this.currentTID = 2;
     readPageHeader();
   }
 
@@ -44,6 +48,8 @@ public class TupleReader {
     this.fileInputStream = new FileInputStream(file);
     this.fileChannel = fileInputStream.getChannel();
     this.buffer = ByteBuffer.allocate(PAGE_SIZE);
+    this.currentPID = -1;
+    this.currentTID = 2;
     readPageHeader();
   }
 
@@ -58,6 +64,8 @@ public class TupleReader {
       this.attributes = buffer.getInt();
       this.numTuples = buffer.getInt();
       this.tuplesRemaining = numTuples;
+      currentPID++;
+      currentTID = 2;
       return true;
 
     } else {
@@ -106,6 +114,11 @@ public class TupleReader {
     this.tuplesRemaining--;
 
     Tuple t = new Tuple(tuple);
+
+    t.setTID(currentTID);
+    t.setPID(currentPID);
+    currentTID++;
+
     return t;
   }
 
