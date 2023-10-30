@@ -8,8 +8,8 @@ import java.util.ArrayList;
 public class Tuple {
 
   ArrayList<Integer> tupleArray;
-  int pid;
-  int tid;
+  private int pid;
+  private int tid;
 
   /**
    * Creates a tuple using string representation of the tuple. Delimiter between the columns is a
