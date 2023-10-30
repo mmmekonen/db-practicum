@@ -7,54 +7,45 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 
 public class TreeIndex {
 
-    int order;
-    int index;
     File file;
     FileOutputStream fileOutputStream;
     FileChannel fileChannel;
     ByteBuffer buffer;
     Tuple nextTuple;
     ArrayList<Integer> nextRecord;
-    Operator op;
-    ArrayList<int[]> nodes;
     static final int PAGE_SIZE = 4096;
 
     public TreeIndex(String fileName, Operator op, int order, int indexElement) {
         this.file = new File(fileName);
-        this.order = order;
-        this.index = indexElement;
         this.nextTuple = op.getNextTuple();
-        this.op = op;
 
         try {
             fileOutputStream = new FileOutputStream(file);
             fileChannel = fileOutputStream.getChannel();
             this.buffer = ByteBuffer.allocate(PAGE_SIZE);
-        } catch (FileNotFoundException e) {
+            file.createNewFile();
+        } catch (Exception e) {
             System.out.println("you shouldn't see this, ever");
         }
 
         ArrayList<int[]> leaves = new ArrayList<>();
 
         while(nextTuple != null) {
-            leaves.add(leafNode());
+            leaves.add(leafNode(op, indexElement));
         }
 
-        this.nodes = new ArrayList<>();
+        ArrayList<int[]> nodes = new ArrayList<>();
         nodes.add(new int[1]);
         nodes.addAll(leaves);
-        indexNodeHelper(leaves);
+        indexNodeHelper(leaves, nodes, order);
 
         nodes.set(0, headerNode(nodes.size() - 1, leaves.size(), order));
 
@@ -68,6 +59,19 @@ public class TreeIndex {
 
     }
 
+    public TreeIndex (String filename) {
+        this.file = new File(filename);
+
+        try {
+            fileOutputStream = new FileOutputStream(file);
+            fileChannel = fileOutputStream.getChannel();
+            this.buffer = ByteBuffer.allocate(PAGE_SIZE);
+        } catch (FileNotFoundException e) {
+            System.out.println("you shouldn't see this, ever");
+        }
+
+    }
+
     public int[] readNode(int page) {
         int[] result = new int[PAGE_SIZE/4];
         buffer.clear();
@@ -75,20 +79,20 @@ public class TreeIndex {
         return result;
     }
 
-    private ArrayList<int[]> indexNodeHelper(ArrayList<int[]> children) {
+    private ArrayList<int[]> indexNodeHelper(ArrayList<int[]> children, ArrayList<int[]> nodes, int order) {
         ArrayList<int[]> result = new ArrayList<>();
 
         for(int i = 0; i < children.size(); i += order) {
-            int[] n = indexNode(children, i);
+            int[] n = indexNode(children, i, order);
             nodes.add(n);
             result.add(n);
         }
 
         if (result.size() == 1) return result;
-        else return indexNodeHelper(result);
+        else return indexNodeHelper(result, nodes, order);
     }
 
-    private int[] indexNode(ArrayList<int[]> leaves, int pointer) {
+    private int[] indexNode(ArrayList<int[]> leaves, int pointer, int order) {
         int[] node = new int[PAGE_SIZE/4];
         node[0] = 1;
         node[1] = 0;
@@ -101,7 +105,7 @@ public class TreeIndex {
         return node;
     }
 
-    private ArrayList<Integer> makeRecord() {
+    private ArrayList<Integer> makeRecord(Operator op, int index) {
         ArrayList<Integer> result = new ArrayList();
         result.add(nextTuple.getElementAtIndex(index));
         result.add(1);
@@ -121,7 +125,7 @@ public class TreeIndex {
         return result;
     }
 
-    private int[] leafNode() {
+    private int[] leafNode(Operator op, int index) {
         int[] node = new int[PAGE_SIZE/4];
         node[0] = 0;
         node[1] = 0;
@@ -137,7 +141,7 @@ public class TreeIndex {
                     return node;
                 }
             }
-            nextRecord = makeRecord();
+            nextRecord = makeRecord(op, index);
         }
         return node;
     }
