@@ -51,7 +51,10 @@ public class Compiler {
     configFile = args[0];
     readConfigFile();
     setConfig();
-    DBCatalog.getInstance().setDataDirectory(inputDir + "/db");
+    DBCatalog db = DBCatalog.getInstance();
+    db.setDataDirectory(inputDir + "/db");
+    db.setSortDirectory(tempDir);
+    db.setIndexInfo();
     try {
       String str = Files.readString(Path.of(inputDir + "/queries.sql"));
       Statements statements = CCJSqlParserUtil.parseStatements(str);
@@ -62,6 +65,8 @@ public class Compiler {
           file.delete(); // clean output directory
       }
 
+      // TODO: build indexes if needed
+      // TODO: check if building queries
       int counter = 1; // for numbering output files
       for (Statement statement : statements.getStatements()) {
         // clean temp directory before each query
@@ -100,7 +105,10 @@ public class Compiler {
     }
   }
 
-  /** TODO */
+  /**
+   * Reads the config file passed through the command line and sets all the
+   * parameters for how queries should be built.
+   */
   private static void readConfigFile() {
     try {
       Scanner s = new Scanner(new File(configFile));
