@@ -181,11 +181,10 @@ public class DBCatalog {
   }
 
   public int findColumnIndex(String tableName, String columnName) {
-    ArrayList<Column> schema = new ArrayList<>();
+    ArrayList<String> schema = new ArrayList<>();
     for (Column c : tables.get(tableName)) {
-      schema.add(new Column(new Table(null, tableName), c.getColumnName()));
+      schema.add(c.getColumnName());
     }
-
-    
+    return schema.indexOf(columnName);
   }
 }
