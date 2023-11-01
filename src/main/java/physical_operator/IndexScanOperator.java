@@ -21,7 +21,7 @@ public class IndexScanOperator extends Operator {
   public int dataEntryIndex;
 
   public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey) {
-    super(null);
+    super(DBCatalog.getInstance().getTableSchema(tableName));
     this.lowkey = lowkey;
     this.highkey = highkey;
     this.scanner = new ScanOperator(tableName, alias);
@@ -38,6 +38,11 @@ public class IndexScanOperator extends Operator {
     } else {
       currentLeaf = tree.deserialize(1, lowkey);
 
+    }
+
+    // set alias info
+    for (int i = 0; i < this.outputSchema.size(); i++) {
+      this.outputSchema.get(i).getTable().setAlias(alias);
     }
   }
 

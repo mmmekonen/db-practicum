@@ -1,23 +1,15 @@
 package common;
 
+import java.util.ArrayList;
+
 import logical_operator.DuplicateElimination;
 import logical_operator.Join;
 import logical_operator.Projection;
 import logical_operator.Scan;
 import logical_operator.Select;
 import logical_operator.Sort;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.PlainSelect;
 import physical_operator.*;
 import net.sf.jsqlparser.expression.Expression;
-
-import java.util.ArrayList;
-import common.SortComparator;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * A class to translate a logical operators into a relational algebra query plan
@@ -51,14 +43,15 @@ public class PhysicalPlanBuilder {
   /** Creates a PhysicalPlanBuilder. */
   public PhysicalPlanBuilder(int joinType, int joinBuffer, int sortType, int sortBuffer) {
 
-    //System.out.print("Join Type: " + joinType);
-    //System.out.println(", Sort Type: " + joinType);
+    // System.out.print("Join Type: " + joinType);
+    // System.out.println(", Sort Type: " + joinType);
 
     if (joinType == 0)
       this.join = JOIN.TNLJ;
     if (joinType == 1)
       this.join = JOIN.BNLJ;
-    if (joinType == 2) //DO NOT FUCK WITH THIS! JUST EDIT THE CONFIG FILE OR THE DEFAULTJOIN FIELD IN QUERYPLANBUILDER!
+    if (joinType == 2) // DO NOT FUCK WITH THIS! JUST EDIT THE CONFIG FILE OR THE DEFAULTJOIN FIELD IN
+                       // QUERYPLANBUILDER!
       this.join = JOIN.SMJ;
 
     if (sortType == 0)
@@ -94,10 +87,37 @@ public class PhysicalPlanBuilder {
    * @param selectOp a logical Select operator.
    */
   public void visit(Select selectOp) {
-    selectOp.getChild().accept(this);
+    Scan scanOp = (Scan) selectOp.getChild();
 
-    Operator child = root;
-    root = new SelectOperator(child, selectOp.getExpression());
+    // if index exists on table
+    DBCatalog db = DBCatalog.getInstance();
+    ArrayList<String> indexInfo = db.getIndexInfo().get(scanOp.getTableName());
+    if (db.useIndexes() && indexInfo != null) {
+      IndexExpressionSplitter splitter = new IndexExpressionSplitter(scanOp.getTableName());
+      selectOp.getExpression().accept(splitter);
+
+      // Expression indexExpression = splitter.getIndexConditions();
+      Integer lowkey = splitter.getLowKey();
+      Integer highkey = splitter.getHighKey();
+      Expression selectExpression = splitter.getSelectConditions();
+
+      if (lowkey == null && highkey == null) {
+        // full scan
+        root = new SelectOperator(new ScanOperator(scanOp.getTableName(), scanOp.getAlias()), selectExpression);
+      } else if (selectExpression == null) {
+        // only indexScan operator, no selection
+        root = new IndexScanOperator(scanOp.getTableName(), scanOp.getAlias(), indexInfo.get(0), lowkey, highkey);
+      } else {
+        // both indexscan and selection
+        Operator indexScanOp = new IndexScanOperator(scanOp.getTableName(), scanOp.getAlias(), indexInfo.get(0), lowkey,
+            highkey);
+        root = new SelectOperator(indexScanOp, selectExpression);
+      }
+    } else {
+      scanOp.accept(this);
+      Operator child = root;
+      root = new SelectOperator(child, selectOp.getExpression());
+    }
   }
 
   /**
@@ -125,60 +145,66 @@ public class PhysicalPlanBuilder {
     Operator right = root;
 
     if (join == JOIN.TNLJ) {
-      //System.out.println("TNLJ");
+      // System.out.println("TNLJ");
       root = new TNLJOperator(left, right, joinOp.getExpression());
     }
     if (join == JOIN.BNLJ) {
-      //System.out.println("BNLJ");
+      // System.out.println("BNLJ");
       root = new BNLJOperator(left, right, joinOp.getExpression(), joinBuffer);
     }
     if (join == JOIN.SMJ) {
+      // unimplemented
 
-      ArrayList<Integer> leftOrder = new ArrayList<>();
-      ArrayList<Integer> rightOrder = new ArrayList<>();
-      ArrayList<Column> rightOrderCols = new ArrayList<>();
-      ArrayList<Column> leftOrderCols = new ArrayList<>();
+      // ArrayList<Integer> leftOrder = new ArrayList<>();
+      // ArrayList<Integer> rightOrder = new ArrayList<>();
+      // ArrayList<Column> rightOrderCols = new ArrayList<>();
+      // ArrayList<Column> leftOrderCols = new ArrayList<>();
 
-      ExpressionVisitor visitorL = new OrderByElementExtractor(left.getOutputSchema());
-      joinOp.getExpression().accept(visitorL);
-      leftOrder = ((OrderByElementExtractor) visitorL).getOrderByElements();
-      leftOrderCols = ((OrderByElementExtractor) visitorL).getOrderByElementsColumns();
+      // ExpressionVisitor visitorL = new
+      // OrderByElementExtractor(left.getOutputSchema());
+      // joinOp.getExpression().accept(visitorL);
+      // leftOrder = ((OrderByElementExtractor) visitorL).getOrderByElements();
+      // leftOrderCols = ((OrderByElementExtractor)
+      // visitorL).getOrderByElementsColumns();
 
-      ExpressionVisitor visitorR = new OrderByElementExtractor(right.getOutputSchema());
-      joinOp.getExpression().accept(visitorR);
-      rightOrder = ((OrderByElementExtractor) visitorR).getOrderByElements();
-      rightOrderCols = ((OrderByElementExtractor) visitorR).getOrderByElementsColumns();
+      // ExpressionVisitor visitorR = new
+      // OrderByElementExtractor(right.getOutputSchema());
+      // joinOp.getExpression().accept(visitorR);
+      // rightOrder = ((OrderByElementExtractor) visitorR).getOrderByElements();
+      // rightOrderCols = ((OrderByElementExtractor)
+      // visitorR).getOrderByElementsColumns();
 
-      // System.out.println("");
+      // // System.out.println("");
 
-      // System.out.println(joinOp.getExpression().toString());
-      // System.out.println(leftOrder);
-      // System.out.println(rightOrder);
-      // System.out.println(leftOrderCols);
-      // System.out.println(rightOrderCols);
-      // System.out.println(right);
-      // System.out.println(left);
-      // System.out.println(left.outputSchema);
-      // System.out.println(right.outputSchema);
+      // // System.out.println(joinOp.getExpression().toString());
+      // // System.out.println(leftOrder);
+      // // System.out.println(rightOrder);
+      // // System.out.println(leftOrderCols);
+      // // System.out.println(rightOrderCols);
+      // // System.out.println(right);
+      // // System.out.println(left);
+      // // System.out.println(left.outputSchema);
+      // // System.out.println(right.outputSchema);
 
-      // System.out.println("");
+      // // System.out.println("");
 
-      if (sort == SORT.IN_MEMORY) {
-        // if (left.outputSchema != null)
-        left = new InMemorySortOperator(left, leftOrderCols);
-        // if (right.outputSchema != null)
-        right = new InMemorySortOperator(right, rightOrderCols);
-      }
-      if (sort == SORT.EXTERNAL) {
-        // if (left.outputSchema != null)
-        left = new ExternalSortOperator(left, leftOrderCols, sortBuffer);
-        // if (right.outputSchema != null)
-        right = new ExternalSortOperator(right, rightOrderCols, sortBuffer);
-      }
+      // if (sort == SORT.IN_MEMORY) {
+      // // if (left.outputSchema != null)
+      // left = new InMemorySortOperator(left, leftOrderCols);
+      // // if (right.outputSchema != null)
+      // right = new InMemorySortOperator(right, rightOrderCols);
+      // }
+      // if (sort == SORT.EXTERNAL) {
+      // // if (left.outputSchema != null)
+      // left = new ExternalSortOperator(left, leftOrderCols, sortBuffer);
+      // // if (right.outputSchema != null)
+      // right = new ExternalSortOperator(right, rightOrderCols, sortBuffer);
+      // }
 
-      root = new SMJOperator(joinOp.getExpression(), left, right, leftOrder, rightOrder);
+      // root = new SMJOperator(joinOp.getExpression(), left, right, leftOrder,
+      // rightOrder);
 
-      // System.out.println("");
+      // // System.out.println("");
     }
   }
 
