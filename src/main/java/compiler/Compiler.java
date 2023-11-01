@@ -140,6 +140,7 @@ public class Compiler {
       sortType = s.nextInt();
       if (sortType == 1)
         sortBuffer = s.nextInt();
+      DBCatalog.getInstance().setUseIndex(s.nextInt() == 1 ? true : false);
     } catch (Exception e) {
       System.out.println(e + ": Could not find config file");
     }
