@@ -180,6 +180,13 @@ public class DBCatalog {
     // return tables.get(tableName);
   }
 
+  /**
+   * Finds the index of a column of a given table, as it is found in the table schema
+   *
+   * @param tableName The table holding the column
+   * @param columnName The column whose index is to be located
+   * @return The index of the column
+   */
   public int findColumnIndex(String tableName, String columnName) {
     ArrayList<String> schema = new ArrayList<>();
     for (Column c : tables.get(tableName)) {
