@@ -51,48 +51,61 @@ public class Compiler {
     configFile = args[0];
     readConfigFile();
     setConfig();
-    DBCatalog.getInstance().setDataDirectory(inputDir + "/db");
-    try {
-      String str = Files.readString(Path.of(inputDir + "/queries.sql"));
-      Statements statements = CCJSqlParserUtil.parseStatements(str);
-      QueryPlanBuilder queryPlanBuilder = new QueryPlanBuilder();
+    DBCatalog db = DBCatalog.getInstance();
+    db.setDataDirectory(inputDir + "/db");
+    db.setSortDirectory(tempDir);
+    db.setIndexInfo();
 
+    try {
       if (outputToFiles) {
         for (File file : (new File(outputDir).listFiles()))
           file.delete(); // clean output directory
       }
 
-      int counter = 1; // for numbering output files
-      for (Statement statement : statements.getStatements()) {
-        // clean temp directory before each query
-        for (File file : (new File(tempDir).listFiles())) {
-          if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-              f.delete();
+      if (buildIndexes == 1) {
+        logger.info("Building indexes...");
+        // TODO: build indexes if needed
+        logger.info("Indexes have been built");
+      }
+
+      // check if building queries
+      if (evalQueries == 1) {
+        String str = Files.readString(Path.of(inputDir + "/queries.sql"));
+        Statements statements = CCJSqlParserUtil.parseStatements(str);
+        QueryPlanBuilder queryPlanBuilder = new QueryPlanBuilder();
+
+        int counter = 1; // for numbering output files
+        for (Statement statement : statements.getStatements()) {
+          // clean temp directory before each query
+          for (File file : (new File(tempDir).listFiles())) {
+            if (file.isDirectory()) {
+              for (File f : file.listFiles()) {
+                f.delete();
+              }
             }
+            file.delete();
           }
-          file.delete();
+
+          logger.info("Processing query: " + statement);
+
+          try {
+            Operator plan = queryPlanBuilder.buildPlan(statement, joinType, joinBuffer, sortType, sortBuffer);
+
+            if (outputToFiles) {
+              File outfile = new File(outputDir + "/query" + counter);
+              long timeElapsed = System.currentTimeMillis();
+              plan.dump(outfile);
+              timeElapsed = System.currentTimeMillis() - timeElapsed;
+              logger.info("Query processing time: " + timeElapsed + "ms");
+            } // else {
+            // plan.dump(System.out);
+            // }
+          } catch (Exception e) {
+            logger.error(e.getMessage());
+          }
+
+          ++counter;
         }
-
-        logger.info("Processing query: " + statement);
-
-        try {
-          Operator plan = queryPlanBuilder.buildPlan(statement, joinType, joinBuffer, sortType, sortBuffer);
-
-          if (outputToFiles) {
-            File outfile = new File(outputDir + "/query" + counter);
-            long timeElapsed = System.currentTimeMillis();
-            plan.dump(outfile);
-            timeElapsed = System.currentTimeMillis() - timeElapsed;
-            logger.info("Query processing time: " + timeElapsed + "ms");
-          } // else {
-          // plan.dump(System.out);
-          // }
-        } catch (Exception e) {
-          logger.error(e.getMessage());
-        }
-
-        ++counter;
       }
     } catch (Exception e) {
       System.err.println("Exception occurred in interpreter");
@@ -100,7 +113,10 @@ public class Compiler {
     }
   }
 
-  /** TODO */
+  /**
+   * Reads the config file passed through the command line and sets all the
+   * parameters for how queries should be built.
+   */
   private static void readConfigFile() {
     try {
       Scanner s = new Scanner(new File(configFile));

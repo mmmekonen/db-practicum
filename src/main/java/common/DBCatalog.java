@@ -4,7 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
+
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +31,7 @@ public class DBCatalog {
   private final Logger logger = LogManager.getLogger();
 
   private final HashMap<String, ArrayList<Column>> tables;
+  private HashMap<String, ArrayList<String>> indexInfo;
   private static DBCatalog db;
 
   private String dbDirectory;
@@ -35,6 +40,7 @@ public class DBCatalog {
   /** Reads schemaFile and populates schema information */
   private DBCatalog() {
     tables = new HashMap<>();
+    indexInfo = new HashMap<>();
   }
 
   /**
@@ -76,6 +82,32 @@ public class DBCatalog {
   }
 
   /**
+   * Sets the info for all the indexes as defined in index_info.txt.
+   */
+  public void setIndexInfo() {
+    try {
+      Scanner s = new Scanner(new File(dbDirectory + "/index_info.txt"));
+      while (s.hasNextLine()) {
+        String[] params = s.nextLine().split(" ");
+        indexInfo.put(params[0], new ArrayList<>(List.of(params[1], params[2], params[3])));
+      }
+    } catch (Exception e) {
+      System.out.println(e + ": Could not find index_info file");
+    }
+  }
+
+  /**
+   * Returns an ArrayList of Strings of the column, cluster flag, and tree order
+   * for the index on the specified table.
+   * 
+   * @param table the name of the specified table.
+   * @return an ArrayList of string for the index info.
+   */
+  public ArrayList<String> getIndexInfo(String table) {
+    return indexInfo.get(table);
+  }
+
+  /**
    * Sets the temporary directory used by external sort.
    *
    * @param directory: The temporary directory.
@@ -91,6 +123,15 @@ public class DBCatalog {
    */
   public String getSortDirectory() {
     return sortDirectory;
+  }
+
+  /**
+   * Gets the path of the index directory used to store indexes.
+   * 
+   * @return string of the indexes file path.
+   */
+  public String getIndexDirectory() {
+    return dbDirectory + "/indexes";
   }
 
   /**
