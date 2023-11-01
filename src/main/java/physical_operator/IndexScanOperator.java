@@ -3,6 +3,7 @@ package physical_operator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import net.sf.jsqlparser.expression.Alias;
 import common.Tuple;
@@ -27,7 +28,8 @@ public class IndexScanOperator extends Operator {
     this.scanner = new ScanOperator(tableName, alias);
 
     DBCatalog catalog = DBCatalog.getInstance();
-    ArrayList<String> indexInfo = catalog.getIndexInfo(tableName);
+    HashMap<String, ArrayList<String>> c = catalog.getIndexInfo();
+    ArrayList<String> indexInfo = c.get(tableName);
     this.clustered = (indexInfo.get(1) == "1");
 
     this.tree = new TreeIndex(catalog.getIndexDirectory() + '/' + tableName + '.' + indexColumnName);
