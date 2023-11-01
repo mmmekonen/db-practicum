@@ -97,15 +97,15 @@ public class DBCatalog {
   }
 
   /**
-   * Returns an ArrayList of Strings of the column, cluster flag, and tree order
-   * for the index on the specified table.
+   * Returns the hashmap of ArrayLists of Strings of the column, cluster flag, and tree order
+   * for the index on each of the tables.
    * 
-   * @param table the name of the specified table.
-   * @return an ArrayList of string for the index info.
+   * @return a hashmap containing the index info.
    */
-  public ArrayList<String> getIndexInfo(String table) {
-    return indexInfo.get(table);
+  public HashMap<String, ArrayList<String>> getIndexInfo() {
+    return indexInfo;
   }
+
 
   /**
    * Sets the temporary directory used by external sort.
@@ -157,5 +157,14 @@ public class DBCatalog {
     }
     return schema;
     // return tables.get(tableName);
+  }
+
+  public int findColumnIndex(String tableName, String columnName) {
+    ArrayList<Column> schema = new ArrayList<>();
+    for (Column c : tables.get(tableName)) {
+      schema.add(new Column(new Table(null, tableName), c.getColumnName()));
+    }
+
+    
   }
 }
