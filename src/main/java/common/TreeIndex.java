@@ -81,9 +81,10 @@ public class TreeIndex {
 
     private ArrayList<int[]> indexNodeHelper(ArrayList<int[]> children, ArrayList<int[]> nodes, int order) {
         ArrayList<int[]> result = new ArrayList<>();
+        int childrenStart = nodes.size() - children.size();
 
-        for(int i = 0; i < children.size(); i += order) {
-            int[] n = indexNode(children, i, order);
+        for(int i = order; i < children.size(); i += order) {
+            int[] n = indexNode(children, childrenStart, order);
             nodes.add(n);
             result.add(n);
         }
@@ -92,13 +93,26 @@ public class TreeIndex {
         else return indexNodeHelper(result, nodes, order);
     }
 
-    private int[] indexNode(ArrayList<int[]> leaves, int pointer, int order) {
+    /*private void indexNodeHelper(ArrayList<int[]> nodes, int start, int order) {
+        int nodesAdded = 0;
+
+        for(int i = order; i < children.size(); i += order) {
+            int[] n = indexNode(children, start, order);
+            nodes.add(n);
+            nodesAdded++;
+        }
+
+        if (nodesAdded == 1) return;
+        else indexNodeHelper(nodes, start + resultSize, order);
+    }*/
+
+    private int[] indexNode(ArrayList<int[]> nodes, int pointer, int order) {
         int[] node = new int[PAGE_SIZE/4];
         node[0] = 1;
         node[1] = 0;
 
         for(int i = 0; i < order; i++) {
-            node[i + 2] = leaves.get(i + pointer)[3];
+            node[i + 2] = nodes.get(i + pointer)[3];
             node[i + order + 2] = i + pointer;
         }
 
