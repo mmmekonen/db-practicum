@@ -21,7 +21,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import physical_operator.Operator;
 
-public class P2UnitTests {
+public class P3UnitTests {
   private static List<Statement> statementList;
   private static QueryPlanBuilder queryPlanBuilder;
   private static Statements statements;
@@ -29,20 +29,19 @@ public class P2UnitTests {
   private static File outputDir;
   private static String tempDir = "src/test/resources/samples/temp";
 
-
   @BeforeAll
   static void setupBeforeAllTests() throws IOException, JSQLParserException {
 
-    ClassLoader classLoader = P2UnitTests.class.getClassLoader();
-    String path = Objects.requireNonNull(classLoader.getResource("samples/input")).getPath();
+    ClassLoader classLoader = P3UnitTests.class.getClassLoader();
+    String path = Objects.requireNonNull(classLoader.getResource("samples/inputP2")).getPath();
 
     DBCatalog.getInstance().setDataDirectory(path + "/db");
     DBCatalog.getInstance().setSortDirectory(tempDir);
-
+    DBCatalog.getInstance().setIndexInfo();
 
     expectedPath = "src/test/resources/samples/expected";
 
-    String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
+    String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/inputP2/queries.sql")).getPath();
     // for windows machine
     // if (queriesFile.contains(":")) {
     // queriesFile = queriesFile.substring(3);
@@ -68,23 +67,6 @@ public class P2UnitTests {
       output = Files.readAllBytes(outfile.toPath());
       Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
       Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
-      /*TupleReader e = new TupleReader(expectedPath + "/query" + queryNum);
-      TupleReader o = new TupleReader(outfile.toPath().toString());
-      Tuple t = e.readNextTuple();
-      HashSet<Tuple> hs = new HashSet();
-      System.out.println(1);
-      while (t != null) {
-        hs.add(t);
-        t = e.readNextTuple();
-      }
-      e.close();
-      t = o.readNextTuple();
-      System.out.println(2);
-      while(t != null) {
-        Assertions.assertTrue(hs.contains(t));
-        t = o.readNextTuple();
-      }
-      o.close();*/
     } catch (IOException e) {
       e.printStackTrace();
       System.out.println("hi");
