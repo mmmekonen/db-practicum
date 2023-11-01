@@ -1,6 +1,7 @@
 package common;
 
 import net.sf.jsqlparser.schema.Column;
+import physical_operator.InMemorySortOperator;
 import physical_operator.Operator;
 
 import java.io.File;
@@ -26,7 +27,7 @@ public class TreeIndex {
     static final int PAGE_SIZE = 4096;
     int curPage;
 
-    public TreeIndex(String fileName, Operator op, int order, int indexElement) {
+    public TreeIndex(String fileName, InMemorySortOperator op, int order, int indexElement) {
         this.file = new File(fileName);
         this.nextTuple = op.getNextTuple();
 

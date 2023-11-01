@@ -5,12 +5,18 @@ import common.QueryPlanBuilder;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Scanner;
+
+import common.TreeIndex;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 import org.apache.logging.log4j.*;
+import physical_operator.InMemorySortOperator;
 import physical_operator.Operator;
+import physical_operator.ScanOperator;
 
 /**
  * Top level harness class; reads queries from an input file one at a time,
@@ -21,6 +27,7 @@ public class Compiler {
   private static final Logger logger = LogManager.getLogger();
 
   private static String configFile;
+  private static String indexInfo;
   private static String outputDir;
   private static String inputDir;
   private static String tempDir;
@@ -33,6 +40,8 @@ public class Compiler {
   private static int joinBuffer;
   private static int sortType;
   private static int sortBuffer;
+
+  private static ArrayList<String[]> indexConfigs;
 
   // files, false = output
   // to System.out
@@ -48,6 +57,7 @@ public class Compiler {
    */
   public static void main(String[] args) {
 
+    //Set up configs for which type of sort and join to use
     configFile = args[0];
     readConfigFile();
     setConfig();
@@ -56,6 +66,7 @@ public class Compiler {
     db.setSortDirectory(tempDir);
     db.setIndexInfo();
 
+    //Set up indexes
     try {
       if (outputToFiles) {
         for (File file : (new File(outputDir).listFiles()))
@@ -64,7 +75,17 @@ public class Compiler {
 
       if (buildIndexes == 1) {
         logger.info("Building indexes...");
-        // TODO: build indexes if needed
+        ArrayList<String> tables = new ArrayList();
+        tables.addAll(db.getIndexInfo().keySet());
+
+        for(int i = 0; i < tables.size(); i++) {
+          ScanOperator base = new ScanOperator(tables.get(i), null);
+          InMemorySortOperator op = new InMemorySortOperator(base, );
+          TreeIndex t = new TreeIndex(inputDir + "/" + tables.get(i), op,
+                  Integer.parseInt(db.getIndexInfo().get(tables.get(i)).get(2)),
+                  db.getTableSchema(tables.get(i)).indexOf(db.getIndexInfo().get(tables.get(i)).get(0)));
+        }
+
         logger.info("Indexes have been built");
       }
 
