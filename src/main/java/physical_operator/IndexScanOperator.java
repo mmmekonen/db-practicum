@@ -23,15 +23,18 @@ public class IndexScanOperator extends Operator {
   public int ridIndex;
   ArrayList<ArrayList<Integer>> dataEntries;
 
-  public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey)
-      throws IOException {
+  public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey) {
     super(DBCatalog.getInstance().getTableSchema(tableName));
     this.lowkey = lowkey;
     this.highkey = highkey;
     this.scanner = new ScanOperator(tableName, alias);
 
     // FIX THE READER INPUT
-    this.reader = new TupleReader(tableName);
+    try {
+      this.reader = new TupleReader(DBCatalog.getInstance().getFileForTable(tableName));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
     DBCatalog catalog = DBCatalog.getInstance();
     HashMap<String, ArrayList<String>> c = catalog.getIndexInfo();
