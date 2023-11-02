@@ -1,9 +1,7 @@
 package physical_operator;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 import net.sf.jsqlparser.expression.Alias;
@@ -25,7 +23,8 @@ public class IndexScanOperator extends Operator {
   public int ridIndex;
   ArrayList<ArrayList<Integer>> dataEntries;
 
-  public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey) {
+  public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey)
+      throws IOException {
     super(DBCatalog.getInstance().getTableSchema(tableName));
     this.lowkey = lowkey;
     this.highkey = highkey;
@@ -48,6 +47,7 @@ public class IndexScanOperator extends Operator {
       currentLeaf = tree.deserialize(1, lowkey);
       dataEntries = tree.getDataEntries();
       ridIndex = 0;
+      tuplePosition = lowkey;
 
       while (dataEntries.get(dataEntryIndex).get(0) < lowkey) {
         dataEntryIndex++;
