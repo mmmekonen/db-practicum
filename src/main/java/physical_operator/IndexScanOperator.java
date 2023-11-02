@@ -25,9 +25,8 @@ public class IndexScanOperator extends Operator {
   public int ridIndex;
   ArrayList<ArrayList<Integer>> dataEntries;
 
-  public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey)
-      throws IOException {
-    super(null);
+  public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey) {
+    super(DBCatalog.getInstance().getTableSchema(tableName));
     this.lowkey = lowkey;
     this.highkey = highkey;
     this.scanner = new ScanOperator(tableName, alias);
@@ -56,6 +55,9 @@ public class IndexScanOperator extends Operator {
 
     }
 
+    for (int i = 0; i < this.outputSchema.size(); i++) {
+      this.outputSchema.get(i).getTable().setAlias(alias);
+    }
   }
 
   public Tuple getNextTuple() {

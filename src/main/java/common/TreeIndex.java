@@ -27,7 +27,15 @@ public class TreeIndex {
     static final int PAGE_SIZE = 4096;
     int curPage;
 
-    public TreeIndex(String fileName, InMemorySortOperator op, int order, int indexElement) {
+    /**
+     * Class to create and read a B+ tree index
+     * 
+     * @param fileName     The file to which the tree will be written
+     * @param op           A sorted operator on the table to be indexed
+     * @param order        The order of the tree index
+     * @param indexElement The element on which the table will be indexed
+     */
+    public TreeIndex(String fileName, InMemorySortOperator op, int order, int indexElement, boolean clustered) {
         this.file = new File(fileName);
         this.nextTuple = op.getNextTuple();
 
@@ -42,9 +50,8 @@ public class TreeIndex {
 
         ArrayList<int[]> leaves = new ArrayList<>();
 
-        while (nextTuple != null) {
-            leaves.add(leafNode(op, indexElement));
-        }
+        while (nextTuple != null)
+            leaves.add(LeafNode(op, indexElement, clustered));
 
         ArrayList<int[]> nodes = new ArrayList<>();
         nodes.add(new int[1]);
@@ -62,6 +69,11 @@ public class TreeIndex {
         }
     }
 
+    /**
+     * A class to read from a tree index
+     * 
+     * @param filename The file from which the tree will be read
+     */
     public TreeIndex(String filename) {
         this.file = new File(filename);
 
@@ -75,6 +87,12 @@ public class TreeIndex {
 
     }
 
+    /**
+     * Reads the node stored in the specified page
+     * 
+     * @param page the page to be read
+     * @return The data in a page, represented as an array of integers
+     */
     public int[] readNode(int page) {
         int[] result = new int[PAGE_SIZE / 4];
         buffer.clear();
@@ -84,10 +102,10 @@ public class TreeIndex {
         return result;
     }
 
-    public int[] deserialize(int page, Integer traversekey) {
+    public int[] deserialize(int page, Integer traverseKey) {
         readNode(page);
         if (buffer.getInt(0) == 1) {
-            return deserializeIndex(page, traversekey);
+            return deserializeIndex(page, traverseKey);
         } else {
             return deserializeLeaf(page);
         }
@@ -98,7 +116,7 @@ public class TreeIndex {
         return readNode(curPage + 1);
     }
 
-    public int[] deserializeIndex(int page, Integer traversekey) {
+    public int[] deserializeIndex(int page, Integer traverseKey) {
         int numKeys = buffer.getInt(4);
 
         int[] keys = new int[numKeys];
@@ -116,11 +134,11 @@ public class TreeIndex {
         }
 
         int index = 0;
-        while (index < numKeys && keys[index] < traversekey) {
+        while (index < numKeys && keys[index] < traverseKey) {
             index++;
         }
 
-        return deserialize(children[index], traversekey);
+        return deserialize(children[index], traverseKey);
     }
 
     private int[] deserializeLeaf(int page) {
@@ -202,6 +220,15 @@ public class TreeIndex {
         return result;
     }
 
+    /**
+     * Helper function to recursively create the index nodes of the table
+     * 
+     * @param children The layer of nodes beneath the ones to be created
+     * @param nodes    A master list of nodes that tracks the entire tree
+     * @param order    The order of the tree
+     * @return A newly created layer of nodes, represented as an arraylist
+     */
+
     private ArrayList<int[]> indexNodeHelper(ArrayList<int[]> children, ArrayList<int[]> nodes, int order) {
         ArrayList<int[]> result = new ArrayList<>();
         int childrenStart = nodes.size() - children.size();
@@ -233,6 +260,14 @@ public class TreeIndex {
      * }
      */
 
+    /**
+     * Creates a new index node
+     * 
+     * @param nodes   a master list of nodes that tracks the entire tree
+     * @param pointer a pointer to the first child of the index node
+     * @param order   the order of the tree to which the node belongs
+     * @return an index node represented as an array of integers
+     */
     private int[] indexNode(ArrayList<int[]> nodes, int pointer, int order) {
         int[] node = new int[PAGE_SIZE / 4];
         node[0] = 1;
@@ -246,7 +281,14 @@ public class TreeIndex {
         return node;
     }
 
-    private ArrayList<Integer> makeRecord(Operator op, int index) {
+    /**
+     * Sequentially creates unclustered records from the table
+     * 
+     * @param op    A sorted operator
+     * @param index The index to be created
+     * @return A new record
+     */
+    private ArrayList<Integer> makeRecord(Operator op, int index, boolean clustered) {
         ArrayList<Integer> result = new ArrayList();
         result.add(nextTuple.getElementAtIndex(index));
         result.add(1);
@@ -258,8 +300,14 @@ public class TreeIndex {
             return null;
 
         while (nextTuple != null && nextTuple.getElementAtIndex(index) == result.get(0)) {
-            result.add(nextTuple.getPID());
-            result.add(nextTuple.getTID());
+            if (clustered) {
+                ArrayList temp = nextTuple.getAllElements();
+                temp.remove(index);
+                result.addAll(temp);
+            } else {
+                result.add(nextTuple.getPID());
+                result.add(nextTuple.getTID());
+            }
             result.set(1, result.get(1) + 1);
             nextTuple = op.getNextTuple();
         }
@@ -267,7 +315,14 @@ public class TreeIndex {
         return result;
     }
 
-    public int[] leafNode(Operator op, int index) {
+    /**
+     * Creates leaf nodes sequentially from the table
+     * 
+     * @param op    a sorted operator
+     * @param index the index to be created
+     * @return a new leaf node represented as an array of integers
+     */
+    private int[] LeafNode(Operator op, int index, boolean clustered) {
         int[] node = new int[PAGE_SIZE / 4];
         node[0] = 0;
         node[1] = 0;
@@ -283,11 +338,17 @@ public class TreeIndex {
                     return node;
                 }
             }
-            nextRecord = makeRecord(op, index);
+            nextRecord = makeRecord(op, index, clustered);
         }
         return node;
     }
 
+    /**
+     * Writes a node to the file storing the tree index
+     * 
+     * @param node The node to be written
+     * @throws IOException
+     */
     private void writeNode(int[] node) throws IOException {
         buffer.clear();
         IntBuffer temp = buffer.asIntBuffer();
@@ -296,6 +357,14 @@ public class TreeIndex {
         fileChannel.write(buffer);
     }
 
+    /**
+     * Creates a header node containing the specified information
+     * 
+     * @param root   the address of the root node
+     * @param leaves the number of leaves in the tree
+     * @param order  the order of the tree
+     * @return a header node for the tree
+     */
     private int[] headerNode(int root, int leaves, int order) {
         int[] node = new int[PAGE_SIZE / 4];
         node[0] = root;

@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import common.TreeIndex;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
@@ -79,11 +80,17 @@ public class Compiler {
         tables.addAll(db.getIndexInfo().keySet());
 
         for(int i = 0; i < tables.size(); i++) {
+
+          ArrayList<String> info = db.getIndexInfo().get(tables.get(i));
+
           ScanOperator base = new ScanOperator(tables.get(i), null);
-          InMemorySortOperator op = new InMemorySortOperator(base, );
+          ArrayList<Column> temp = new ArrayList<>();
+          temp.add(new Column(new Table(null, tables.get(i)), info.get(0)));
+          InMemorySortOperator op = new InMemorySortOperator(base, temp);
+
           TreeIndex t = new TreeIndex(inputDir + "/" + tables.get(i), op,
-                  Integer.parseInt(db.getIndexInfo().get(tables.get(i)).get(2)),
-                  db.getTableSchema(tables.get(i)).indexOf(db.getIndexInfo().get(tables.get(i)).get(0)));
+                  Integer.parseInt(info.get(2)),
+                  db.findColumnIndex(tables.get(i), info.get(0)));
         }
 
         logger.info("Indexes have been built");
@@ -166,4 +173,6 @@ public class Compiler {
       System.out.println(e + ": Could not find config file");
     }
   }
+
+
 }

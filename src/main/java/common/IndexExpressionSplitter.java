@@ -115,7 +115,7 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
      * @param tablename The name of the table the expression is for.
      */
     public IndexExpressionSplitter(String tablename) {
-        indexColumn = DBCatalog.getInstance().getIndexInfo(tablename).get(0);
+        indexColumn = DBCatalog.getInstance().getIndexInfo().get(tablename).get(0);
     }
 
     // /**
