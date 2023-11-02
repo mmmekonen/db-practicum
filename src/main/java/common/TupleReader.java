@@ -73,6 +73,19 @@ public class TupleReader {
     }
   }
 
+  public Tuple getTupleByPosition(int pageID, int tupleID) {
+    currentPID = pageID;
+    currentTID = tupleID;
+    long position = (long) pageID * PAGE_SIZE + (tupleID * attributes * 4) + 8;
+    buffer.position((int) position);
+
+    try {
+      return readNextTuple();
+    } catch (IOException e) {
+      return null;
+    }
+  }
+
   /**
    * Returns the number of attributes in the tuples
    */

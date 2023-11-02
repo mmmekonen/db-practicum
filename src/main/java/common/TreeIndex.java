@@ -172,6 +172,36 @@ public class TreeIndex {
         return result;
     }
 
+    public ArrayList<ArrayList<Integer>> getDataEntries() {
+        ArrayList<ArrayList<Integer>> result = new ArrayList<>();
+        int numDataEntries = buffer.getInt(4);
+        int pos = 8;
+
+        for (int i = 0; i < numDataEntries; i++) {
+            int key = buffer.getInt(pos);
+            pos += 4;
+
+            int numRids = buffer.getInt(pos);
+            pos += 4;
+
+            ArrayList<Integer> rids = new ArrayList<>();
+            rids.add(key);
+            for (int j = 0; j < numRids; j++) {
+                int pageNum = buffer.getInt(pos);
+                pos += 4;
+                int tupleNum = buffer.getInt(pos);
+                pos += 4;
+
+                rids.add(pageNum);
+                rids.add(tupleNum);
+            }
+
+            result.add(rids);
+        }
+
+        return result;
+    }
+
     private ArrayList<int[]> indexNodeHelper(ArrayList<int[]> children, ArrayList<int[]> nodes, int order) {
         ArrayList<int[]> result = new ArrayList<>();
         int childrenStart = nodes.size() - children.size();

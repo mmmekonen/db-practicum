@@ -1,12 +1,14 @@
 package physical_operator;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import net.sf.jsqlparser.expression.Alias;
 import common.Tuple;
+import common.TupleReader;
 import common.TreeIndex;
 import common.DBCatalog;
 
@@ -18,14 +20,20 @@ public class IndexScanOperator extends Operator {
   public int tuplePosition;
   public ScanOperator scanner;
   public int[] currentLeaf;
-  public int[] currentDataEntries;
+  public TupleReader reader;
   public int dataEntryIndex;
+  public int ridIndex;
+  ArrayList<ArrayList<Integer>> dataEntries;
 
-  public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey) {
+  public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey)
+      throws IOException {
     super(null);
     this.lowkey = lowkey;
     this.highkey = highkey;
     this.scanner = new ScanOperator(tableName, alias);
+
+    // FIX THE READER INPUT
+    this.reader = new TupleReader(tableName);
 
     DBCatalog catalog = DBCatalog.getInstance();
     HashMap<String, ArrayList<String>> c = catalog.getIndexInfo();
@@ -39,8 +47,15 @@ public class IndexScanOperator extends Operator {
       currentLeaf = tree.readNode(1);
     } else {
       currentLeaf = tree.deserialize(1, lowkey);
+      dataEntries = tree.getDataEntries();
+      ridIndex = 0;
+
+      while (dataEntries.get(dataEntryIndex).get(0) < lowkey) {
+        dataEntryIndex++;
+      }
 
     }
+
   }
 
   public Tuple getNextTuple() {
@@ -52,28 +67,31 @@ public class IndexScanOperator extends Operator {
       }
     } else {
       if (currentLeaf != null) {
-        while (dataEntryIndex < currentDataEntries.length) {
-          int key = currentDataEntries[dataEntryIndex];
-          int recordID = currentDataEntries[dataEntryIndex + 1];
+        while (dataEntryIndex < dataEntries.size()) {
+          int key = dataEntries.get(dataEntryIndex).get(0);
+          int pageID = dataEntries.get(dataEntryIndex).get(1 + ridIndex * 2);
+          int tupleID = dataEntries.get(dataEntryIndex).get(2 + ridIndex * 2);
+          ridIndex++;
 
           if (key >= lowkey && key <= highkey) {
-            Tuple tuple = getTupleFromRecordID(tree, recordID);
+            Tuple tuple = reader.getTupleByPosition(pageID, tupleID);
 
             tuplePosition++;
-            dataEntryIndex += 2;
+            dataEntryIndex += 1;
             return tuple;
           } else if (key > highkey) {
             break;
           } else {
-            dataEntryIndex += 2;
+            dataEntryIndex += 1;
           }
         }
 
         currentLeaf = tree.getNextLeaf();
 
         if (currentLeaf != null) {
-          currentDataEntries = extractDataEntries(currentLeaf);
+          dataEntries = tree.getDataEntries();
           dataEntryIndex = 0;
+          ridIndex = 0;
         }
       }
     }
@@ -81,28 +99,9 @@ public class IndexScanOperator extends Operator {
     return null;
   }
 
-  private Tuple getTupleFromRecordID(TreeIndex tree2, int recordID) {
-    return null;
-  }
-
   @Override
   public void reset() {
     super.reset(0);
-  }
-
-  public int[] extractDataEntries(int[] leafNode) {
-    if (leafNode != null && leafNode[0] == 0) {
-      int numDataEntries = leafNode[1];
-      int[] dataEntries = new int[numDataEntries * 2];
-
-      for (int i = 0; i < numDataEntries; i++) {
-        int dataIndex = 2 + (i * 2);
-        dataEntries[i * 2] = leafNode[dataIndex];
-        dataEntries[i * 2 + 1] = leafNode[dataIndex + 1];
-      }
-      return dataEntries;
-    }
-    return null;
   }
 
 }
