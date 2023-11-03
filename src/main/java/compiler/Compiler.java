@@ -65,6 +65,7 @@ public class Compiler {
     DBCatalog db = DBCatalog.getInstance();
     db.setDataDirectory(inputDir + "/db");
     db.setSortDirectory(tempDir);
+    db.setIndexDirectory(inputDir + "/db/indexes");
     db.setIndexInfo();
 
     // Set up indexes

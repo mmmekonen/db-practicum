@@ -44,10 +44,17 @@ public class IndexScanOperator extends Operator {
     this.tree = new TreeIndex(catalog.getIndexDirectory() + '/' + tableName + '.' + indexColumnName);
     this.tuplePosition = 0;
 
+    int[] header = tree.readNode(0);
+    int rootPageID = header[0];
+
+    if (highkey == null) {
+      highkey = Integer.MAX_VALUE;
+    }
+
     if (lowkey == null) {
       currentLeaf = tree.readNode(1);
     } else {
-      currentLeaf = tree.deserialize(1, lowkey);
+      currentLeaf = tree.deserialize(rootPageID, lowkey);
       dataEntries = tree.getDataEntries();
       ridIndex = 0;
       tuplePosition = lowkey;

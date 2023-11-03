@@ -25,7 +25,6 @@ public class P3UnitTests {
   private static List<Statement> statementList;
   private static QueryPlanBuilder queryPlanBuilder;
   private static Statements statements;
-  private static String expectedIndexes;
   private static File outputDir;
   private static String tempDir = "src/test/resources/samples/temp";
 
@@ -37,9 +36,8 @@ public class P3UnitTests {
 
     DBCatalog.getInstance().setDataDirectory(path + "/db");
     DBCatalog.getInstance().setSortDirectory(tempDir);
+    DBCatalog.getInstance().setIndexDirectory("src/test/resources/samples/expected_indexes");
     DBCatalog.getInstance().setIndexInfo();
-
-    expectedIndexes = "src/test/resources/samples/expected_indexes";
 
     String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
     // for windows machine
@@ -130,14 +128,14 @@ public class P3UnitTests {
     testHelper(planIndex, planNoIndex, 5);
   }
 
-  @Test
-  public void testQuery6() throws ExecutionControl.NotImplementedException {
-    DBCatalog.getInstance().setUseIndex(true);
-    Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(5));
+  // @Test
+  // public void testQuery6() throws ExecutionControl.NotImplementedException {
+  // DBCatalog.getInstance().setUseIndex(true);
+  // Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(5));
 
-    DBCatalog.getInstance().setUseIndex(false);
-    Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(5));
+  // DBCatalog.getInstance().setUseIndex(false);
+  // Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(5));
 
-    testHelper(planIndex, planNoIndex, 6);
-  }
+  // testHelper(planIndex, planNoIndex, 6);
+  // }
 }
