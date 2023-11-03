@@ -25,7 +25,7 @@ public class P3UnitTests {
   private static List<Statement> statementList;
   private static QueryPlanBuilder queryPlanBuilder;
   private static Statements statements;
-  private static String expectedPath;
+  private static String expectedIndexes;
   private static File outputDir;
   private static String tempDir = "src/test/resources/samples/temp";
 
@@ -33,19 +33,19 @@ public class P3UnitTests {
   static void setupBeforeAllTests() throws IOException, JSQLParserException {
 
     ClassLoader classLoader = P3UnitTests.class.getClassLoader();
-    String path = Objects.requireNonNull(classLoader.getResource("samples/inputP2")).getPath();
+    String path = Objects.requireNonNull(classLoader.getResource("samples/input")).getPath();
 
     DBCatalog.getInstance().setDataDirectory(path + "/db");
     DBCatalog.getInstance().setSortDirectory(tempDir);
     DBCatalog.getInstance().setIndexInfo();
 
-    expectedPath = "src/test/resources/samples/expected";
+    expectedIndexes = "src/test/resources/samples/expected_indexes";
 
-    String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/inputP2/queries.sql")).getPath();
+    String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
     // for windows machine
-    // if (queriesFile.contains(":")) {
-    // queriesFile = queriesFile.substring(3);
-    // }
+    if (queriesFile.contains(":")) {
+      queriesFile = queriesFile.substring(3);
+    }
 
     statements = CCJSqlParserUtil.parseStatements(Files.readString(Path.of(queriesFile)));
     queryPlanBuilder = new QueryPlanBuilder();
@@ -56,17 +56,19 @@ public class P3UnitTests {
       file.delete(); // clean output directory
   }
 
-  private void testHelper(Operator plan, int queryNum) {
-    File outfile = new File(outputDir, "/query" + queryNum);
-    plan.dump(outfile);
+  private void testHelper(Operator planIndex, Operator planNoIndex, int queryNum) {
+    File outfileIndex = new File(outputDir, "/query_Index" + queryNum);
+    planIndex.dump(outfileIndex);
+    File outfileNoIndex = new File(outputDir, "/query_NoIndex" + queryNum);
+    planNoIndex.dump(outfileNoIndex);
 
-    byte[] expected;
-    byte[] output;
+    byte[] noIndex;
+    byte[] withindex;
     try {
-      expected = Files.readAllBytes(Path.of(expectedPath + "/query" + queryNum));
-      output = Files.readAllBytes(outfile.toPath());
-      Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
-      Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
+      noIndex = Files.readAllBytes(outfileNoIndex.toPath());
+      withindex = Files.readAllBytes(outfileIndex.toPath());
+      Assertions.assertEquals(noIndex.length, withindex.length, "Unexpected number of rows.");
+      Assertions.assertTrue(Arrays.equals(withindex, noIndex), "Outputs are not equal.");
     } catch (IOException e) {
       e.printStackTrace();
       System.out.println("hi");
@@ -75,94 +77,67 @@ public class P3UnitTests {
 
   @Test
   public void testQuery1() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(0));
+    DBCatalog.getInstance().setUseIndex(true);
+    Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(0));
 
-    testHelper(plan, 1);
+    DBCatalog.getInstance().setUseIndex(false);
+    Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(0));
+
+    testHelper(planIndex, planNoIndex, 1);
   }
 
   @Test
   public void testQuery2() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(1));
+    DBCatalog.getInstance().setUseIndex(true);
+    Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(1));
 
-    testHelper(plan, 2);
+    DBCatalog.getInstance().setUseIndex(false);
+    Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(1));
+
+    testHelper(planIndex, planNoIndex, 2);
   }
 
   @Test
   public void testQuery3() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(2));
-    testHelper(plan, 3);
+    DBCatalog.getInstance().setUseIndex(true);
+    Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(2));
+
+    DBCatalog.getInstance().setUseIndex(false);
+    Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(2));
+
+    testHelper(planIndex, planNoIndex, 3);
   }
 
   @Test
   public void testQuery4() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(3));
-    testHelper(plan, 4);
+    DBCatalog.getInstance().setUseIndex(true);
+    Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(3));
+
+    DBCatalog.getInstance().setUseIndex(false);
+    Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(3));
+
+    testHelper(planIndex, planNoIndex, 4);
   }
 
   @Test
   public void testQuery5() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(4));
-    testHelper(plan, 5);
+    DBCatalog.getInstance().setUseIndex(true);
+    Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(4));
+
+    DBCatalog.getInstance().setUseIndex(false);
+    Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(4));
+
+    testHelper(planIndex, planNoIndex, 5);
   }
 
   @Test
   public void testQuery6() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(5));
-    testHelper(plan, 6);
-  }
+    DBCatalog.getInstance().setUseIndex(true);
+    Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(5));
 
-  @Test
-  public void testQuery7() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(6));
-    testHelper(plan, 7);
-  }
+    DBCatalog.getInstance().setUseIndex(false);
+    Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(5));
 
-  @Test
-  public void testQuery8() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(7));
-    testHelper(plan, 8);
+    testHelper(planIndex, planNoIndex, 6);
   }
-
-  @Test
-  public void testQuery9() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(8));
-    testHelper(plan, 9);
-  }
-
-  @Test
-  public void testQuery10() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(9));
-    testHelper(plan, 10);
-  }
-
-  @Test
-  public void testQuery11() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(10));
-    testHelper(plan, 11);
-  }
-
-  @Test
-  public void testQuery12() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(11));
-    testHelper(plan, 12);
-  }
-
-  @Test
-  public void testQuery13() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(12));
-    testHelper(plan, 13);
-  }
-
-  @Test
-  public void testQuery14() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(13));
-    testHelper(plan, 14);
-  }
-
-  @Test
-  public void testQuery15() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(14));
-    testHelper(plan, 15);
-  }
-
 }
