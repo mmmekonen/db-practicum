@@ -257,10 +257,10 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
             if (!equalsCondition) {
                 if (left == right) {
                     // left value, right column
-                    highkey = Math.min(highkey.intValue(), left - 1);
+                    highkey = highkey == null ? left - 1 : Math.min(highkey.intValue(), left - 1);
                 } else {
                     // right value, left column
-                    lowkey = Math.max(lowkey.intValue(), right + 1);
+                    lowkey = lowkey == null ? right + 1 : Math.max(lowkey.intValue(), right + 1);
                 }
             }
         } else {
@@ -286,10 +286,10 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
             if (!equalsCondition) {
                 if (left == right) {
                     // left value, right column
-                    highkey = Math.min(highkey.intValue(), left);
+                    highkey = highkey == null ? left : Math.min(highkey.intValue(), left);
                 } else {
                     // right value, left column
-                    lowkey = Math.max(lowkey.intValue(), right);
+                    lowkey = lowkey == null ? right : Math.max(lowkey.intValue(), right);
                 }
             }
         } else {
@@ -315,10 +315,10 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
             if (!equalsCondition) {
                 if (left == right) {
                     // left value, right column
-                    lowkey = Math.max(lowkey.intValue(), left + 1);
+                    lowkey = lowkey == null ? left + 1 : Math.max(lowkey.intValue(), left + 1);
                 } else {
                     // right value, left column
-                    highkey = Math.min(highkey.intValue(), right - 1);
+                    highkey = highkey == null ? right - 1 : Math.min(highkey.intValue(), right - 1);
                 }
             }
         } else {
@@ -344,10 +344,10 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
             if (!equalsCondition) {
                 if (left == right) {
                     // left value, right column
-                    lowkey = Math.max(lowkey.intValue(), left);
+                    lowkey = lowkey == null ? left : Math.max(lowkey.intValue(), left);
                 } else {
                     // right value, left column
-                    highkey = Math.min(highkey.intValue(), right);
+                    highkey = highkey == null ? right : Math.min(highkey.intValue(), right);
                 }
             }
         } else {

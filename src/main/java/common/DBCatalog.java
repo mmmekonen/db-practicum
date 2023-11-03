@@ -36,6 +36,7 @@ public class DBCatalog {
 
   private String dbDirectory;
   private String sortDirectory;
+  private String indexDirectory;
 
   /** Reads schemaFile and populates schema information */
   private DBCatalog() {
@@ -146,12 +147,21 @@ public class DBCatalog {
   }
 
   /**
+   * Sets the path of the index directory used to store indexes.
+   * 
+   * @param directory string of the indexes file path.
+   */
+  public void setIndexDirectory(String directory) {
+    indexDirectory = directory;
+  }
+
+  /**
    * Gets the path of the index directory used to store indexes.
    * 
    * @return string of the indexes file path.
    */
   public String getIndexDirectory() {
-    return dbDirectory + "/indexes";
+    return indexDirectory;
   }
 
   /**
