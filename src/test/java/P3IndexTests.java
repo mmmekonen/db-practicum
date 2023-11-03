@@ -1,32 +1,28 @@
 import common.DBCatalog;
-import common.QueryPlanBuilder;
+import common.TreeIndex;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 
-import common.Tuple;
-import common.TupleReader;
 import jdk.jshell.spi.ExecutionControl;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.Statements;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import physical_operator.Operator;
+
+import physical_operator.InMemorySortOperator;
+import physical_operator.ScanOperator;
 
 public class P3IndexTests {
-  private static List<Statement> statementList;
-  private static QueryPlanBuilder queryPlanBuilder;
-  private static Statements statements;
   private static String expectedPath;
-  private static File outputDir;
+  private static String outputPath;
   private static String tempDir = "src/test/resources/samples/temp";
 
   @BeforeAll
@@ -35,16 +31,31 @@ public class P3IndexTests {
     ClassLoader classLoader = P3IndexTests.class.getClassLoader();
     String path = Objects.requireNonNull(classLoader.getResource("samples/input")).getPath();
 
-    DBCatalog.getInstance().setDataDirectory(path + "/db");
-    DBCatalog.getInstance().setSortDirectory(tempDir);
-    DBCatalog.getInstance().setIndexInfo();
+    DBCatalog db = DBCatalog.getInstance();
+    db.setDataDirectory(path + "/db");
+    db.setSortDirectory(tempDir);
+    db.setIndexInfo();
 
     expectedPath = "src/test/resources/samples/expected_indexes";
-    outputDir = new File("src/test/resources/samples/db/indexes");
-    for (File file : (outputDir.listFiles()))
-      file.delete(); // clean output directory
+    outputPath = "src/test/resources/samples/db/indexes";
 
-    // TODO: make indexes
+    // make indexes
+    ArrayList<String> tables = new ArrayList<>();
+    tables.addAll(db.getIndexInfo().keySet());
+
+    for (int i = 0; i < tables.size(); i++) {
+
+      ArrayList<String> info = db.getIndexInfo().get(tables.get(i));
+
+      ScanOperator base = new ScanOperator(tables.get(i), null);
+      ArrayList<Column> temp = new ArrayList<>();
+      temp.add(new Column(new Table(null, tables.get(i)), info.get(0)));
+      InMemorySortOperator op = new InMemorySortOperator(base, temp);
+
+      TreeIndex t = new TreeIndex(db.getIndexDirectory() + "/" + tables.get(i) + "." + info.get(0), op,
+          Integer.parseInt(info.get(2)),
+          db.findColumnIndex(tables.get(i), info.get(0)), Integer.valueOf(info.get(1)) == 1 ? true : false);
+    }
   }
 
   private void testHelper(String filename) {
@@ -52,7 +63,7 @@ public class P3IndexTests {
     byte[] output;
     try {
       expected = Files.readAllBytes(Path.of(expectedPath + "/" + filename));
-      output = Files.readAllBytes(Path.of(outputDir + "/" + filename));
+      output = Files.readAllBytes(Path.of(outputPath + "/" + filename));
       Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
       Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
     } catch (IOException e) {
@@ -63,15 +74,11 @@ public class P3IndexTests {
 
   @Test
   public void testIndex1() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(0));
-
     testHelper("Boats.E");
   }
 
   @Test
   public void testIndex2() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(1));
-
     testHelper("Sailors.A");
   }
 }

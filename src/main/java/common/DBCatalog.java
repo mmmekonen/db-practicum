@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
@@ -98,7 +97,8 @@ public class DBCatalog {
   }
 
   /**
-   * Returns the hashmap of ArrayLists of Strings of the column, cluster flag, and tree order
+   * Returns the hashmap of ArrayLists of Strings of the column, cluster flag, and
+   * tree order
    * for the index on each of the tables.
    * 
    * @return a hashmap containing the index info.
@@ -106,7 +106,6 @@ public class DBCatalog {
   public HashMap<String, ArrayList<String>> getIndexInfo() {
     return indexInfo;
   }
-
 
   /**
    * Sets the boolean value as to whether indexes are to be used for selection or
@@ -181,9 +180,10 @@ public class DBCatalog {
   }
 
   /**
-   * Finds the index of a column of a given table, as it is found in the table schema
+   * Finds the index of a column of a given table, as it is found in the table
+   * schema
    *
-   * @param tableName The table holding the column
+   * @param tableName  The table holding the column
    * @param columnName The column whose index is to be located
    * @return The index of the column
    */
