@@ -74,16 +74,29 @@ public class TupleReader {
   }
 
   public Tuple getTupleByPosition(int pageID, int tupleID) {
-    currentPID = pageID;
-    currentTID = tupleID;
-    long position = (long) pageID * PAGE_SIZE + (tupleID * attributes * 4) + 8;
-    buffer.position((int) position);
-
     try {
-      return readNextTuple();
+      this.currentPID = pageID;
+      this.currentTID = tupleID;
+
+      fileChannel.position(pageID * PAGE_SIZE);
+      buffer.clear();
+      fileChannel.read(buffer);
+      buffer.flip();
+      this.attributes = buffer.getInt();
+      buffer.position(4 + 4 + (4 * attributes * tupleID));
+
+      ArrayList<Integer> tuple = new ArrayList<Integer>();
+      for (int i = 0; i < attributes; i++) {
+        int attributeValue = buffer.getInt();
+        tuple.add(attributeValue);
+      }
+
+      return new Tuple(tuple);
     } catch (IOException e) {
-      return null;
+      System.out.println("Error");
     }
+
+    return null;
   }
 
   /**

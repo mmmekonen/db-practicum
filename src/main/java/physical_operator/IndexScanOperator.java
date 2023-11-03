@@ -76,18 +76,27 @@ public class IndexScanOperator extends Operator {
           int key = dataEntries.get(dataEntryIndex).get(0);
           int pageID = dataEntries.get(dataEntryIndex).get(1 + ridIndex * 2);
           int tupleID = dataEntries.get(dataEntryIndex).get(2 + ridIndex * 2);
-          ridIndex++;
 
           if (key >= lowkey && key <= highkey) {
             Tuple tuple = reader.getTupleByPosition(pageID, tupleID);
 
-            tuplePosition++;
-            dataEntryIndex += 1;
+            if (ridIndex >= ((dataEntries.get(dataEntryIndex).size() - 1) / 2)) {
+              dataEntryIndex++;
+              ridIndex = 0;
+            } else {
+              ridIndex++;
+            }
+
             return tuple;
           } else if (key > highkey) {
             break;
           } else {
-            dataEntryIndex += 1;
+            if (ridIndex >= ((dataEntries.get(dataEntryIndex).size() - 1) / 2)) {
+              dataEntryIndex++;
+              ridIndex = 0;
+            } else {
+              ridIndex++;
+            }
           }
         }
 

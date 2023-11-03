@@ -25,7 +25,7 @@ public class TreeIndex {
     Tuple nextTuple;
     ArrayList<Integer> nextRecord;
     static final int PAGE_SIZE = 4096;
-    int curPage;
+    public int curPage;
 
     /**
      * Class to create and read a B+ tree index
