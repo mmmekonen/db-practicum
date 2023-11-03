@@ -111,10 +111,11 @@ public class IndexScanOperator extends Operator {
                 ridIndex = 0;
               }
 
+              System.out.println("TUPLLLEEE");
               System.out.println(tuple);
               return tuple;
             } else if (key > highkey) {
-              notEndReached = false;
+              return null;
             } else {
               if (ridIndex >= ((dataEntries.get(dataEntryIndex).size() - 1) / 2)) {
                 dataEntryIndex++;
