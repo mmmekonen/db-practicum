@@ -76,7 +76,7 @@ public class Compiler {
 
       if (buildIndexes == 1) {
         logger.info("Building indexes...");
-        ArrayList<String> tables = new ArrayList();
+        ArrayList<String> tables = new ArrayList<>();
         tables.addAll(db.getIndexInfo().keySet());
 
         for (int i = 0; i < tables.size(); i++) {
@@ -88,7 +88,7 @@ public class Compiler {
           temp.add(new Column(new Table(null, tables.get(i)), info.get(0)));
           InMemorySortOperator op = new InMemorySortOperator(base, temp);
 
-          TreeIndex t = new TreeIndex(inputDir + "/" + tables.get(i) + "." + info.get(0), op,
+          TreeIndex t = new TreeIndex(db.getIndexDirectory() + "/" + tables.get(i) + "." + info.get(0), op,
               Integer.parseInt(info.get(2)),
               db.findColumnIndex(tables.get(i), info.get(0)), Integer.valueOf(info.get(1)) == 1 ? true : false);
         }
