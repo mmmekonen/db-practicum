@@ -22,6 +22,7 @@ public class IndexScanOperator extends Operator {
   public int dataEntryIndex;
   public int ridIndex;
   ArrayList<ArrayList<Integer>> dataEntries;
+  public boolean notEndReached;
 
   public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey) {
     super(DBCatalog.getInstance().getTableSchema(tableName));
@@ -43,21 +44,32 @@ public class IndexScanOperator extends Operator {
 
     this.tree = new TreeIndex(catalog.getIndexDirectory() + '/' + tableName + '.' + indexColumnName);
     this.tuplePosition = 0;
+    this.notEndReached = true;
 
-    int[] header = tree.readNode(0);
+    System.out.println("STARTING");
+    System.out.println("");
+
+    System.out.println("Low key: " + lowkey);
+    System.out.println("High key: " + highkey);
+
+    int[] header = tree.readNode3(0);
     int rootPageID = header[0];
+    System.out.println("Root page ID: " + rootPageID);
 
     if (highkey == null) {
-      highkey = Integer.MAX_VALUE;
+      this.highkey = Integer.MAX_VALUE;
     }
 
     if (lowkey == null) {
-      currentLeaf = tree.readNode(1);
+      currentLeaf = tree.readNode3(1);
     } else {
       currentLeaf = tree.deserialize(rootPageID, lowkey);
       dataEntries = tree.getDataEntries();
       ridIndex = 0;
       tuplePosition = lowkey;
+
+      // System.out.println("curr page" + tree.curPage);
+      // System.out.println(dataEntries);
 
       while (dataEntries.get(dataEntryIndex).get(0) < lowkey) {
         dataEntryIndex++;
@@ -71,48 +83,67 @@ public class IndexScanOperator extends Operator {
   }
 
   public Tuple getNextTuple() {
-    if (clustered) {
-      Tuple tuple = scanner.getNextTuple();
-      if (tuple != null && tuplePosition >= lowkey && tuplePosition <= highkey) {
-        tuplePosition++;
-        return tuple;
-      }
-    } else {
-      if (currentLeaf != null) {
-        while (dataEntryIndex < dataEntries.size()) {
-          int key = dataEntries.get(dataEntryIndex).get(0);
-          int pageID = dataEntries.get(dataEntryIndex).get(1 + ridIndex * 2);
-          int tupleID = dataEntries.get(dataEntryIndex).get(2 + ridIndex * 2);
 
-          if (key >= lowkey && key <= highkey) {
-            Tuple tuple = reader.getTupleByPosition(pageID, tupleID);
+    while (notEndReached) {
+      if (clustered) {
+        Tuple tuple = scanner.getNextTuple();
+        if (tuple != null && tuplePosition >= lowkey && tuplePosition <= highkey) {
+          tuplePosition++;
+          return tuple;
+        }
+      } else {
+        if (currentLeaf != null) {
+          while (dataEntryIndex < dataEntries.size()) {
 
-            if (ridIndex >= ((dataEntries.get(dataEntryIndex).size() - 1) / 2)) {
-              dataEntryIndex++;
-              ridIndex = 0;
-            } else {
+            // System.out.println("data entry index: " + dataEntryIndex);
+            // System.out.println("ridIndex" + ridIndex);
+
+            int key = dataEntries.get(dataEntryIndex).get(0);
+            int pageID = dataEntries.get(dataEntryIndex).get(1 + ridIndex * 2);
+            int tupleID = dataEntries.get(dataEntryIndex).get(2 + ridIndex * 2);
+
+            if (key >= lowkey && key <= highkey) {
+              Tuple tuple = reader.getTupleByPosition(pageID, tupleID);
               ridIndex++;
-            }
 
-            return tuple;
-          } else if (key > highkey) {
-            break;
-          } else {
-            if (ridIndex >= ((dataEntries.get(dataEntryIndex).size() - 1) / 2)) {
-              dataEntryIndex++;
-              ridIndex = 0;
+              if (ridIndex >= ((dataEntries.get(dataEntryIndex).size() - 1) / 2)) {
+                dataEntryIndex++;
+                ridIndex = 0;
+              }
+
+              System.out.println(tuple);
+              return tuple;
+            } else if (key > highkey) {
+              notEndReached = false;
             } else {
-              ridIndex++;
+              if (ridIndex >= ((dataEntries.get(dataEntryIndex).size() - 1) / 2)) {
+                dataEntryIndex++;
+                ridIndex = 0;
+              } else {
+                ridIndex++;
+              }
             }
           }
-        }
 
-        currentLeaf = tree.getNextLeaf();
+          System.out.println("CALLING GET NEXT LEAF");
+          currentLeaf = tree.getNextLeaf();
+          System.out.println("GOT NEXT LEAF");
 
-        if (currentLeaf != null) {
-          dataEntries = tree.getDataEntries();
-          dataEntryIndex = 0;
-          ridIndex = 0;
+          if (currentLeaf != null) {
+            if (currentLeaf[0] == 1) {
+
+              return null;
+            } else {
+              dataEntries = tree.getDataEntries();
+              dataEntryIndex = 0;
+              ridIndex = 0;
+            }
+          } else if (currentLeaf == null) {
+            return null;
+          }
+
+        } else {
+          return null;
         }
       }
     }
