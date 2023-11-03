@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.schema.Column;
 import common.Tuple;
 import common.TupleReader;
 import common.TreeIndex;
@@ -23,6 +24,7 @@ public class IndexScanOperator extends Operator {
   public int ridIndex;
   ArrayList<ArrayList<Integer>> dataEntries;
   public boolean notEndReached;
+  public int indexColumnInt;
 
   public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey) {
     super(DBCatalog.getInstance().getTableSchema(tableName));
@@ -30,7 +32,24 @@ public class IndexScanOperator extends Operator {
     this.highkey = highkey;
     this.scanner = new ScanOperator(tableName, alias);
 
-    // FIX THE READER INPUT
+    // System.out.println("INDEX COLUMN NAME");
+    // System.out.println(indexColumnName);
+
+    System.out.println(tableName + "." + indexColumnName);
+    ArrayList<Column> cols = DBCatalog.getInstance().getTableSchema(tableName);
+    ArrayList<String> colNames = new ArrayList<String>();
+
+    for (int i = 0; i < cols.size(); i++) {
+      colNames.add(cols.get(i).getColumnName());
+    }
+
+    // System.out.println("COL NAMES");
+    // System.out.println(colNames);
+
+    this.indexColumnInt = colNames.indexOf(indexColumnName);
+    // System.out.println("INDEX COLUMN INT");
+    // System.out.println(indexColumnInt);
+
     try {
       this.reader = new TupleReader(DBCatalog.getInstance().getFileForTable(tableName));
     } catch (IOException e) {
@@ -40,21 +59,32 @@ public class IndexScanOperator extends Operator {
     DBCatalog catalog = DBCatalog.getInstance();
     HashMap<String, ArrayList<String>> c = catalog.getIndexInfo();
     ArrayList<String> indexInfo = c.get(tableName);
-    this.clustered = (indexInfo.get(1) == "1");
+
+    // System.out.println("INDEX INFO");
+    // System.out.println(indexInfo.get(1));
+
+    // System.out.println(indexInfo.get(1).equals("1"));
+
+    this.clustered = (indexInfo.get(1).equals("1"));
+
+    // System.out.println("CLUSTERED");
+    // System.out.println(clustered);
 
     this.tree = new TreeIndex(catalog.getIndexDirectory() + '/' + tableName + '.' + indexColumnName);
     this.tuplePosition = 0;
     this.notEndReached = true;
 
-    System.out.println("STARTING");
-    System.out.println("");
+    // System.out.println("STARTING");
+    // System.out.println("");
 
-    System.out.println("Low key: " + lowkey);
-    System.out.println("High key: " + highkey);
+    // System.out.println("Low key: " + lowkey);
+    // System.out.println("High key: " + highkey);
+
+    // System.out.println("Clustered, table " + clustered + ", " + tableName);
 
     int[] header = tree.readNode3(0);
     int rootPageID = header[0];
-    System.out.println("Root page ID: " + rootPageID);
+    // System.out.println("Root page ID: " + rootPageID);
 
     if (highkey == null) {
       this.highkey = Integer.MAX_VALUE;
@@ -87,8 +117,15 @@ public class IndexScanOperator extends Operator {
     while (notEndReached) {
       if (clustered) {
         Tuple tuple = scanner.getNextTuple();
-        if (tuple != null && tuplePosition >= lowkey && tuplePosition <= highkey) {
-          tuplePosition++;
+
+        // if (tuple != null)
+        // System.out.println(tuple.getElementAtIndex(indexColumnInt));
+
+        if (tuple == null) {
+          return null;
+        } else if (tuple.getElementAtIndex(indexColumnInt) > highkey) {
+          return null;
+        } else {
           return tuple;
         }
       } else {
@@ -111,8 +148,8 @@ public class IndexScanOperator extends Operator {
                 ridIndex = 0;
               }
 
-              System.out.println("TUPLLLEEE");
-              System.out.println(tuple);
+              // System.out.println("TUPLLLEEE");
+              // System.out.println(tuple);
               return tuple;
             } else if (key > highkey) {
               return null;
@@ -126,9 +163,9 @@ public class IndexScanOperator extends Operator {
             }
           }
 
-          System.out.println("CALLING GET NEXT LEAF");
+          // System.out.println("CALLING GET NEXT LEAF");
           currentLeaf = tree.getNextLeaf();
-          System.out.println("GOT NEXT LEAF");
+          // System.out.println("GOT NEXT LEAF");
 
           if (currentLeaf != null) {
             if (currentLeaf[0] == 1) {
