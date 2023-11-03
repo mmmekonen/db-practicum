@@ -38,14 +38,18 @@ public class TreeIndex {
     public TreeIndex(String fileName, InMemorySortOperator op, int order, int indexElement, boolean clustered) {
         this.file = new File(fileName);
         this.nextTuple = op.getNextTuple();
+        this.nextRecord = makeRecord(op, indexElement, clustered);
+        System.out.println(fileName);
 
         try {
+            file.getParentFile().mkdirs();
+            file.createNewFile();
             fileOutputStream = new FileOutputStream(file);
             fileChannel = fileOutputStream.getChannel();
             this.buffer = ByteBuffer.allocate(PAGE_SIZE);
-            file.createNewFile();
         } catch (Exception e) {
             System.out.println("you shouldn't see this, ever");
+            e.printStackTrace();
         }
 
         ArrayList<int[]> leaves = new ArrayList<>();
@@ -78,11 +82,12 @@ public class TreeIndex {
         this.file = new File(filename);
 
         try {
+            file.getParentFile().mkdirs();
             fileOutputStream = new FileOutputStream(file);
             fileChannel = fileOutputStream.getChannel();
             this.buffer = ByteBuffer.allocate(PAGE_SIZE);
         } catch (FileNotFoundException e) {
-            System.out.println("you shouldn't see this, ever");
+            System.out.println("tree doesn't exist");
         }
 
     }
@@ -239,10 +244,11 @@ public class TreeIndex {
             result.add(n);
         }
 
-        if (result.size() == 1)
+        if (result.size() <= 1)
             return result;
-        else
+        else{
             return indexNodeHelper(result, nodes, order);
+        }
     }
 
     /*
@@ -290,14 +296,14 @@ public class TreeIndex {
      */
     private ArrayList<Integer> makeRecord(Operator op, int index, boolean clustered) {
         ArrayList<Integer> result = new ArrayList();
+        if (nextTuple == null) return null;
+
         result.add(nextTuple.getElementAtIndex(index));
         result.add(1);
         result.add(nextTuple.getPID());
         result.add(nextTuple.getTID());
 
         nextTuple = op.getNextTuple();
-        if (nextTuple == null)
-            return null;
 
         while (nextTuple != null && nextTuple.getElementAtIndex(index) == result.get(0)) {
             if (clustered) {
