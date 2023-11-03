@@ -11,12 +11,14 @@ import common.TupleReader;
 import common.TreeIndex;
 import common.DBCatalog;
 
+/**
+ * A class to represent an index scan operator on a relation.
+ */
 public class IndexScanOperator extends Operator {
   public Integer lowkey;
   public Integer highkey;
   public TreeIndex tree;
   public boolean clustered;
-  public int tuplePosition;
   public ScanOperator scanner;
   public int[] currentLeaf;
   public TupleReader reader;
@@ -26,16 +28,15 @@ public class IndexScanOperator extends Operator {
   public boolean notEndReached;
   public int indexColumnInt;
 
+  /**
+   * Creates a new IndexScanOperator.
+   */
   public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey) {
     super(DBCatalog.getInstance().getTableSchema(tableName));
     this.lowkey = lowkey;
     this.highkey = highkey;
     this.scanner = new ScanOperator(tableName, alias);
 
-    // System.out.println("INDEX COLUMN NAME");
-    // System.out.println(indexColumnName);
-
-    System.out.println(tableName + "." + indexColumnName);
     ArrayList<Column> cols = DBCatalog.getInstance().getTableSchema(tableName);
     ArrayList<String> colNames = new ArrayList<String>();
 
@@ -43,12 +44,7 @@ public class IndexScanOperator extends Operator {
       colNames.add(cols.get(i).getColumnName());
     }
 
-    // System.out.println("COL NAMES");
-    // System.out.println(colNames);
-
     this.indexColumnInt = colNames.indexOf(indexColumnName);
-    // System.out.println("INDEX COLUMN INT");
-    // System.out.println(indexColumnInt);
 
     try {
       this.reader = new TupleReader(DBCatalog.getInstance().getFileForTable(tableName));
@@ -59,32 +55,13 @@ public class IndexScanOperator extends Operator {
     DBCatalog catalog = DBCatalog.getInstance();
     HashMap<String, ArrayList<String>> c = catalog.getIndexInfo();
     ArrayList<String> indexInfo = c.get(tableName);
-
-    // System.out.println("INDEX INFO");
-    // System.out.println(indexInfo.get(1));
-
-    // System.out.println(indexInfo.get(1).equals("1"));
-
     this.clustered = (indexInfo.get(1).equals("1"));
 
-    // System.out.println("CLUSTERED");
-    // System.out.println(clustered);
-
     this.tree = new TreeIndex(catalog.getIndexDirectory() + '/' + tableName + '.' + indexColumnName);
-    this.tuplePosition = 0;
     this.notEndReached = true;
-
-    // System.out.println("STARTING");
-    // System.out.println("");
-
-    // System.out.println("Low key: " + lowkey);
-    // System.out.println("High key: " + highkey);
-
-    // System.out.println("Clustered, table " + clustered + ", " + tableName);
 
     int[] header = tree.readNode3(0);
     int rootPageID = header[0];
-    // System.out.println("Root page ID: " + rootPageID);
 
     if (highkey == null) {
       this.highkey = Integer.MAX_VALUE;
@@ -96,10 +73,6 @@ public class IndexScanOperator extends Operator {
       currentLeaf = tree.deserialize(rootPageID, lowkey);
       dataEntries = tree.getDataEntries();
       ridIndex = 0;
-      tuplePosition = lowkey;
-
-      // System.out.println("curr page" + tree.curPage);
-      // System.out.println(dataEntries);
 
       while (dataEntries.get(dataEntryIndex).get(0) < lowkey) {
         dataEntryIndex++;
@@ -112,14 +85,20 @@ public class IndexScanOperator extends Operator {
     }
   }
 
+  /**
+   * Gets the next tuple from the operator.
+   * 
+   * @return the next tuple.
+   */
   public Tuple getNextTuple() {
 
     while (notEndReached) {
       if (clustered) {
         Tuple tuple = scanner.getNextTuple();
 
-        // if (tuple != null)
-        // System.out.println(tuple.getElementAtIndex(indexColumnInt));
+        while (tuple != null && tuple.getElementAtIndex(indexColumnInt) < lowkey) {
+          tuple = scanner.getNextTuple();
+        }
 
         if (tuple == null) {
           return null;
@@ -131,10 +110,6 @@ public class IndexScanOperator extends Operator {
       } else {
         if (currentLeaf != null) {
           while (dataEntryIndex < dataEntries.size()) {
-
-            // System.out.println("data entry index: " + dataEntryIndex);
-            // System.out.println("ridIndex" + ridIndex);
-
             int key = dataEntries.get(dataEntryIndex).get(0);
             int pageID = dataEntries.get(dataEntryIndex).get(1 + ridIndex * 2);
             int tupleID = dataEntries.get(dataEntryIndex).get(2 + ridIndex * 2);
@@ -148,8 +123,6 @@ public class IndexScanOperator extends Operator {
                 ridIndex = 0;
               }
 
-              // System.out.println("TUPLLLEEE");
-              // System.out.println(tuple);
               return tuple;
             } else if (key > highkey) {
               return null;
@@ -163,13 +136,10 @@ public class IndexScanOperator extends Operator {
             }
           }
 
-          // System.out.println("CALLING GET NEXT LEAF");
           currentLeaf = tree.getNextLeaf();
-          // System.out.println("GOT NEXT LEAF");
 
           if (currentLeaf != null) {
             if (currentLeaf[0] == 1) {
-
               return null;
             } else {
               dataEntries = tree.getDataEntries();
@@ -189,6 +159,9 @@ public class IndexScanOperator extends Operator {
     return null;
   }
 
+  /**
+   * Resets the operator to the beginning.
+   */
   @Override
   public void reset() {
     super.reset(0);

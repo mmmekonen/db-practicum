@@ -1,20 +1,16 @@
 package common;
 
-import net.sf.jsqlparser.schema.Column;
 import physical_operator.InMemorySortOperator;
 import physical_operator.Operator;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -89,6 +85,7 @@ public class TreeIndex {
         }
     }
 
+    // DOES NOT GET USED
     /**
      * Reads the node stored in the specified page
      * 
@@ -113,8 +110,13 @@ public class TreeIndex {
         return result;
     }
 
+    /**
+     * Reads the node stored in the specified page
+     * 
+     * @param page the page to be read
+     * @return The data in a page, represented as an array of integers
+     */
     public int[] readNode3(int page) {
-        System.out.println("readNode3: " + page);
         int[] result = new int[PAGE_SIZE / 4];
 
         try {
@@ -130,20 +132,6 @@ public class TreeIndex {
 
         this.curPage = page;
         this.curDataEntry = result;
-
-        for (int i : curDataEntry) {
-            System.out.print(i + " ");
-        }
-        System.out.println("");
-
-        System.out.println("done");
-        return result;
-    }
-
-    public int[] readHeaderNode() {
-        int[] result = new int[PAGE_SIZE / 4];
-        buffer.clear();
-        buffer.asIntBuffer().get(result, 0, PAGE_SIZE / 4);
 
         return result;
     }
@@ -181,7 +169,6 @@ public class TreeIndex {
      * @return The data in a page, represented as an array of integers
      */
     public int[] deserializeIndex(int page, Integer traverseKey) {
-        System.out.println("deserializeIndex: " + page + " " + traverseKey);
         int numKeys = buffer.getInt(4);
 
         int[] keys = new int[numKeys];
@@ -198,30 +185,12 @@ public class TreeIndex {
             pos += 4;
         }
 
-        System.out.print("keys: ");
-        for (int i : keys) {
-            System.out.print(i + " ");
-        }
-
-        System.out.println();
-
-        System.out.print("children: ");
-        for (int i : children) {
-            System.out.print(i + " ");
-        }
-
-        System.out.println();
-
         int index = numKeys;
         for (int i = numKeys - 1; i >= 0; i--) {
             if (traverseKey < keys[i]) {
                 index = i;
             }
         }
-
-        System.out.println("INDEX " + index);
-
-        System.out.println("DESEARIALZING " + children[index] + " " + traverseKey);
 
         return deserialize(children[index], traverseKey);
     }
@@ -233,7 +202,6 @@ public class TreeIndex {
      * @return The data in a page, represented as an array of integers
      */
     private int[] deserializeLeaf(int page) {
-        System.out.println("deserializeLeaf: " + page);
         List<Integer> keys = new ArrayList<>();
         List<List<Integer>> entries = new ArrayList<>();
 
@@ -274,21 +242,16 @@ public class TreeIndex {
             tempRes.addAll(entries.get(i));
         }
 
-        // covert tempRes to int array
         int[] result = new int[tempRes.size()];
         for (int i = 0; i < tempRes.size(); i++) {
             result[i] = tempRes.get(i);
-        }
-
-        System.out.println("result: ");
-        for (int i : result) {
-            System.out.print(i + " ");
         }
 
         this.curDataEntry = result;
         return result;
     }
 
+    // DOES NOT GET USED
     /**
      * Gets the data entries from a leaf node
      * 
@@ -324,12 +287,13 @@ public class TreeIndex {
         return result;
     }
 
+    /**
+     * Gets the data entries from a leaf node
+     * 
+     * @return The data entries from a leaf node
+     */
     public ArrayList<ArrayList<Integer>> getDataEntries() {
         int numDataEntries = curDataEntry[1];
-        System.out.println("getDataEntries: ");
-
-        System.out.println(numDataEntries);
-        System.out.println();
 
         ArrayList<ArrayList<Integer>> result = new ArrayList<>();
         int index = 2;
@@ -354,9 +318,9 @@ public class TreeIndex {
             result.add(rids);
         }
 
-        for (ArrayList<Integer> i : result) {
-            System.out.println(i);
-        }
+        // for (ArrayList<Integer> i : result) {
+        // System.out.println(i);
+        // }
 
         return result;
     }
