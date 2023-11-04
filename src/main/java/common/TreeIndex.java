@@ -39,7 +39,7 @@ public class TreeIndex {
         this.file = new File(fileName);
         this.nextTuple = op.getNextTuple();
         this.nextRecord = makeRecord(op, indexElement, clustered);
-        System.out.println(fileName);
+        //System.out.println(nextTuple);
 
         try {
             file.getParentFile().mkdirs();
@@ -54,8 +54,7 @@ public class TreeIndex {
 
         ArrayList<int[]> leaves = new ArrayList<>();
 
-        while (nextTuple != null)
-            leaves.add(LeafNode(op, indexElement, clustered));
+        while (nextTuple != null) leaves.add(LeafNode(op, indexElement, clustered));
 
         ArrayList<int[]> nodes = new ArrayList<>();
         nodes.add(new int[1]);
@@ -299,11 +298,8 @@ public class TreeIndex {
         if (nextTuple == null) return null;
 
         result.add(nextTuple.getElementAtIndex(index));
-        result.add(1);
-        result.add(nextTuple.getPID());
-        result.add(nextTuple.getTID());
+        result.add(0);
 
-        nextTuple = op.getNextTuple();
 
         while (nextTuple != null && nextTuple.getElementAtIndex(index) == result.get(0)) {
             if (clustered) {
@@ -316,7 +312,9 @@ public class TreeIndex {
             }
             result.set(1, result.get(1) + 1);
             nextTuple = op.getNextTuple();
+            //System.out.println(1);
         }
+        //System.out.println(2);
 
         return result;
     }
@@ -334,8 +332,8 @@ public class TreeIndex {
         node[1] = 0;
         int i = 2;
 
-        Iterator<Integer> record = nextRecord.iterator();
         while (nextRecord != null) {
+            Iterator<Integer> record = nextRecord.iterator();
             while (record.hasNext()) {
                 try {
                     node[i] = record.next();
@@ -345,6 +343,8 @@ public class TreeIndex {
                 }
             }
             nextRecord = makeRecord(op, index, clustered);
+            node[1]++;
+
         }
         return node;
     }
@@ -359,7 +359,7 @@ public class TreeIndex {
         buffer.clear();
         IntBuffer temp = buffer.asIntBuffer();
         temp.put(node);
-        buffer.flip();
+        //buffer.flip();
         fileChannel.write(buffer);
     }
 
