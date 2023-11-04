@@ -1,2 +1,0 @@
-Test1 B 0 10
-Test2 A 1 15
