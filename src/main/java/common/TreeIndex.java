@@ -393,7 +393,7 @@ public class TreeIndex {
      * @return A new record
      */
     private ArrayList<Integer> makeRecord(Operator op, int index, boolean clustered) {
-        ArrayList<Integer> result = new ArrayList();
+        ArrayList<Integer> result = new ArrayList<>();
         result.add(nextTuple.getElementAtIndex(index));
         result.add(1);
         result.add(nextTuple.getPID());
@@ -405,7 +405,7 @@ public class TreeIndex {
 
         while (nextTuple != null && nextTuple.getElementAtIndex(index) == result.get(0)) {
             if (clustered) {
-                ArrayList temp = nextTuple.getAllElements();
+                ArrayList<Integer> temp = nextTuple.getAllElements();
                 temp.remove(index);
                 result.addAll(temp);
             } else {

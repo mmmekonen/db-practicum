@@ -54,7 +54,7 @@ public class P3IndexTests {
 
       TreeIndex t = new TreeIndex(db.getIndexDirectory() + "/" + tables.get(i) + "." + info.get(0), op,
           Integer.parseInt(info.get(2)),
-          db.findColumnIndex(tables.get(i), info.get(0)), Integer.valueOf(info.get(1)) == 1 ? true : false);
+          db.findColumnIndex(tables.get(i), info.get(0)), Integer.valueOf(info.get(1)) == 1);
     }
   }
 
