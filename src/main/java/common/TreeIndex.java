@@ -38,20 +38,23 @@ public class TreeIndex {
     public TreeIndex(String fileName, InMemorySortOperator op, int order, int indexElement, boolean clustered) {
         this.file = new File(fileName);
         this.nextTuple = op.getNextTuple();
+        this.nextRecord = makeRecord(op, indexElement, clustered);
+        //System.out.println(nextTuple);
 
         try {
+            file.getParentFile().mkdirs();
+            file.createNewFile();
             fileOutputStream = new FileOutputStream(file);
             fileChannel = fileOutputStream.getChannel();
             this.buffer = ByteBuffer.allocate(PAGE_SIZE);
-            file.createNewFile();
         } catch (Exception e) {
             System.out.println("you shouldn't see this, ever");
+            e.printStackTrace();
         }
 
         ArrayList<int[]> leaves = new ArrayList<>();
 
-        while (nextTuple != null)
-            leaves.add(LeafNode(op, indexElement, clustered));
+        while (nextTuple != null) leaves.add(LeafNode(op, indexElement, clustered));
 
         ArrayList<int[]> nodes = new ArrayList<>();
         nodes.add(new int[1]);
@@ -343,10 +346,11 @@ public class TreeIndex {
             result.add(n);
         }
 
-        if (result.size() == 1)
+        if (result.size() <= 1)
             return result;
-        else
+        else{
             return indexNodeHelper(result, nodes, order);
+        }
     }
 
     /*
@@ -393,15 +397,12 @@ public class TreeIndex {
      * @return A new record
      */
     private ArrayList<Integer> makeRecord(Operator op, int index, boolean clustered) {
-        ArrayList<Integer> result = new ArrayList<>();
-        result.add(nextTuple.getElementAtIndex(index));
-        result.add(1);
-        result.add(nextTuple.getPID());
-        result.add(nextTuple.getTID());
+        ArrayList<Integer> result = new ArrayList();
+        if (nextTuple == null) return null;
 
-        nextTuple = op.getNextTuple();
-        if (nextTuple == null)
-            return null;
+        result.add(nextTuple.getElementAtIndex(index));
+        result.add(0);
+
 
         while (nextTuple != null && nextTuple.getElementAtIndex(index) == result.get(0)) {
             if (clustered) {
@@ -414,7 +415,9 @@ public class TreeIndex {
             }
             result.set(1, result.get(1) + 1);
             nextTuple = op.getNextTuple();
+            //System.out.println(1);
         }
+        //System.out.println(2);
 
         return result;
     }
@@ -432,8 +435,8 @@ public class TreeIndex {
         node[1] = 0;
         int i = 2;
 
-        Iterator<Integer> record = nextRecord.iterator();
         while (nextRecord != null) {
+            Iterator<Integer> record = nextRecord.iterator();
             while (record.hasNext()) {
                 try {
                     node[i] = record.next();
@@ -443,6 +446,8 @@ public class TreeIndex {
                 }
             }
             nextRecord = makeRecord(op, index, clustered);
+            node[1]++;
+
         }
         return node;
     }
@@ -457,7 +462,7 @@ public class TreeIndex {
         buffer.clear();
         IntBuffer temp = buffer.asIntBuffer();
         temp.put(node);
-        buffer.flip();
+        //buffer.flip();
         fileChannel.write(buffer);
     }
 

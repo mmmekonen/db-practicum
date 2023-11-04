@@ -37,7 +37,7 @@ public class P3IndexTests {
     db.setIndexInfo();
 
     expectedPath = "src/test/resources/samples/expected_indexes";
-    outputPath = "src/test/resources/samples/db/indexes";
+    outputPath = "src/test/resources/samples/input/db/indexes";
 
     // make indexes
     ArrayList<String> tables = new ArrayList<>();
@@ -52,9 +52,9 @@ public class P3IndexTests {
       temp.add(new Column(new Table(null, tables.get(i)), info.get(0)));
       InMemorySortOperator op = new InMemorySortOperator(base, temp);
 
-      TreeIndex t = new TreeIndex(db.getIndexDirectory() + "/" + tables.get(i) + "." + info.get(0), op,
-          Integer.parseInt(info.get(2)),
-          db.findColumnIndex(tables.get(i), info.get(0)), Integer.valueOf(info.get(1)) == 1);
+      TreeIndex t = new TreeIndex("src/test/resources/samples/input/db/indexes/" + tables.get(i) + "."
+              + info.get(0), op, Integer.parseInt(info.get(2)), db.findColumnIndex(tables.get(i),
+              info.get(0)), Integer.valueOf(info.get(1)) == 1 ? true : false);
     }
   }
 
@@ -68,7 +68,7 @@ public class P3IndexTests {
       Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
     } catch (IOException e) {
       e.printStackTrace();
-      System.out.println("hi");
+      //System.out.println("hi");
     }
   }
 
