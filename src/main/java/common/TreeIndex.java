@@ -27,6 +27,7 @@ public class TreeIndex {
     public int[] curDataEntry;
     public boolean isIndex;
     int order;
+    int tableSize;
 
     /**
      * Class to create and read a B+ tree index
@@ -38,7 +39,17 @@ public class TreeIndex {
      */
     public TreeIndex(String fileName, InMemorySortOperator op, int order, int indexElement, boolean clustered) {
         this.file = new File(fileName);
+
         this.nextTuple = op.getNextTuple();
+        int tableSize = 0;
+        while (nextTuple != null) {
+            tableSize++;
+            nextTuple = op.getNextTuple();
+        }
+        op.reset();
+        nextTuple = op.getNextTuple();
+
+
         this.nextRecord = makeRecord(op, indexElement, clustered);
         this.order = order;
         //System.out.println(nextTuple);
@@ -56,7 +67,16 @@ public class TreeIndex {
 
         ArrayList<int[]> leaves = new ArrayList<>();
 
-        while (nextTuple != null) leaves.add(LeafNode(op, indexElement, clustered));
+        while (nextTuple != null) {
+            if (tableSize < 3 * order) {
+                int temp = tableSize;
+                leaves.add(LeafNode(op, indexElement, temp/2, clustered));
+                leaves.add(LeafNode(op, indexElement, tableSize - temp/2, clustered));
+                break;
+            } else {
+                leaves.add(LeafNode(op, indexElement, 2 * order, clustered));
+            }
+        }
 
         ArrayList<int[]> nodes = new ArrayList<>();
         nodes.add(new int[1]);
@@ -404,6 +424,7 @@ public class TreeIndex {
                 result.add(nextTuple.getTID());
             }
             result.set(1, result.get(1) + 1);
+            tableSize--;
             nextTuple = op.getNextTuple();
             //System.out.println(1);
         }
@@ -419,13 +440,14 @@ public class TreeIndex {
      * @param index the index to be created
      * @return a new leaf node represented as an array of integers
      */
-    private int[] LeafNode(Operator op, int index, boolean clustered) {
+    private int[] LeafNode(Operator op, int index, int numRecords, boolean clustered) {
+
         int[] node = new int[PAGE_SIZE / 4];
         node[0] = 0;
         node[1] = 0;
         int i = 2;
 
-        for (int j = 0; nextRecord != null && j < 2 * order; j++) {
+        for (int j = 0; nextRecord != null && j < numRecords; j++) {
             Iterator<Integer> record = nextRecord.iterator();
             while (record.hasNext()) {
                 try {
