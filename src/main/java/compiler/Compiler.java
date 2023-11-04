@@ -28,7 +28,6 @@ public class Compiler {
   private static final Logger logger = LogManager.getLogger();
 
   private static String configFile;
-  private static String indexInfo;
   private static String outputDir;
   private static String inputDir;
   private static String tempDir;
@@ -41,8 +40,6 @@ public class Compiler {
   private static int joinBuffer;
   private static int sortType;
   private static int sortBuffer;
-
-  private static ArrayList<String[]> indexConfigs;
 
   // files, false = output
   // to System.out
@@ -91,7 +88,7 @@ public class Compiler {
 
           TreeIndex t = new TreeIndex(inputDir + "/db/indexes/" + tables.get(i) + "." + info.get(0), op,
               Integer.parseInt(info.get(2)),
-              db.findColumnIndex(tables.get(i), info.get(0)), Integer.valueOf(info.get(1)) == 1 ? true : false);
+              db.findColumnIndex(tables.get(i), info.get(0)), Integer.valueOf(info.get(1)) == 1);
         }
 
         logger.info("Indexes have been built");
