@@ -26,6 +26,7 @@ public class TreeIndex {
     public int curPage;
     public int[] curDataEntry;
     public boolean isIndex;
+    int order;
 
     /**
      * Class to create and read a B+ tree index
@@ -39,6 +40,7 @@ public class TreeIndex {
         this.file = new File(fileName);
         this.nextTuple = op.getNextTuple();
         this.nextRecord = makeRecord(op, indexElement, clustered);
+        this.order = order;
         //System.out.println(nextTuple);
 
         try {
@@ -353,21 +355,6 @@ public class TreeIndex {
         }
     }
 
-    /*
-     * private void indexNodeHelper(ArrayList<int[]> nodes, int start, int order) {
-     * int nodesAdded = 0;
-     * 
-     * for(int i = order; i < children.size(); i += order) {
-     * int[] n = indexNode(children, start, order);
-     * nodes.add(n);
-     * nodesAdded++;
-     * }
-     * 
-     * if (nodesAdded == 1) return;
-     * else indexNodeHelper(nodes, start + resultSize, order);
-     * }
-     */
-
     /**
      * Creates a new index node
      * 
@@ -381,7 +368,7 @@ public class TreeIndex {
         node[0] = 1;
         node[1] = 0;
 
-        for (int i = 0; i < order; i++) {
+        for (int i = 0; i < 2 * order && i + pointer < nodes.size(); i++) {
             node[i + 2] = nodes.get(i + pointer)[3];
             node[i + order + 2] = i + pointer;
         }
@@ -435,7 +422,7 @@ public class TreeIndex {
         node[1] = 0;
         int i = 2;
 
-        while (nextRecord != null) {
+        for (int j = 0; nextRecord != null && j < 2 * order; j++) {
             Iterator<Integer> record = nextRecord.iterator();
             while (record.hasNext()) {
                 try {
