@@ -342,7 +342,7 @@ public class TreeIndex {
         ArrayList<int[]> result = new ArrayList<>();
         int childrenStart = nodes.size() - children.size();
 
-        for (int i = order; i < children.size(); i += order) {
+        for (int i = 0; i < children.size(); i += 2*order+1) {
             int[] n = indexNode(children, childrenStart, order);
             nodes.add(n);
             result.add(n);
@@ -367,10 +367,13 @@ public class TreeIndex {
         int[] node = new int[PAGE_SIZE / 4];
         node[0] = 1;
         node[1] = 0;
+        node[2 * order + 2] = pointer;
 
         for (int i = 0; i < 2 * order && i + pointer < nodes.size(); i++) {
             node[i + 2] = nodes.get(i + pointer)[3];
-            node[i + order + 2] = i + pointer;
+        }
+        for(int i = 0; i < 2 * order && i + pointer < nodes.size(); i++) {
+            node[i + 2 * order + 3] = i + pointer;
         }
 
         return node;
