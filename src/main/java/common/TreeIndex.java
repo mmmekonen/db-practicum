@@ -84,6 +84,7 @@ public class TreeIndex {
         indexNodeHelper(leaves, nodes, order);
 
         nodes.set(0, headerNode(nodes.size() - 1, leaves.size(), order));
+        System.out.println(nodes.size());
 
         for (int i = 0; i < nodes.size(); i++) {
             try {
@@ -363,7 +364,7 @@ public class TreeIndex {
         int childrenStart = nodes.size() - children.size();
 
         for (int i = 0; i < children.size(); i += 2*order+1) {
-            if (2 * order + 1 < children.size() - i && children.size() - i < 3 * order + 2) {
+            if (2 * order + 1 < children.size() - i &&  children.size() - i < 3 * order + 2) {
                 int[] n = indexNode(children, childrenStart, (children.size() - i)/2);
                 nodes.add(n);
                 result.add(n);
@@ -423,15 +424,48 @@ public class TreeIndex {
         result.add(nextTuple.getElementAtIndex(index));
         result.add(0);
 
+        ArrayList<ArrayList<Integer>> sort = new ArrayList<>();
 
         while (nextTuple != null && nextTuple.getElementAtIndex(index) == result.get(0)) {
             if (clustered) {
                 ArrayList<Integer> temp = nextTuple.getAllElements();
                 temp.remove(index);
+                //sort.add(temp);
                 result.addAll(temp);
             } else {
-                result.add(nextTuple.getPID());
-                result.add(nextTuple.getTID());
+                /*ArrayList<Integer> temp = new ArrayList<>();
+                temp.add(nextTuple.getPID());
+                temp.add(nextTuple.getTID());
+                sort.add(temp);
+                */
+
+
+                int pid = nextTuple.getPID();
+                int tid = nextTuple.getTID();
+                boolean inserted = false;
+
+                for (int i = 2; i < result.size(); i += 2) {
+                    if (pid < result.get(i)) {
+                        result.add(i, tid);
+                        result.add(i, pid);
+                        inserted = true;
+                        break;
+                    } else if (result.get(i).equals(pid)) {
+                        if (tid < result.get(i + 1)) {
+                            result.add(i, tid);
+                            result.add(i, pid);
+                            inserted = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!inserted) {
+                    result.add(pid);
+                    result.add(tid);
+                }
+
+
             }
             result.set(1, result.get(1) + 1);
             tableSize--;
@@ -439,6 +473,27 @@ public class TreeIndex {
             //System.out.println(1);
         }
         //System.out.println(2);
+        //result.addAll(sortNestedList(sort));
+        return result;
+    }
+
+    public static ArrayList sortNestedList(ArrayList<ArrayList<Integer>> arr) {
+        ArrayList<Integer> result = new ArrayList<>();
+        boolean inserted = false;
+
+        for (int i = 0; i < arr.size(); i++) {
+            for (int j = 0; j < result.size(); j++) {
+                int l = 0;
+                while (l < arr.get(i).size() - 1 && arr.get(i).get(l).equals(result.get(j))) l++;
+
+                if (arr.get(i).get(l) < result.get(j)) {
+                    for (int k = arr.get(i).size() - 1; k >= 0; k--) result.add(j, arr.get(i).get(k));
+                    inserted = true;
+                    break;
+                }
+            }
+            if (!inserted) for (int k = 0; k < arr.get(i).size(); k++) result.add(arr.get(i).get(k));
+        }
 
         return result;
     }

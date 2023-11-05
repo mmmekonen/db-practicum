@@ -102,13 +102,23 @@ public class P3IndexTests {
 
       int output[] = new int[o.length / 4];
       for(int i = 0; i < output.length; i++) {
-        expected[i] = (o[3 + 4 * i] & 0xFF) | ((o[2 + 4 * i] & 0xFF) << 8) |
+        output[i] = (o[3 + 4 * i] & 0xFF) | ((o[2 + 4 * i] & 0xFF) << 8) |
                 ((o[1 + 4 * i] & 0xFF) << 16) | ((o[0 + 4 * i] & 0xFF) << 24);
       }
 
       for (int i = 0; i < expected.length; i += 1024) {
-        Assertions.assertEquals(Arrays.copyOfRange(output, i, i + 1024),
-                Arrays.copyOfRange(expected, i, i + 1024), "Outputs are not equal at page " + i / 1024);
+        int[] ex = Arrays.copyOfRange(expected, i, i + 1024);
+        int[] op = Arrays.copyOfRange(output, i, i + 1024);
+
+        /*
+        for (int j = 0; j < ex.length; j++) {
+          if (ex[j] != op[j]) System.out.println(j + ": " + ex[j] + " != " + op[j]);
+        }*/
+
+
+        Assertions.assertEquals(Arrays.toString(Arrays.copyOfRange(expected, i, i + 1024)),
+                Arrays.toString(Arrays.copyOfRange(output, i, i + 1024)),
+                "Outputs are not equal at page " + i / 1024);
       }
     } catch (IOException exception) {
       exception.printStackTrace();

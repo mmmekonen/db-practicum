@@ -65,7 +65,7 @@ public class TupleReader {
       this.numTuples = buffer.getInt();
       this.tuplesRemaining = numTuples;
       currentPID++;
-      currentTID = 2;
+      currentTID = 0;
       return true;
 
     } else {
