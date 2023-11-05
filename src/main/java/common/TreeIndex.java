@@ -68,7 +68,7 @@ public class TreeIndex {
         ArrayList<int[]> leaves = new ArrayList<>();
 
         while (nextTuple != null) {
-            if (tableSize < 3 * order) {
+            if (2* order < tableSize && tableSize < 3 * order) {
                 int temp = tableSize;
                 leaves.add(LeafNode(op, indexElement, temp/2, clustered));
                 leaves.add(LeafNode(op, indexElement, tableSize - temp/2, clustered));
@@ -363,9 +363,19 @@ public class TreeIndex {
         int childrenStart = nodes.size() - children.size();
 
         for (int i = 0; i < children.size(); i += 2*order+1) {
-            int[] n = indexNode(children, childrenStart, order);
-            nodes.add(n);
-            result.add(n);
+            if (2 * order + 1 < children.size() - i && children.size() - i < 3 * order + 2) {
+                int[] n = indexNode(children, childrenStart, (children.size() - i)/2);
+                nodes.add(n);
+                result.add(n);
+                int[] m = indexNode(children, childrenStart, children.size() - (children.size() - i)/2);
+                nodes.add(m);
+                result.add(m);
+                break;
+            } else {
+                int[] n = indexNode(children, childrenStart, 2 * order);
+                nodes.add(n);
+                result.add(n);
+            }
         }
 
         if (result.size() <= 1)
@@ -387,13 +397,13 @@ public class TreeIndex {
         int[] node = new int[PAGE_SIZE / 4];
         node[0] = 1;
         node[1] = 0;
-        node[2 * order + 2] = pointer;
+        node[order + 2] = pointer;
 
-        for (int i = 0; i < 2 * order && i + pointer < nodes.size(); i++) {
+        for (int i = 0; i < order && i + pointer < nodes.size(); i++) {
             node[i + 2] = nodes.get(i + pointer)[3];
         }
-        for(int i = 0; i < 2 * order && i + pointer < nodes.size(); i++) {
-            node[i + 2 * order + 3] = i + pointer;
+        for(int i = 0; i <order && i + pointer < nodes.size(); i++) {
+            node[i + order + 3] = i + pointer;
         }
 
         return node;
