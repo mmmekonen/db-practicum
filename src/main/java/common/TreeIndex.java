@@ -24,13 +24,11 @@ public class TreeIndex {
     public FileChannel fileChannel;
     public ByteBuffer buffer;
     Tuple nextTuple;
-    ArrayList<Integer> nextRecord;
     static final int PAGE_SIZE = 4096;
     public int curPage;
     public int[] curDataEntry;
     public boolean isIndex;
     int order;
-    int tableSize;
 
     /**
      * Class to create and read a B+ tree index
@@ -57,17 +55,16 @@ public class TreeIndex {
 
 
         this.nextTuple = op.getNextTuple();
-        int tableSize = 0;
-        while (nextTuple != null) {
-            tableSize++;
-            nextTuple = op.getNextTuple();
+
+        ArrayList<ArrayList<Integer>> recordList = new ArrayList<>();
+        ArrayList<Integer> nextRecord = makeRecord(op, indexElement);
+        while(nextRecord != null) {
+            recordList.add(nextRecord);
+            nextRecord = makeRecord(op, indexElement);
         }
-        op.reset();
-        nextTuple = op.getNextTuple();
+        Iterator<ArrayList<Integer>> data = recordList.iterator();
+        int remaining = recordList.size();
 
-
-        this.nextRecord = makeRecord(op, indexElement);
-        //System.out.println(nextTuple);
 
         try {
             file.getParentFile().mkdirs();
@@ -82,14 +79,15 @@ public class TreeIndex {
 
         ArrayList<int[]> leaves = new ArrayList<>();
 
-        while (nextTuple != null) {
-            if (2* order < tableSize && tableSize < 3 * order) {
-                int temp = tableSize;
-                leaves.add(LeafNode(op, indexElement, temp/2));
-                leaves.add(LeafNode(op, indexElement, tableSize - temp/2));
+        while (data.hasNext()) {
+            if (2 * order < remaining && remaining < 3 * order) {
+                leaves.add(LeafNode(data, remaining/2));
+                remaining -= remaining/2;
+                leaves.add(LeafNode(data, remaining));
                 break;
             } else {
-                leaves.add(LeafNode(op, indexElement, 2 * order));
+                leaves.add(LeafNode(data, 2 * order));
+                remaining -= 2 * order;
             }
         }
 
@@ -431,7 +429,6 @@ public class TreeIndex {
             }
 
             result.set(1, result.get(1) + 1);
-            tableSize--;
             nextTuple = op.getNextTuple();
         }
         return result;
@@ -465,15 +462,15 @@ public class TreeIndex {
      * @param index the index to be created
      * @return a new leaf node represented as an array of integers
      */
-    private int[] LeafNode(Operator op, int index, int numRecords) {
+    private int[] LeafNode(Iterator<ArrayList<Integer>> iter, int numRecords) {
 
         int[] node = new int[PAGE_SIZE / 4];
         node[0] = 0;
         node[1] = 0;
         int i = 2;
 
-        for (int j = 0; nextRecord != null && j < numRecords; j++) {
-            Iterator<Integer> record = nextRecord.iterator();
+        for (int j = 0; iter.hasNext() && j < numRecords; j++) {
+            Iterator<Integer> record = iter.next().iterator();
             while (record.hasNext()) {
                 try {
                     node[i] = record.next();
@@ -482,7 +479,6 @@ public class TreeIndex {
                     return node;
                 }
             }
-            nextRecord = makeRecord(op, index);
             node[1]++;
 
         }
