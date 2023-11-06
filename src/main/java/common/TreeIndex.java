@@ -84,7 +84,6 @@ public class TreeIndex {
         indexNodeHelper(leaves, nodes, order);
 
         nodes.set(0, headerNode(nodes.size() - 1, leaves.size(), order));
-        System.out.println(nodes.size());
 
         for (int i = 0; i < nodes.size(); i++) {
             try {
@@ -365,15 +364,17 @@ public class TreeIndex {
 
         for (int i = 0; i < children.size(); i += 2*order+1) {
             if (2 * order + 1 < children.size() - i &&  children.size() - i < 3 * order + 2) {
-                int[] n = indexNode(children, childrenStart, (children.size() - i)/2);
+                int[] n = indexNode(nodes, childrenStart + i, (children.size() - i)/2);
                 nodes.add(n);
                 result.add(n);
-                int[] m = indexNode(children, childrenStart, children.size() - (children.size() - i)/2);
+                int[] m = indexNode(nodes, childrenStart + i + (children.size() - i)/2,
+                        children.size() - (children.size() - i)/2 - i);
                 nodes.add(m);
                 result.add(m);
                 break;
             } else {
-                int[] n = indexNode(children, childrenStart, 2 * order);
+                int[] n = indexNode(nodes, childrenStart + i,
+                        Integer.min(2 * order + 1, children.size() - i));
                 nodes.add(n);
                 result.add(n);
             }
@@ -391,23 +392,30 @@ public class TreeIndex {
      * 
      * @param nodes   a master list of nodes that tracks the entire tree
      * @param pointer a pointer to the first child of the index node
-     * @param order   the order of the tree to which the node belongs
+     * @param numChildren   the order of the tree to which the node belongs
      * @return an index node represented as an array of integers
      */
-    private int[] indexNode(ArrayList<int[]> nodes, int pointer, int order) {
+    private int[] indexNode(ArrayList<int[]> nodes, int pointer, int numChildren) {
         int[] node = new int[PAGE_SIZE / 4];
         node[0] = 1;
-        node[1] = 0;
-        node[order + 2] = pointer;
+        node[1] = numChildren - 1;
+        node[numChildren + 1] = pointer;
+        //System.out.println(pointer);
 
-        for (int i = 0; i < order && i + pointer < nodes.size(); i++) {
-            node[i + 2] = nodes.get(i + pointer)[3];
-        }
-        for(int i = 0; i <order && i + pointer < nodes.size(); i++) {
-            node[i + order + 3] = i + pointer;
+        for (int i = 1; i < numChildren && i + pointer < nodes.size(); i++) {
+            node[i + 1] = findSplitKey(i + pointer, nodes);
+            node[i + numChildren + 1] = i + pointer;
         }
 
         return node;
+    }
+
+    private int findSplitKey(int addr, ArrayList<int[]> nodes) {
+        while (nodes.get(addr)[0] == 1) {
+            int[] n = nodes.get(addr);
+            addr = n[n[1] + 2];
+        }
+        return nodes.get(addr)[2];
     }
 
     /**
