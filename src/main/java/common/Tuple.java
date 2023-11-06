@@ -100,18 +100,34 @@ public class Tuple {
     return this.toString().hashCode();
   }
 
+  /**
+   * A getter function to access the PID field of the tuple
+   * @return the PID of the tuple
+   */
   public int getPID() {
     return pid;
   }
 
+  /**
+   * A getter function to access the TID field of the tuple
+   * @return the TID of the tuple
+   */
   public int getTID() {
     return tid;
   }
 
+  /**
+   * A setter function to access the PID field of the tuple
+   * @param pid
+   */
   public void setPID(int pid) {
     this.pid = pid;
   }
 
+  /**
+   * A setter function to access the TID field of the tuple
+   * @param tid
+   */
   public void setTID(int tid) {
     this.tid = tid;
   }

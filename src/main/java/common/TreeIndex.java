@@ -33,10 +33,10 @@ public class TreeIndex {
     /**
      * Class to create and read a B+ tree index
      * 
-     * @param indexFile     The file to which the tree will be written
-     * @param op           A sorted operator on the table to be indexed
-     * @param order        The order of the tree index
+     * @param inputDir     The input directory, which contains information such as the tables and index configurations
+     * @param tableName    The name of the table to be indexed
      * @param indexElement The element on which the table will be indexed
+     * @param info         An arraylist containing the config data for the index
      */
     public TreeIndex(String inputDir, String tableName, int indexElement, ArrayList<String> info) {
 
@@ -123,6 +123,11 @@ public class TreeIndex {
         }
     }
 
+    /**
+     * A helper function that sorts a relation, primarily so that a clustered index can later be built on it
+     * @param op A sort operator which will be used to sort the table
+     * @param filepath The filepath of the table to be sorted
+     */
     public static void sortTable(InMemorySortOperator op, String filepath) {
         try {
             TupleWriter t = new TupleWriter(filepath);
@@ -378,6 +383,12 @@ public class TreeIndex {
         return node;
     }
 
+    /**
+     * A helper function that traverses a subtree and finds the leftmost key it contains
+     * @param addr the address of the node on which to start
+     * @param nodes an arraylist containing all the nodes in the tree
+     * @return the leftmost key in the tree
+     */
     private int findSplitKey(int addr, ArrayList<int[]> nodes) {
         while (nodes.get(addr)[0] == 1) {
             int[] n = nodes.get(addr);
@@ -389,9 +400,9 @@ public class TreeIndex {
     /**
      * Sequentially creates unclustered records from the table
      * 
-     * @param op    A sorted operator
-     * @param index The index to be created
-     * @return A new record
+     * @param op A sorted operator
+     * @param index The column on which the index is to be created
+     * @return A new record in the <key,list> format
      */
     private ArrayList<Integer> makeRecord(Operator op, int index) {
         ArrayList<Integer> result = new ArrayList();
@@ -399,8 +410,6 @@ public class TreeIndex {
 
         result.add(nextTuple.getElementAtIndex(index));
         result.add(0);
-
-        ArrayList<ArrayList<Integer>> sort = new ArrayList<>();
 
         while (nextTuple != null && nextTuple.getElementAtIndex(index) == result.get(0)) {
 
@@ -434,32 +443,11 @@ public class TreeIndex {
         return result;
     }
 
-    public static ArrayList sortNestedList(ArrayList<ArrayList<Integer>> arr) {
-        ArrayList<Integer> result = new ArrayList<>();
-        boolean inserted = false;
-
-        for (int i = 0; i < arr.size(); i++) {
-            for (int j = 0; j < result.size(); j++) {
-                int l = 0;
-                while (l < arr.get(i).size() - 1 && arr.get(i).get(l).equals(result.get(j))) l++;
-
-                if (arr.get(i).get(l) < result.get(j)) {
-                    for (int k = arr.get(i).size() - 1; k >= 0; k--) result.add(j, arr.get(i).get(k));
-                    inserted = true;
-                    break;
-                }
-            }
-            if (!inserted) for (int k = 0; k < arr.get(i).size(); k++) result.add(arr.get(i).get(k));
-        }
-
-        return result;
-    }
-
     /**
-     * Creates leaf nodes sequentially from the table
+     * Creates leaf nodes sequentially from a list of records
      * 
-     * @param op    a sorted operator
-     * @param index the index to be created
+     * @param iter an iterator on the list of records in the table
+     * @param numRecords the number of records to be included in the leaf
      * @return a new leaf node represented as an array of integers
      */
     private int[] LeafNode(Iterator<ArrayList<Integer>> iter, int numRecords) {

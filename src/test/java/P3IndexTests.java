@@ -94,26 +94,12 @@ public class P3IndexTests {
       Assertions.assertEquals(e.length, o.length, "Unexpected number of rows.");
 
 
-      int expected[] = new int[e.length / 4];
-      for(int i = 0; i < expected.length; i++) {
-        expected[i] = (e[3 + 4 * i] & 0xFF) | ((e[2 + 4 * i] & 0xFF) << 8) |
-                ((e[1 + 4 * i] & 0xFF) << 16) | ((e[0 + 4 * i] & 0xFF) << 24);
-      }
-
-      int output[] = new int[o.length / 4];
-      for(int i = 0; i < output.length; i++) {
-        output[i] = (o[3 + 4 * i] & 0xFF) | ((o[2 + 4 * i] & 0xFF) << 8) |
-                ((o[1 + 4 * i] & 0xFF) << 16) | ((o[0 + 4 * i] & 0xFF) << 24);
-      }
+      int expected[] = byteToIntArray(e);
+      int output[] = byteToIntArray(o);
 
       for (int i = 0; i < expected.length; i += 1024) {
         int[] ex = Arrays.copyOfRange(expected, i, i + 1024);
         int[] op = Arrays.copyOfRange(output, i, i + 1024);
-
-        /*
-        for (int j = 0; j < ex.length; j++) {
-          if (ex[j] != op[j]) System.out.println(j + ": " + ex[j] + " != " + op[j]);
-        }*/
 
 
         Assertions.assertEquals(Arrays.toString(Arrays.copyOfRange(expected, i, i + 1024)),
@@ -124,6 +110,21 @@ public class P3IndexTests {
       exception.printStackTrace();
       //System.out.println("hi");
     }
+  }
+
+  private int[] byteToIntArray(byte[] arr) {
+    int[] result = new int[arr.length/4];
+
+    for(int i = 0; i < result.length; i++) {
+      int n = 0;
+      n += arr[3 + 4 * i];
+      n += arr[2 + 4 * i] * 256;
+      n += arr[1 + 4 * i] * 65536;
+      n += arr[0 + 4 * i] * 16777216;
+      result[i] = n;
+    }
+
+    return result;
   }
 
   @Test
