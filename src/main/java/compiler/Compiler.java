@@ -81,14 +81,7 @@ public class Compiler {
 
           ArrayList<String> info = db.getIndexInfo().get(tables.get(i));
 
-          ScanOperator base = new ScanOperator(tables.get(i), null);
-          ArrayList<Column> temp = new ArrayList<>();
-          temp.add(new Column(new Table(null, tables.get(i)), info.get(0)));
-          InMemorySortOperator op = new InMemorySortOperator(base, temp);
-
-          TreeIndex t = new TreeIndex(inputDir + "/db/indexes/" + tables.get(i) + "." + info.get(0), op,
-              Integer.parseInt(info.get(2)),
-              db.findColumnIndex(tables.get(i), info.get(0)), Integer.valueOf(info.get(1)) == 1);
+          TreeIndex t = new TreeIndex(inputDir, tables.get(i), db.findColumnIndex(tables.get(i), info.get(0)), info);
         }
 
         logger.info("Indexes have been built");

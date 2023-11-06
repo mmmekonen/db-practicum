@@ -1,7 +1,10 @@
 package common;
 
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import physical_operator.InMemorySortOperator;
 import physical_operator.Operator;
+import physical_operator.ScanOperator;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,13 +35,26 @@ public class TreeIndex {
     /**
      * Class to create and read a B+ tree index
      * 
-     * @param fileName     The file to which the tree will be written
+     * @param indexFile     The file to which the tree will be written
      * @param op           A sorted operator on the table to be indexed
      * @param order        The order of the tree index
      * @param indexElement The element on which the table will be indexed
      */
-    public TreeIndex(String fileName, InMemorySortOperator op, int order, int indexElement, boolean clustered) {
-        this.file = new File(fileName);
+    public TreeIndex(String inputDir, String tableName, int indexElement, ArrayList<String> info) {
+
+        this.file = new File(inputDir + "/db/indexes/" + tableName + "." + info.get(0));
+        this.order = Integer.parseInt(info.get(2));
+
+        ScanOperator base = new ScanOperator(tableName, null);
+        ArrayList<Column> schema = new ArrayList<>();
+        schema.add(new Column(new Table(null, tableName), info.get(0)));
+        InMemorySortOperator op = new InMemorySortOperator(base, schema);
+
+        if (Integer.valueOf(info.get(1)) == 1) sortTable(op, inputDir + "/db/data/" + tableName);
+
+        base = new ScanOperator(tableName, null);
+        op = new InMemorySortOperator(base, schema);
+
 
         this.nextTuple = op.getNextTuple();
         int tableSize = 0;
@@ -50,8 +66,7 @@ public class TreeIndex {
         nextTuple = op.getNextTuple();
 
 
-        this.nextRecord = makeRecord(op, indexElement, clustered);
-        this.order = order;
+        this.nextRecord = makeRecord(op, indexElement);
         //System.out.println(nextTuple);
 
         try {
@@ -70,11 +85,11 @@ public class TreeIndex {
         while (nextTuple != null) {
             if (2* order < tableSize && tableSize < 3 * order) {
                 int temp = tableSize;
-                leaves.add(LeafNode(op, indexElement, temp/2, clustered));
-                leaves.add(LeafNode(op, indexElement, tableSize - temp/2, clustered));
+                leaves.add(LeafNode(op, indexElement, temp/2));
+                leaves.add(LeafNode(op, indexElement, tableSize - temp/2));
                 break;
             } else {
-                leaves.add(LeafNode(op, indexElement, 2 * order, clustered));
+                leaves.add(LeafNode(op, indexElement, 2 * order));
             }
         }
 
@@ -110,30 +125,21 @@ public class TreeIndex {
         }
     }
 
-    // DOES NOT GET USED
-    /**
-     * Reads the node stored in the specified page
-     * 
-     * @param page the page to be read
-     * @return The data in a page, represented as an array of integers
-     */
-    public int[] readNode(int page) {
-        int[] result = new int[PAGE_SIZE / 4];
-        buffer.clear();
-
-        buffer.asIntBuffer().get(result, (page + 1) * PAGE_SIZE / 4, PAGE_SIZE / 4);
-
-        this.curPage = page;
-        this.curDataEntry = result;
-
-        System.out.println();
-        for (int i : result) {
-            System.out.print(i);
+    public static void sortTable(InMemorySortOperator op, String filepath) {
+        try {
+            TupleWriter t = new TupleWriter(filepath);
+            Tuple next = op.getNextTuple();
+            while (next != null) {
+                t.writeTuple(next);
+                next = op.getNextTuple();
+            }
+            t.close();
+            op.reset();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        System.out.println();
-
-        return result;
     }
+
 
     /**
      * Reads the node stored in the specified page
@@ -276,42 +282,6 @@ public class TreeIndex {
         return result;
     }
 
-    // DOES NOT GET USED
-    /**
-     * Gets the data entries from a leaf node
-     * 
-     * @return The data entries from a leaf node
-     */
-    public ArrayList<ArrayList<Integer>> getDataEntries2() {
-        ArrayList<ArrayList<Integer>> result = new ArrayList<>();
-        int numDataEntries = buffer.getInt(4);
-        int pos = 8;
-
-        for (int i = 0; i < numDataEntries; i++) {
-            int key = buffer.getInt(pos);
-            pos += 4;
-
-            int numRids = buffer.getInt(pos);
-            pos += 4;
-
-            ArrayList<Integer> rids = new ArrayList<>();
-            rids.add(key);
-            for (int j = 0; j < numRids; j++) {
-                int pageNum = buffer.getInt(pos);
-                pos += 4;
-                int tupleNum = buffer.getInt(pos);
-                pos += 4;
-
-                rids.add(pageNum);
-                rids.add(tupleNum);
-            }
-
-            result.add(rids);
-        }
-
-        return result;
-    }
-
     /**
      * Gets the data entries from a leaf node
      * 
@@ -425,7 +395,7 @@ public class TreeIndex {
      * @param index The index to be created
      * @return A new record
      */
-    private ArrayList<Integer> makeRecord(Operator op, int index, boolean clustered) {
+    private ArrayList<Integer> makeRecord(Operator op, int index) {
         ArrayList<Integer> result = new ArrayList();
         if (nextTuple == null) return null;
 
@@ -435,53 +405,35 @@ public class TreeIndex {
         ArrayList<ArrayList<Integer>> sort = new ArrayList<>();
 
         while (nextTuple != null && nextTuple.getElementAtIndex(index) == result.get(0)) {
-            if (clustered) {
-                ArrayList<Integer> temp = nextTuple.getAllElements();
-                temp.remove(index);
-                //sort.add(temp);
-                result.addAll(temp);
-            } else {
-                /*ArrayList<Integer> temp = new ArrayList<>();
-                temp.add(nextTuple.getPID());
-                temp.add(nextTuple.getTID());
-                sort.add(temp);
-                */
 
+            int pid = nextTuple.getPID();
+            int tid = nextTuple.getTID();
+            boolean inserted = false;
 
-                int pid = nextTuple.getPID();
-                int tid = nextTuple.getTID();
-                boolean inserted = false;
-
-                for (int i = 2; i < result.size(); i += 2) {
-                    if (pid < result.get(i)) {
+            for (int i = 2; i < result.size(); i += 2) {
+                if (pid < result.get(i)) {
+                    result.add(i, tid);
+                    result.add(i, pid);
+                    inserted = true;
+                    break;
+                } else if (result.get(i).equals(pid)) {
+                    if (tid < result.get(i + 1)) {
                         result.add(i, tid);
                         result.add(i, pid);
                         inserted = true;
                         break;
-                    } else if (result.get(i).equals(pid)) {
-                        if (tid < result.get(i + 1)) {
-                            result.add(i, tid);
-                            result.add(i, pid);
-                            inserted = true;
-                            break;
-                        }
                     }
                 }
-
-                if (!inserted) {
-                    result.add(pid);
-                    result.add(tid);
-                }
-
-
             }
+            if (!inserted) {
+                result.add(pid);
+                result.add(tid);
+            }
+
             result.set(1, result.get(1) + 1);
             tableSize--;
             nextTuple = op.getNextTuple();
-            //System.out.println(1);
         }
-        //System.out.println(2);
-        //result.addAll(sortNestedList(sort));
         return result;
     }
 
@@ -513,7 +465,7 @@ public class TreeIndex {
      * @param index the index to be created
      * @return a new leaf node represented as an array of integers
      */
-    private int[] LeafNode(Operator op, int index, int numRecords, boolean clustered) {
+    private int[] LeafNode(Operator op, int index, int numRecords) {
 
         int[] node = new int[PAGE_SIZE / 4];
         node[0] = 0;
@@ -530,7 +482,7 @@ public class TreeIndex {
                     return node;
                 }
             }
-            nextRecord = makeRecord(op, index, clustered);
+            nextRecord = makeRecord(op, index);
             node[1]++;
 
         }
