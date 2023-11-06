@@ -2,22 +2,17 @@ package compiler;
 
 import common.DBCatalog;
 import common.QueryPlanBuilder;
+import common.TreeIndex;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Scanner;
-
-import common.TreeIndex;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 import org.apache.logging.log4j.*;
-import physical_operator.InMemorySortOperator;
 import physical_operator.Operator;
-import physical_operator.ScanOperator;
 
 /**
  * Top level harness class; reads queries from an input file one at a time,
@@ -81,7 +76,8 @@ public class Compiler {
 
           ArrayList<String> info = db.getIndexInfo().get(tables.get(i));
 
-          TreeIndex t = new TreeIndex(inputDir, tables.get(i), db.findColumnIndex(tables.get(i), info.get(0)), info);
+          TreeIndex t = new TreeIndex(
+              inputDir, tables.get(i), db.findColumnIndex(tables.get(i), info.get(0)), info);
         }
 
         logger.info("Indexes have been built");
@@ -134,7 +130,8 @@ public class Compiler {
 
   /**
    * Reads the config file passed through the command line and sets all the
-   * parameters for how queries should be built.
+   * parameters for how
+   * queries should be built.
    */
   private static void readConfigFile() {
     try {
@@ -164,5 +161,4 @@ public class Compiler {
       System.out.println(e + ": Could not find config file");
     }
   }
-
 }

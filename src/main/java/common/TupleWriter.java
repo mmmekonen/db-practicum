@@ -6,10 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-/**
- * Class to write tuples to a binary file, pages at a time
- */
-
+/** Class to write tuples to a binary file, pages at a time */
 public class TupleWriter {
   private static int PAGE_SIZE = 4096;
   private FileOutputStream fileOutputStream;
@@ -22,7 +19,6 @@ public class TupleWriter {
    * Creates a new tuple writer for the given file
    *
    * @param fileName The name of the file to write to
-   *
    * @throws IOException
    */
   public TupleWriter(String fileName) throws IOException {
@@ -38,7 +34,6 @@ public class TupleWriter {
    * Creates a new tuple writer for the given file
    *
    * @param file The file to write to
-   *
    * @throws IOException
    */
   public TupleWriter(File file) throws IOException {
@@ -50,11 +45,10 @@ public class TupleWriter {
   }
 
   /**
-   * Writes the given tuple to the buffer
-   * Checks if a new page needs to be created and/or written to disk
+   * Writes the given tuple to the buffer Checks if a new page needs to be created and/or written to
+   * disk
    *
    * @param tuple The tuple to be written
-   *
    * @throws IOException
    */
   public void writeTuple(Tuple tuple) throws IOException {

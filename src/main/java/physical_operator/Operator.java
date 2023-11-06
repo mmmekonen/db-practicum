@@ -10,12 +10,9 @@ import java.util.List;
 import net.sf.jsqlparser.schema.Column;
 
 /**
- * Abstract class to represent relational operators. Every operator has a
- * reference to an
- * outputSchema which represents the schema of the output tuples from the
- * operator. This is a list
- * of Column objects. Each Column has an embedded Table object with the name and
- * alias (if required)
+ * Abstract class to represent relational operators. Every operator has a reference to an
+ * outputSchema which represents the schema of the output tuples from the operator. This is a list
+ * of Column objects. Each Column has an embedded Table object with the name and alias (if required)
  * fields set appropriately.
  */
 public abstract class Operator {
@@ -31,8 +28,7 @@ public abstract class Operator {
   }
 
   /**
-   * A function to create a copy of the operator's schema, preventing operators
-   * from modifying each
+   * A function to create a copy of the operator's schema, preventing operators from modifying each
    * other's schema
    *
    * @return This operator's schema
@@ -77,10 +73,8 @@ public abstract class Operator {
     return getNextTuple();
   }
 
-
   /**
-   * Iterate through output of operator and send it all, in Tuple format, to the
-   * specified
+   * Iterate through output of operator and send it all, in Tuple format, to the specified
    * printStream.
    *
    * @param printStream stream to receive output, one tuple per line.
@@ -93,8 +87,7 @@ public abstract class Operator {
   }
 
   /**
-   * Iterate through output of operator and send it all, in binary format, to the
-   * specified
+   * Iterate through output of operator and send it all, in binary format, to the specified
    * printStream.
    *
    * @param file file to receive output, in binary format.

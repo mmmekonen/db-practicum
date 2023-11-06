@@ -7,24 +7,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
-
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Class to contain information about database - names of tables, schema of each
- * table and file
+ * Class to contain information about database - names of tables, schema of each table and file
  * where each table is located. Uses singleton pattern.
  *
- * <p>
- * Assumes dbDirectory has a schema.txt file and a /data subdirectory containing
- * one file per
+ * <p>Assumes dbDirectory has a schema.txt file and a /data subdirectory containing one file per
  * relation, named "relname".
  *
- * <p>
- * Call by using DBCatalog.getInstance();
+ * <p>Call by using DBCatalog.getInstance();
  */
 public class DBCatalog {
   private final Logger logger = LogManager.getLogger();
@@ -45,8 +40,7 @@ public class DBCatalog {
   }
 
   /**
-   * Instance getter for singleton pattern, lazy initialization on first
-   * invocation
+   * Instance getter for singleton pattern, lazy initialization on first invocation
    *
    * @return unique DB catalog instance
    */
@@ -82,9 +76,7 @@ public class DBCatalog {
     }
   }
 
-  /**
-   * Sets the info for all the indexes as defined in index_info.txt.
-   */
+  /** Sets the info for all the indexes as defined in index_info.txt. */
   public void setIndexInfo() {
     try {
       Scanner s = new Scanner(new File(dbDirectory + "/index_info.txt"));
@@ -98,10 +90,9 @@ public class DBCatalog {
   }
 
   /**
-   * Returns the hashmap of ArrayLists of Strings of the column, cluster flag, and
-   * tree order
-   * for the index on each of the tables.
-   * 
+   * Returns the hashmap of ArrayLists of Strings of the column, cluster flag, and tree order for
+   * the index on each of the tables.
+   *
    * @return a hashmap containing the index info.
    */
   public HashMap<String, ArrayList<String>> getIndexInfo() {
@@ -109,9 +100,8 @@ public class DBCatalog {
   }
 
   /**
-   * Sets the boolean value as to whether indexes are to be used for selection or
-   * not.
-   * 
+   * Sets the boolean value as to whether indexes are to be used for selection or not.
+   *
    * @param val true if indexes are to be used.
    */
   public void setUseIndex(boolean val) {
@@ -119,9 +109,8 @@ public class DBCatalog {
   }
 
   /**
-   * Returns a boolean value as to whether indexes are to be used for selection or
-   * not.
-   * 
+   * Returns a boolean value as to whether indexes are to be used for selection or not.
+   *
    * @return true if indexes are to be used.
    */
   public boolean useIndexes() {
@@ -148,7 +137,7 @@ public class DBCatalog {
 
   /**
    * Sets the path of the index directory used to store indexes.
-   * 
+   *
    * @param directory string of the indexes file path.
    */
   public void setIndexDirectory(String directory) {
@@ -157,7 +146,7 @@ public class DBCatalog {
 
   /**
    * Gets the path of the index directory used to store indexes.
-   * 
+   *
    * @return string of the indexes file path.
    */
   public String getIndexDirectory() {
@@ -190,10 +179,9 @@ public class DBCatalog {
   }
 
   /**
-   * Finds the index of a column of a given table, as it is found in the table
-   * schema
+   * Finds the index of a column of a given table, as it is found in the table schema
    *
-   * @param tableName  The table holding the column
+   * @param tableName The table holding the column
    * @param columnName The column whose index is to be located
    * @return The index of the column
    */

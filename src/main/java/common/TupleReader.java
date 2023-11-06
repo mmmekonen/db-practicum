@@ -7,9 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 
-/**
- * Class to read tuples from a binary file, pages at a time
- */
+/** Class to read tuples from a binary file, pages at a time */
 public class TupleReader {
   private FileInputStream fileInputStream;
   private FileChannel fileChannel;
@@ -25,7 +23,6 @@ public class TupleReader {
    * Creates a new tuple reader for the given file
    *
    * @param fileName The name of the file to read from
-   *
    * @throws IOException
    */
   public TupleReader(String fileName) throws IOException {
@@ -41,7 +38,6 @@ public class TupleReader {
    * Creates a new tuple reader for the given file
    *
    * @param file The file to read from
-   *
    * @throws IOException
    */
   public TupleReader(File file) throws IOException {
@@ -53,10 +49,7 @@ public class TupleReader {
     readPageHeader();
   }
 
-  /**
-   * Reads the next page header from the file to get the attributes and number of
-   * tuples
-   */
+  /** Reads the next page header from the file to get the attributes and number of tuples */
   private boolean readPageHeader() throws IOException {
     buffer.clear();
     if (fileChannel.read(buffer) != -1) {
@@ -99,16 +92,12 @@ public class TupleReader {
     return null;
   }
 
-  /**
-   * Returns the number of attributes in the tuples
-   */
+  /** Returns the number of attributes in the tuples */
   public int getAttributes() {
     return attributes;
   }
 
-  /**
-   * Returns the number of tuples in the file
-   */
+  /** Returns the number of tuples in the file */
   public int getNumTuples() {
     return numTuples;
   }

@@ -1,19 +1,16 @@
 package physical_operator;
 
+import common.DBCatalog;
+import common.TreeIndex;
+import common.Tuple;
+import common.TupleReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
-import common.Tuple;
-import common.TupleReader;
-import common.TreeIndex;
-import common.DBCatalog;
 
-/**
- * A class to represent an index scan operator on a relation.
- */
+/** A class to represent an index scan operator on a relation. */
 public class IndexScanOperator extends Operator {
   public Integer lowkey;
   public Integer highkey;
@@ -28,10 +25,9 @@ public class IndexScanOperator extends Operator {
   public boolean notEndReached;
   public int indexColumnInt;
 
-  /**
-   * Creates a new IndexScanOperator.
-   */
-  public IndexScanOperator(String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey) {
+  /** Creates a new IndexScanOperator. */
+  public IndexScanOperator(
+      String tableName, Alias alias, String indexColumnName, Integer lowkey, Integer highkey) {
     super(DBCatalog.getInstance().getTableSchema(tableName));
     this.lowkey = lowkey;
     this.highkey = highkey;
@@ -57,7 +53,8 @@ public class IndexScanOperator extends Operator {
     ArrayList<String> indexInfo = c.get(tableName);
     this.clustered = (indexInfo.get(1).equals("1"));
 
-    this.tree = new TreeIndex(catalog.getIndexDirectory() + '/' + tableName + '.' + indexColumnName);
+    this.tree =
+        new TreeIndex(catalog.getIndexDirectory() + '/' + tableName + '.' + indexColumnName);
     this.notEndReached = true;
 
     int[] header = tree.readNode3(0);
@@ -77,7 +74,6 @@ public class IndexScanOperator extends Operator {
       while (dataEntries.get(dataEntryIndex).get(0) < lowkey) {
         dataEntryIndex++;
       }
-
     }
 
     for (int i = 0; i < this.outputSchema.size(); i++) {
@@ -87,7 +83,7 @@ public class IndexScanOperator extends Operator {
 
   /**
    * Gets the next tuple from the operator.
-   * 
+   *
    * @return the next tuple.
    */
   public Tuple getNextTuple() {
@@ -159,12 +155,9 @@ public class IndexScanOperator extends Operator {
     return null;
   }
 
-  /**
-   * Resets the operator to the beginning.
-   */
+  /** Resets the operator to the beginning. */
   @Override
   public void reset() {
     super.reset(0);
   }
-
 }

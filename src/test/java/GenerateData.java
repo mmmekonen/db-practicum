@@ -1,14 +1,3 @@
-import common.Tuple;
-import common.TupleWriter;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import net.sf.jsqlparser.JSQLParserException;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 public class GenerateData {
   private static String inputDir = "src/test/resources/samples/input2/db/data";
 

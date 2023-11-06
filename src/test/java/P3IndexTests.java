@@ -1,14 +1,11 @@
 import common.DBCatalog;
 import common.TreeIndex;
-
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
-
 import jdk.jshell.spi.ExecutionControl;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.schema.Column;
@@ -16,7 +13,6 @@ import net.sf.jsqlparser.schema.Table;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
 import physical_operator.InMemorySortOperator;
 import physical_operator.ScanOperator;
 
@@ -52,10 +48,13 @@ public class P3IndexTests {
       temp.add(new Column(new Table(null, tables.get(i)), info.get(0)));
       InMemorySortOperator op = new InMemorySortOperator(base, temp);
 
-      TreeIndex t = new TreeIndex("src/test/resources/samples/input",
-              tables.get(i), db.findColumnIndex(tables.get(i), info.get(0)), info);
+      TreeIndex t =
+          new TreeIndex(
+              "src/test/resources/samples/input",
+              tables.get(i),
+              db.findColumnIndex(tables.get(i), info.get(0)),
+              info);
     }
-
   }
 
   private void testSizeHelper(String filename) {
@@ -67,7 +66,7 @@ public class P3IndexTests {
       Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
     } catch (IOException e) {
       e.printStackTrace();
-      //System.out.println("hi");
+      // System.out.println("hi");
     }
   }
 
@@ -81,7 +80,7 @@ public class P3IndexTests {
       Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
     } catch (IOException e) {
       e.printStackTrace();
-      //System.out.println("hi");
+      // System.out.println("hi");
     }
   }
 
@@ -93,7 +92,6 @@ public class P3IndexTests {
       o = Files.readAllBytes(Path.of(outputPath + "/" + filename));
       Assertions.assertEquals(e.length, o.length, "Unexpected number of rows.");
 
-
       int expected[] = byteToIntArray(e);
       int output[] = byteToIntArray(o);
 
@@ -101,21 +99,21 @@ public class P3IndexTests {
         int[] ex = Arrays.copyOfRange(expected, i, i + 1024);
         int[] op = Arrays.copyOfRange(output, i, i + 1024);
 
-
-        Assertions.assertEquals(Arrays.toString(Arrays.copyOfRange(expected, i, i + 1024)),
-                Arrays.toString(Arrays.copyOfRange(output, i, i + 1024)),
-                "Outputs are not equal at page " + i / 1024);
+        Assertions.assertEquals(
+            Arrays.toString(Arrays.copyOfRange(expected, i, i + 1024)),
+            Arrays.toString(Arrays.copyOfRange(output, i, i + 1024)),
+            "Outputs are not equal at page " + i / 1024);
       }
     } catch (IOException exception) {
       exception.printStackTrace();
-      //System.out.println("hi");
+      // System.out.println("hi");
     }
   }
 
   private int[] byteToIntArray(byte[] arr) {
-    int[] result = new int[arr.length/4];
+    int[] result = new int[arr.length / 4];
 
-    for(int i = 0; i < result.length; i++) {
+    for (int i = 0; i < result.length; i++) {
       int n = 0;
       n += arr[3 + 4 * i];
       n += arr[2 + 4 * i] * 256;
@@ -156,5 +154,4 @@ public class P3IndexTests {
   public void testIndex2ByPage() throws ExecutionControl.NotImplementedException {
     testPageEqualityHelper("Sailors.A");
   }
-
 }

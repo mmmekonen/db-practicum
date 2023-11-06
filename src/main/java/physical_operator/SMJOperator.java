@@ -1,7 +1,7 @@
 package physical_operator;
 
-import java.util.ArrayList;
 import common.Tuple;
+import java.util.ArrayList;
 import net.sf.jsqlparser.expression.Expression;
 
 public class SMJOperator extends Operator {
@@ -18,14 +18,18 @@ public class SMJOperator extends Operator {
 
   /**
    * Constructor for the SMJ operator
-   * 
-   * @param expression     The expression to be evaluated
-   * @param left           The left child operator
-   * @param right          The right child operator
-   * @param leftSortOrder  The sort order for the left child
+   *
+   * @param expression The expression to be evaluated
+   * @param left The left child operator
+   * @param right The right child operator
+   * @param leftSortOrder The sort order for the left child
    * @param rightSortOrder The sort order for the right child
    */
-  public SMJOperator(Expression expression, Operator left, Operator right, ArrayList<Integer> leftSortOrder,
+  public SMJOperator(
+      Expression expression,
+      Operator left,
+      Operator right,
+      ArrayList<Integer> leftSortOrder,
       ArrayList<Integer> rightSortOrder) {
     super(null);
     this.outputSchema = left.getOutputSchema();
@@ -43,7 +47,7 @@ public class SMJOperator extends Operator {
 
   /**
    * Compares two tuples based on the sort order
-   * 
+   *
    * @param left
    * @param right
    * @return -1 if left < right, 0 if left == right, 1 if left > right
@@ -63,9 +67,7 @@ public class SMJOperator extends Operator {
     return 0;
   }
 
-  /**
-   * Resets the operator
-   */
+  /** Resets the operator */
   @Override
   public void reset() {
     left.reset();
@@ -79,7 +81,7 @@ public class SMJOperator extends Operator {
 
   /**
    * Returns the next valid combination of tuples from the child operators
-   * 
+   *
    * @return next Tuple, or null if we are at the end
    */
   @Override
@@ -111,7 +113,6 @@ public class SMJOperator extends Operator {
         leftIndex++;
         index = -1;
       }
-
     }
 
     return null;
@@ -119,7 +120,7 @@ public class SMJOperator extends Operator {
 
   /**
    * Merges two tuples
-   * 
+   *
    * @param leftTup
    * @param rightTup
    * @return

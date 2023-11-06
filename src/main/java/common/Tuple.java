@@ -84,7 +84,6 @@ public class Tuple {
   }
 
   /**
-   *
    * @return the number of bytes occupied by a single tuple
    */
   public int size() {
@@ -92,7 +91,6 @@ public class Tuple {
   }
 
   /**
-   *
    * @return a unique hashcode for each tuple, based on the hashcode for its corresponding string
    */
   @Override
@@ -102,6 +100,7 @@ public class Tuple {
 
   /**
    * A getter function to access the PID field of the tuple
+   *
    * @return the PID of the tuple
    */
   public int getPID() {
@@ -110,6 +109,7 @@ public class Tuple {
 
   /**
    * A getter function to access the TID field of the tuple
+   *
    * @return the TID of the tuple
    */
   public int getTID() {
@@ -118,6 +118,7 @@ public class Tuple {
 
   /**
    * A setter function to access the PID field of the tuple
+   *
    * @param pid
    */
   public void setPID(int pid) {
@@ -126,6 +127,7 @@ public class Tuple {
 
   /**
    * A setter function to access the TID field of the tuple
+   *
    * @param tid
    */
   public void setTID(int tid) {
