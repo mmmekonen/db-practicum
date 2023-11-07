@@ -15,8 +15,7 @@ import org.apache.logging.log4j.*;
 import physical_operator.Operator;
 
 /**
- * Top level harness class; reads queries from an input file one at a time,
- * processes them and sends
+ * Top level harness class; reads queries from an input file one at a time, processes them and sends
  * output to file or to System depending on flag.
  */
 public class Compiler {
@@ -40,13 +39,10 @@ public class Compiler {
   // to System.out
 
   /**
-   * Reads statements from queriesFile one at a time, builds query plan and
-   * evaluates, dumping
+   * Reads statements from queriesFile one at a time, builds query plan and evaluates, dumping
    * results to files or console as desired.
    *
-   * <p>
-   * If dumping to files result of ith query is in file named queryi, indexed
-   * stating at 1.
+   * <p>If dumping to files result of ith query is in file named queryi, indexed stating at 1.
    */
   public static void main(String[] args) {
 
@@ -63,8 +59,7 @@ public class Compiler {
     // Set up indexes
     try {
       if (outputToFiles) {
-        for (File file : (new File(outputDir).listFiles()))
-          file.delete(); // clean output directory
+        for (File file : (new File(outputDir).listFiles())) file.delete(); // clean output directory
       }
 
       if (buildIndexes == 1) {
@@ -76,8 +71,9 @@ public class Compiler {
 
           ArrayList<String> info = db.getIndexInfo().get(tables.get(i));
 
-          TreeIndex t = new TreeIndex(
-              inputDir, tables.get(i), db.findColumnIndex(tables.get(i), info.get(0)), info);
+          TreeIndex t =
+              new TreeIndex(
+                  inputDir, tables.get(i), db.findColumnIndex(tables.get(i), info.get(0)), info);
         }
 
         logger.info("Indexes have been built");
@@ -104,7 +100,8 @@ public class Compiler {
           logger.info("Processing query: " + statement);
 
           try {
-            Operator plan = queryPlanBuilder.buildPlan(statement, joinType, joinBuffer, sortType, sortBuffer);
+            Operator plan =
+                queryPlanBuilder.buildPlan(statement, joinType, joinBuffer, sortType, sortBuffer);
 
             if (outputToFiles) {
               File outfile = new File(outputDir + "/query" + counter);
@@ -129,8 +126,7 @@ public class Compiler {
   }
 
   /**
-   * Reads the config file passed through the command line and sets all the
-   * parameters for how
+   * Reads the config file passed through the command line and sets all the parameters for how
    * queries should be built.
    */
   private static void readConfigFile() {
@@ -151,11 +147,9 @@ public class Compiler {
     try {
       Scanner s = new Scanner(new File(inputDir + "/plan_builder_config.txt"));
       joinType = s.nextInt();
-      if (joinType == 1)
-        joinBuffer = s.nextInt();
+      if (joinType == 1) joinBuffer = s.nextInt();
       sortType = s.nextInt();
-      if (sortType == 1)
-        sortBuffer = s.nextInt();
+      if (sortType == 1) sortBuffer = s.nextInt();
       DBCatalog.getInstance().setUseIndex(s.nextInt() == 1 ? true : false);
     } catch (Exception e) {
       System.out.println(e + ": Could not find config file");
