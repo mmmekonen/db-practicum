@@ -66,6 +66,7 @@ public class IndexScanOperator extends Operator {
 
     if (lowkey == null) {
       currentLeaf = tree.readNode3(1);
+      this.lowkey = Integer.MIN_VALUE;
     } else {
       currentLeaf = tree.deserialize(rootPageID, lowkey);
       dataEntries = tree.getDataEntries();
@@ -105,6 +106,11 @@ public class IndexScanOperator extends Operator {
         }
       } else {
         if (currentLeaf != null) {
+
+          if (dataEntries == null) {
+            dataEntries = tree.getDataEntries();
+          }
+
           while (dataEntryIndex < dataEntries.size()) {
             int key = dataEntries.get(dataEntryIndex).get(0);
             int pageID = dataEntries.get(dataEntryIndex).get(1 + ridIndex * 2);
@@ -141,6 +147,10 @@ public class IndexScanOperator extends Operator {
               dataEntries = tree.getDataEntries();
               dataEntryIndex = 0;
               ridIndex = 0;
+
+              if (dataEntries == null) {
+                return null;
+              }
             }
           } else if (currentLeaf == null) {
             return null;
