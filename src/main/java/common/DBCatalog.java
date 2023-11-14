@@ -32,6 +32,7 @@ public class DBCatalog {
 
   private final HashMap<String, ArrayList<Column>> tables;
   private HashMap<String, ArrayList<String>> indexInfo;
+  private HashMap<String, ArrayList<String>> stats;
   private static DBCatalog db;
 
   private String dbDirectory;
@@ -42,6 +43,7 @@ public class DBCatalog {
   private DBCatalog() {
     tables = new HashMap<>();
     indexInfo = new HashMap<>();
+    stats = new HashMap<>();
   }
 
   /**
@@ -104,6 +106,34 @@ public class DBCatalog {
    */
   public HashMap<String, ArrayList<String>> getIndexInfo() {
     return indexInfo;
+  }
+
+  /**
+   * Sets the statistics for all the relations in the databse.
+   */
+  public void setStats() {
+    try {
+      Scanner s = new Scanner(new File(dbDirectory + "/stats.txt"));
+      while (s.hasNextLine()) {
+        String[] params = s.nextLine().split("[, ]");
+        ArrayList<String> tableStats = new ArrayList<>();
+        for (int i = 1; i < params.length; i++) {
+          tableStats.add(params[i]);
+        }
+        stats.put(params[0], tableStats);
+      }
+    } catch (Exception e) {
+      System.out.println(e + ": Could not find stats file");
+    }
+  }
+
+  /**
+   * Returns the statistics for all the relations in the database.
+   * 
+   * @return a hash map of a table to its stats, all in strings.
+   */
+  public HashMap<String, ArrayList<String>> getStats() {
+    return stats;
   }
 
   /**
