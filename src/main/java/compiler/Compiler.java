@@ -3,16 +3,26 @@ package compiler;
 import common.DBCatalog;
 import common.QueryPlanBuilder;
 import common.TreeIndex;
+import common.Tuple;
+
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
+import java.util.Set;
+
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 import org.apache.logging.log4j.*;
 import physical_operator.Operator;
+import physical_operator.ScanOperator;
 
 /**
  * Top level harness class; reads queries from an input file one at a time,
@@ -57,7 +67,8 @@ public class Compiler {
           file.delete(); // clean output directory
       }
 
-      // TODO: gather statistics
+      // gather statistics
+      gatherStats();
 
       // Set up indexes
       logger.info("Building indexes...");
@@ -97,6 +108,7 @@ public class Compiler {
           Operator plan = queryPlanBuilder.buildPlan(statement);
 
           if (outputToFiles) {
+            // TODO: output logical and physicl query plans
             File outfile = new File(outputDir + "/query" + counter);
             long timeElapsed = System.currentTimeMillis();
             plan.dump(outfile);
@@ -129,6 +141,52 @@ public class Compiler {
       tempDir = s.nextLine();
     } catch (Exception e) {
       System.out.println(e + ": Could not find config file");
+    }
+  }
+
+  /** TODO */
+  private static void gatherStats() {
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(inputDir + "/db/stats.txt"));) {
+      DBCatalog db = DBCatalog.getInstance();
+      Set<String> tableNames = db.getTableNames();
+
+      // store data
+      HashMap<Integer, Integer> min = new HashMap<>();
+      HashMap<Integer, Integer> max = new HashMap<>();
+      int len = 0;
+
+      // whether or not to write a newline in stats.txt
+      boolean newline = false;
+      for (String table : tableNames) {
+        ArrayList<Column> columns = db.getTableSchema(table);
+        Operator op = new ScanOperator(table, null);
+        Tuple tuple;
+        while ((tuple = op.getNextTuple()) != null) {
+          for (int i = 0; i < columns.size(); i++) {
+            min.put(i,
+                min.get(i) == null ? tuple.getElementAtIndex(i) : Math.min(min.get(i), tuple.getElementAtIndex(i)));
+            max.put(i,
+                max.get(i) == null ? tuple.getElementAtIndex(i) : Math.max(max.get(i), tuple.getElementAtIndex(i)));
+          }
+          len++;
+        }
+        // write to file
+        if (newline) {
+          bw.newLine();
+        }
+        bw.write(table + " " + len);
+        for (int i = 0; i < columns.size(); i++) {
+          bw.write(" " + columns.get(i).getColumnName() + "," + min.get(i) + "," + max.get(i));
+        }
+        newline = true;
+
+        // clear hashmaps and length
+        min.clear();
+        max.clear();
+        len = 0;
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 }
