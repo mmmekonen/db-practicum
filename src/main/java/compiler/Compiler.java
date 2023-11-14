@@ -28,11 +28,6 @@ public class Compiler {
   private static String tempDir;
   private static final boolean outputToFiles = true; // true = output to
 
-  private static int joinType;
-  private static int joinBuffer;
-  private static int sortType;
-  private static int sortBuffer;
-
   // files, false = output
   // to System.out
 
@@ -50,7 +45,6 @@ public class Compiler {
     // Set up configs for which type of sort and join to use
     configFile = args[0];
     readConfigFile();
-    setConfig();
     DBCatalog db = DBCatalog.getInstance();
     db.setDataDirectory(inputDir + "/db");
     db.setSortDirectory(tempDir);
@@ -62,6 +56,8 @@ public class Compiler {
         for (File file : (new File(outputDir).listFiles()))
           file.delete(); // clean output directory
       }
+
+      // TODO: gather statistics
 
       // Set up indexes
       logger.info("Building indexes...");
@@ -98,7 +94,7 @@ public class Compiler {
         logger.info("Processing query: " + statement);
 
         try {
-          Operator plan = queryPlanBuilder.buildPlan(statement, joinType, joinBuffer, sortType, sortBuffer);
+          Operator plan = queryPlanBuilder.buildPlan(statement);
 
           if (outputToFiles) {
             File outfile = new File(outputDir + "/query" + counter);
@@ -123,8 +119,7 @@ public class Compiler {
 
   /**
    * Reads the config file passed through the command line and sets all the
-   * parameters for how
-   * queries should be built.
+   * directories.
    */
   private static void readConfigFile() {
     try {
@@ -132,22 +127,6 @@ public class Compiler {
       inputDir = s.nextLine();
       outputDir = s.nextLine();
       tempDir = s.nextLine();
-    } catch (Exception e) {
-      System.out.println(e + ": Could not find config file");
-    }
-  }
-
-  /** helper function to read in settings from the plan_builder_config.txt file */
-  private static void setConfig() {
-    try {
-      Scanner s = new Scanner(new File(inputDir + "/plan_builder_config.txt"));
-      joinType = s.nextInt();
-      if (joinType == 1)
-        joinBuffer = s.nextInt();
-      sortType = s.nextInt();
-      if (sortType == 1)
-        sortBuffer = s.nextInt();
-      DBCatalog.getInstance().setUseIndex(s.nextInt() == 1 ? true : false);
     } catch (Exception e) {
       System.out.println(e + ": Could not find config file");
     }
