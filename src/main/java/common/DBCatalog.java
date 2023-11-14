@@ -32,7 +32,6 @@ public class DBCatalog {
 
   private final HashMap<String, ArrayList<Column>> tables;
   private HashMap<String, ArrayList<String>> indexInfo;
-  private boolean useIndexes;
   private static DBCatalog db;
 
   private String dbDirectory;
@@ -105,26 +104,6 @@ public class DBCatalog {
    */
   public HashMap<String, ArrayList<String>> getIndexInfo() {
     return indexInfo;
-  }
-
-  /**
-   * Sets the boolean value as to whether indexes are to be used for selection or
-   * not.
-   *
-   * @param val true if indexes are to be used.
-   */
-  public void setUseIndex(boolean val) {
-    useIndexes = val;
-  }
-
-  /**
-   * Returns a boolean value as to whether indexes are to be used for selection or
-   * not.
-   *
-   * @return true if indexes are to be used.
-   */
-  public boolean useIndexes() {
-    return useIndexes;
   }
 
   /**

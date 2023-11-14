@@ -89,7 +89,8 @@ public class PhysicalPlanBuilder {
     // if index exists on table
     DBCatalog db = DBCatalog.getInstance();
     ArrayList<String> indexInfo = db.getIndexInfo().get(scanOp.getTableName());
-    if (db.useIndexes() && indexInfo != null) {
+    // TODO determine if using indexes
+    if (/* db.useIndexes() && */ indexInfo != null) {
       IndexExpressionSplitter splitter = new IndexExpressionSplitter(scanOp.getTableName());
       selectOp.getExpression().accept(splitter);
 
