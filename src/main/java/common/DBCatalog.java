@@ -13,19 +13,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Class to contain information about database - names of tables, schema of each table and file
+ * Class to contain information about database - names of tables, schema of each
+ * table and file
  * where each table is located. Uses singleton pattern.
  *
- * <p>Assumes dbDirectory has a schema.txt file and a /data subdirectory containing one file per
+ * <p>
+ * Assumes dbDirectory has a schema.txt file and a /data subdirectory containing
+ * one file per
  * relation, named "relname".
  *
- * <p>Call by using DBCatalog.getInstance();
+ * <p>
+ * Call by using DBCatalog.getInstance();
  */
 public class DBCatalog {
   private final Logger logger = LogManager.getLogger();
 
   private final HashMap<String, ArrayList<Column>> tables;
-  private HashMap<String, ArrayList<String>> indexInfo;
+  private HashMap<String, HashMap<String, ArrayList<Integer>>> indexInfo;
   private boolean useIndexes;
   private static DBCatalog db;
 
@@ -40,7 +44,8 @@ public class DBCatalog {
   }
 
   /**
-   * Instance getter for singleton pattern, lazy initialization on first invocation
+   * Instance getter for singleton pattern, lazy initialization on first
+   * invocation
    *
    * @return unique DB catalog instance
    */
@@ -82,7 +87,14 @@ public class DBCatalog {
       Scanner s = new Scanner(new File(dbDirectory + "/index_info.txt"));
       while (s.hasNextLine()) {
         String[] params = s.nextLine().split(" ");
-        indexInfo.put(params[0], new ArrayList<>(List.of(params[1], params[2], params[3])));
+        if (indexInfo.containsKey(params[0])) {
+          HashMap<String, ArrayList<Integer>> colmap = indexInfo.get(params[0]);
+          colmap.put(params[1], new ArrayList<>(List.of(Integer.valueOf(params[2]), Integer.valueOf(params[3]))));
+        } else {
+          HashMap<String, ArrayList<Integer>> colmap = new HashMap<>();
+          colmap.put(params[1], new ArrayList<>(List.of(Integer.valueOf(params[2]), Integer.valueOf(params[3]))));
+          indexInfo.put(params[0], colmap);
+        }
       }
     } catch (Exception e) {
       System.out.println(e + ": Could not find index_info file");
@@ -90,17 +102,19 @@ public class DBCatalog {
   }
 
   /**
-   * Returns the hashmap of ArrayLists of Strings of the column, cluster flag, and tree order for
+   * Returns the hashmap of ArrayLists of Strings of the column, cluster flag, and
+   * tree order for
    * the index on each of the tables.
    *
    * @return a hashmap containing the index info.
    */
-  public HashMap<String, ArrayList<String>> getIndexInfo() {
+  public HashMap<String, HashMap<String, ArrayList<Integer>>> getIndexInfo() {
     return indexInfo;
   }
 
   /**
-   * Sets the boolean value as to whether indexes are to be used for selection or not.
+   * Sets the boolean value as to whether indexes are to be used for selection or
+   * not.
    *
    * @param val true if indexes are to be used.
    */
@@ -109,7 +123,8 @@ public class DBCatalog {
   }
 
   /**
-   * Returns a boolean value as to whether indexes are to be used for selection or not.
+   * Returns a boolean value as to whether indexes are to be used for selection or
+   * not.
    *
    * @return true if indexes are to be used.
    */
@@ -179,9 +194,10 @@ public class DBCatalog {
   }
 
   /**
-   * Finds the index of a column of a given table, as it is found in the table schema
+   * Finds the index of a column of a given table, as it is found in the table
+   * schema
    *
-   * @param tableName The table holding the column
+   * @param tableName  The table holding the column
    * @param columnName The column whose index is to be located
    * @return The index of the column
    */
