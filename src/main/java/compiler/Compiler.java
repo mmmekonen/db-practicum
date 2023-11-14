@@ -75,13 +75,14 @@ public class Compiler {
       logger.info("Building indexes...");
       ArrayList<String> tables = new ArrayList<>();
       tables.addAll(db.getIndexInfo().keySet());
-
       for (int i = 0; i < tables.size(); i++) {
+        HashMap<String, ArrayList<Integer>> colmap = db.getIndexInfo().get(tables.get(i));
+        for (String col : colmap.keySet()) {
+          ArrayList<Integer> info = colmap.get(col);
 
-        ArrayList<String> info = db.getIndexInfo().get(tables.get(i));
-
-        TreeIndex t = new TreeIndex(
-            inputDir, tables.get(i), db.findColumnIndex(tables.get(i), info.get(0)), info);
+          TreeIndex t = new TreeIndex(
+              inputDir, tables.get(i), col, db.findColumnIndex(tables.get(i), col), info);
+        }
       }
 
       logger.info("Indexes have been built");
@@ -109,7 +110,7 @@ public class Compiler {
           Operator plan = queryPlanBuilder.buildPlan(statement);
 
           if (outputToFiles) {
-            // TODO: output logical and physicl query plans
+            // TODO: output logical and physical query plans
             File outfile = new File(outputDir + "/query" + counter);
             long timeElapsed = System.currentTimeMillis();
             plan.dump(outfile);
@@ -131,8 +132,15 @@ public class Compiler {
   }
 
   /**
+   * <<<<<<< HEAD
    * Reads the config file passed through the command line and sets all the
    * directories.
+   * =======
+   * 
+   * Reads the config file passed through the command line and sets all the
+   * parameters for how
+   * queries should be built.
+   * >>>>>>> multiple_indexes
    */
   private static void readConfigFile() {
     try {

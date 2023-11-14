@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Objects;
 import jdk.jshell.spi.ExecutionControl;
 import net.sf.jsqlparser.JSQLParserException;
@@ -40,20 +41,13 @@ public class P3IndexTests {
     tables.addAll(db.getIndexInfo().keySet());
 
     for (int i = 0; i < tables.size(); i++) {
+      HashMap<String, ArrayList<Integer>> colmap = db.getIndexInfo().get(tables.get(i));
+      for (String col : colmap.keySet()) {
+        ArrayList<Integer> info = colmap.get(col);
 
-      ArrayList<String> info = db.getIndexInfo().get(tables.get(i));
-
-      ScanOperator base = new ScanOperator(tables.get(i), null);
-      ArrayList<Column> temp = new ArrayList<>();
-      temp.add(new Column(new Table(null, tables.get(i)), info.get(0)));
-      InMemorySortOperator op = new InMemorySortOperator(base, temp);
-
-      TreeIndex t =
-          new TreeIndex(
-              "src/test/resources/samples/input",
-              tables.get(i),
-              db.findColumnIndex(tables.get(i), info.get(0)),
-              info);
+        TreeIndex t = new TreeIndex("src/test/resources/samples/input", tables.get(i), col,
+            db.findColumnIndex(tables.get(i), col), info);
+      }
     }
   }
 

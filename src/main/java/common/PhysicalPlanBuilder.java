@@ -1,6 +1,8 @@
 package common;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import logical_operator.DuplicateElimination;
 import logical_operator.Join;
 import logical_operator.Projection;
@@ -88,10 +90,12 @@ public class PhysicalPlanBuilder {
 
     // if index exists on table
     DBCatalog db = DBCatalog.getInstance();
-    ArrayList<String> indexInfo = db.getIndexInfo().get(scanOp.getTableName());
+    HashMap<String, ArrayList<Integer>> indexInfo = db.getIndexInfo().get(scanOp.getTableName());
+    // TODO: decide column to use index for
+    String columnName = null;
     // TODO determine if using indexes
     if (/* db.useIndexes() && */ indexInfo != null) {
-      IndexExpressionSplitter splitter = new IndexExpressionSplitter(scanOp.getTableName());
+      IndexExpressionSplitter splitter = new IndexExpressionSplitter(columnName);
       selectOp.getExpression().accept(splitter);
 
       // Expression indexExpression = splitter.getIndexConditions();
@@ -106,11 +110,11 @@ public class PhysicalPlanBuilder {
       } else if (selectExpression == null) {
         // only indexScan operator, no selection
         root = new IndexScanOperator(
-            scanOp.getTableName(), scanOp.getAlias(), indexInfo.get(0), lowkey, highkey);
+            scanOp.getTableName(), scanOp.getAlias(), columnName, lowkey, highkey);
       } else {
         // both indexscan and selection
         Operator indexScanOp = new IndexScanOperator(
-            scanOp.getTableName(), scanOp.getAlias(), indexInfo.get(0), lowkey, highkey);
+            scanOp.getTableName(), scanOp.getAlias(), columnName, lowkey, highkey);
         root = new SelectOperator(indexScanOp, selectExpression);
       }
     } else {

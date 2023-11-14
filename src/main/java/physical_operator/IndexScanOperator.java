@@ -49,12 +49,11 @@ public class IndexScanOperator extends Operator {
     }
 
     DBCatalog catalog = DBCatalog.getInstance();
-    HashMap<String, ArrayList<String>> c = catalog.getIndexInfo();
-    ArrayList<String> indexInfo = c.get(tableName);
-    this.clustered = (indexInfo.get(1).equals("1"));
+    HashMap<String, HashMap<String, ArrayList<Integer>>> c = catalog.getIndexInfo();
+    ArrayList<Integer> indexInfo = c.get(tableName).get(indexColumnName);
+    this.clustered = indexInfo.get(0) == 1;
 
-    this.tree =
-        new TreeIndex(catalog.getIndexDirectory() + '/' + tableName + '.' + indexColumnName);
+    this.tree = new TreeIndex(catalog.getIndexDirectory() + '/' + tableName + '.' + indexColumnName);
     this.notEndReached = true;
 
     int[] header = tree.readNode3(0);

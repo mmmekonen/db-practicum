@@ -31,8 +31,8 @@ public class DBCatalog {
   private final Logger logger = LogManager.getLogger();
 
   private final HashMap<String, ArrayList<Column>> tables;
-  private HashMap<String, ArrayList<String>> indexInfo;
   private HashMap<String, ArrayList<String>> stats;
+  private HashMap<String, HashMap<String, ArrayList<Integer>>> indexInfo;
   private static DBCatalog db;
 
   private String dbDirectory;
@@ -90,7 +90,14 @@ public class DBCatalog {
       Scanner s = new Scanner(new File(dbDirectory + "/index_info.txt"));
       while (s.hasNextLine()) {
         String[] params = s.nextLine().split(" ");
-        indexInfo.put(params[0], new ArrayList<>(List.of(params[1], params[2], params[3])));
+        if (indexInfo.containsKey(params[0])) {
+          HashMap<String, ArrayList<Integer>> colmap = indexInfo.get(params[0]);
+          colmap.put(params[1], new ArrayList<>(List.of(Integer.valueOf(params[2]), Integer.valueOf(params[3]))));
+        } else {
+          HashMap<String, ArrayList<Integer>> colmap = new HashMap<>();
+          colmap.put(params[1], new ArrayList<>(List.of(Integer.valueOf(params[2]), Integer.valueOf(params[3]))));
+          indexInfo.put(params[0], colmap);
+        }
       }
     } catch (Exception e) {
       System.out.println(e + ": Could not find index_info file");
@@ -104,12 +111,19 @@ public class DBCatalog {
    *
    * @return a hashmap containing the index info.
    */
-  public HashMap<String, ArrayList<String>> getIndexInfo() {
+  public HashMap<String, HashMap<String, ArrayList<Integer>>> getIndexInfo() {
     return indexInfo;
   }
 
   /**
+   * <<<<<<< HEAD
    * Sets the statistics for all the relations in the databse.
+   * =======
+   * Sets the boolean value as to whether indexes are to be used for selection or
+   * not.
+   *
+   * @param val true if indexes are to be used.
+   *            >>>>>>> multiple_indexes
    */
   public void setStats() {
     try {
@@ -128,9 +142,17 @@ public class DBCatalog {
   }
 
   /**
+   * <<<<<<< HEAD
    * Returns the statistics for all the relations in the database.
    * 
    * @return a hash map of a table to its stats, all in strings.
+   *         =======
+   *         Returns a boolean value as to whether indexes are to be used for
+   *         selection or
+   *         not.
+   *
+   * @return true if indexes are to be used.
+   *         >>>>>>> multiple_indexes
    */
   public HashMap<String, ArrayList<String>> getStats() {
     return stats;

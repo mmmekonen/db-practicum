@@ -35,8 +35,7 @@ public class P3UnitTests {
     DBCatalog.getInstance().setIndexDirectory("src/test/resources/samples/expected_indexes");
     DBCatalog.getInstance().setIndexInfo();
 
-    String queriesFile =
-        Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
+    String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
     // for windows machine
     if (queriesFile.contains(":")) {
       queriesFile = queriesFile.substring(3);
@@ -47,7 +46,8 @@ public class P3UnitTests {
     statementList = statements.getStatements();
 
     outputDir = new File("src/test/resources/samples/output");
-    for (File file : (outputDir.listFiles())) file.delete(); // clean output directory
+    for (File file : (outputDir.listFiles()))
+      file.delete(); // clean output directory
   }
 
   private void testHelper(Operator planIndex, Operator planNoIndex, int queryNum) {
@@ -71,10 +71,8 @@ public class P3UnitTests {
 
   @Test
   public void testQuery1() throws ExecutionControl.NotImplementedException {
-    DBCatalog.getInstance().setUseIndex(true);
     Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(0));
 
-    DBCatalog.getInstance().setUseIndex(false);
     Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(0));
 
     testHelper(planIndex, planNoIndex, 1);
@@ -82,10 +80,9 @@ public class P3UnitTests {
 
   @Test
   public void testQuery2() throws ExecutionControl.NotImplementedException {
-    DBCatalog.getInstance().setUseIndex(true);
+
     Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(1));
 
-    DBCatalog.getInstance().setUseIndex(false);
     Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(1));
 
     testHelper(planIndex, planNoIndex, 2);
@@ -93,10 +90,8 @@ public class P3UnitTests {
 
   @Test
   public void testQuery3() throws ExecutionControl.NotImplementedException {
-    DBCatalog.getInstance().setUseIndex(true);
     Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(2));
 
-    DBCatalog.getInstance().setUseIndex(false);
     Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(2));
 
     testHelper(planIndex, planNoIndex, 3);
@@ -104,10 +99,8 @@ public class P3UnitTests {
 
   @Test
   public void testQuery4() throws ExecutionControl.NotImplementedException {
-    DBCatalog.getInstance().setUseIndex(true);
     Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(3));
 
-    DBCatalog.getInstance().setUseIndex(false);
     Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(3));
 
     testHelper(planIndex, planNoIndex, 4);
@@ -115,10 +108,8 @@ public class P3UnitTests {
 
   @Test
   public void testQuery5() throws ExecutionControl.NotImplementedException {
-    DBCatalog.getInstance().setUseIndex(true);
     Operator planIndex = queryPlanBuilder.buildPlan(statementList.get(4));
 
-    DBCatalog.getInstance().setUseIndex(false);
     Operator planNoIndex = queryPlanBuilder.buildPlan(statementList.get(4));
 
     testHelper(planIndex, planNoIndex, 5);
