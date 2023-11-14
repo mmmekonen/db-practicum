@@ -144,7 +144,9 @@ public class Compiler {
     }
   }
 
-  /** TODO */
+  /**
+   * Computes the statistics for each relation in the database.
+   */
   private static void gatherStats() {
     try (BufferedWriter bw = new BufferedWriter(new FileWriter(inputDir + "/db/stats.txt"));) {
       DBCatalog db = DBCatalog.getInstance();

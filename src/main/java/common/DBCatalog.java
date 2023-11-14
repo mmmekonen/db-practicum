@@ -173,7 +173,11 @@ public class DBCatalog {
     return new File(dbDirectory + "/data/" + tableName);
   }
 
-  /** TODO: */
+  /**
+   * Returns the names of all the tables in the database.
+   * 
+   * @return a set of strings of table names.
+   */
   public Set<String> getTableNames() {
     return tables.keySet();
   }
