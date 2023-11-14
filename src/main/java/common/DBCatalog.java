@@ -116,14 +116,7 @@ public class DBCatalog {
   }
 
   /**
-   * <<<<<<< HEAD
    * Sets the statistics for all the relations in the databse.
-   * =======
-   * Sets the boolean value as to whether indexes are to be used for selection or
-   * not.
-   *
-   * @param val true if indexes are to be used.
-   *            >>>>>>> multiple_indexes
    */
   public void setStats() {
     try {
@@ -142,17 +135,9 @@ public class DBCatalog {
   }
 
   /**
-   * <<<<<<< HEAD
    * Returns the statistics for all the relations in the database.
    * 
    * @return a hash map of a table to its stats, all in strings.
-   *         =======
-   *         Returns a boolean value as to whether indexes are to be used for
-   *         selection or
-   *         not.
-   *
-   * @return true if indexes are to be used.
-   *         >>>>>>> multiple_indexes
    */
   public HashMap<String, ArrayList<String>> getStats() {
     return stats;

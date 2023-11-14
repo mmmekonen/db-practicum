@@ -132,15 +132,8 @@ public class Compiler {
   }
 
   /**
-   * <<<<<<< HEAD
    * Reads the config file passed through the command line and sets all the
    * directories.
-   * =======
-   * 
-   * Reads the config file passed through the command line and sets all the
-   * parameters for how
-   * queries should be built.
-   * >>>>>>> multiple_indexes
    */
   private static void readConfigFile() {
     try {
