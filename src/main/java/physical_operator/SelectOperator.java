@@ -1,8 +1,8 @@
 package physical_operator;
 
-import common.SelectExpressionVisitor;
 import common.Tuple;
 import net.sf.jsqlparser.expression.Expression;
+import visitors.SelectExpressionVisitor;
 
 /**
  * A class to represent a select operator on a relation. Takes a tuple from its child operator and

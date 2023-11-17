@@ -1,167 +1,290 @@
-package common;
+package visitors;
 
-import java.util.*;
-import net.sf.jsqlparser.expression.*;
-import net.sf.jsqlparser.expression.operators.arithmetic.*;
+import java.util.ArrayList;
+import java.util.Stack;
+
+import common.Tuple;
+import net.sf.jsqlparser.expression.AllValue;
+import net.sf.jsqlparser.expression.AnalyticExpression;
+import net.sf.jsqlparser.expression.AnyComparisonExpression;
+import net.sf.jsqlparser.expression.ArrayConstructor;
+import net.sf.jsqlparser.expression.ArrayExpression;
+import net.sf.jsqlparser.expression.CaseExpression;
+import net.sf.jsqlparser.expression.CastExpression;
+import net.sf.jsqlparser.expression.CollateExpression;
+import net.sf.jsqlparser.expression.ConnectByRootOperator;
+import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
+import net.sf.jsqlparser.expression.DateValue;
+import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.ExpressionVisitor;
+import net.sf.jsqlparser.expression.ExtractExpression;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.HexValue;
+import net.sf.jsqlparser.expression.IntervalExpression;
+import net.sf.jsqlparser.expression.JdbcNamedParameter;
+import net.sf.jsqlparser.expression.JdbcParameter;
+import net.sf.jsqlparser.expression.JsonAggregateFunction;
+import net.sf.jsqlparser.expression.JsonExpression;
+import net.sf.jsqlparser.expression.JsonFunction;
+import net.sf.jsqlparser.expression.KeepExpression;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.MySQLGroupConcat;
+import net.sf.jsqlparser.expression.NextValExpression;
+import net.sf.jsqlparser.expression.NotExpression;
+import net.sf.jsqlparser.expression.NullValue;
+import net.sf.jsqlparser.expression.NumericBind;
+import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
+import net.sf.jsqlparser.expression.OracleHint;
+import net.sf.jsqlparser.expression.OracleNamedFunctionParameter;
+import net.sf.jsqlparser.expression.OverlapsCondition;
+import net.sf.jsqlparser.expression.Parenthesis;
+import net.sf.jsqlparser.expression.RowConstructor;
+import net.sf.jsqlparser.expression.RowGetExpression;
+import net.sf.jsqlparser.expression.SafeCastExpression;
+import net.sf.jsqlparser.expression.SignedExpression;
+import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.TimeKeyExpression;
+import net.sf.jsqlparser.expression.TimeValue;
+import net.sf.jsqlparser.expression.TimestampValue;
+import net.sf.jsqlparser.expression.TimezoneExpression;
+import net.sf.jsqlparser.expression.TryCastExpression;
+import net.sf.jsqlparser.expression.UserVariable;
+import net.sf.jsqlparser.expression.ValueListExpression;
+import net.sf.jsqlparser.expression.VariableAssignment;
+import net.sf.jsqlparser.expression.WhenClause;
+import net.sf.jsqlparser.expression.XMLSerializeExpr;
+import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
+import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseAnd;
+import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseLeftShift;
+import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseOr;
+import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseRightShift;
+import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseXor;
+import net.sf.jsqlparser.expression.operators.arithmetic.Concat;
+import net.sf.jsqlparser.expression.operators.arithmetic.Division;
+import net.sf.jsqlparser.expression.operators.arithmetic.IntegerDivision;
+import net.sf.jsqlparser.expression.operators.arithmetic.Modulo;
+import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
+import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
-import net.sf.jsqlparser.expression.operators.relational.*;
+import net.sf.jsqlparser.expression.operators.relational.Between;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
+import net.sf.jsqlparser.expression.operators.relational.FullTextSearch;
+import net.sf.jsqlparser.expression.operators.relational.GeometryDistance;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.IsBooleanExpression;
+import net.sf.jsqlparser.expression.operators.relational.IsDistinctExpression;
+import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
+import net.sf.jsqlparser.expression.operators.relational.JsonOperator;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
+import net.sf.jsqlparser.expression.operators.relational.Matches;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
+import net.sf.jsqlparser.expression.operators.relational.SimilarToExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
-public class ExpressionSplitter implements ExpressionVisitor {
+/**
+ * A class to evaluate the WHERE clause of queries. Given a tuple and its column schema, it uses a
+ * visitor pattern to evaluate the accepted Expression on the current tuple. The final result can be
+ * accessed through the conditionSatisfied function.
+ */
+public class SelectExpressionVisitor implements ExpressionVisitor {
 
-  private HashMap<Table, Expression> conditions;
+  // the final condition
+  private boolean condition;
+
+  // the current tuple the expression is being evaluated on
+  private Tuple tuple;
+
+  // stack contianing the current values to use in the expression
+  private Stack<Long> stack;
+
+  // the columns corresponding to each tuple position
+  private ArrayList<Column> columns;
 
   /**
-   * Creates an empty ExpressionSplitter object that keeps track of the expressions it visits using
-   * a hashmap
+   * Creates an expression visitor using a Tuple and an ArrayList of Columns.
+   *
+   * @param tuple a Tuple of integers.
+   * @param schema ArrayList of columns which correspond to the respective tuple values.
    */
-  public ExpressionSplitter() {
-    this.conditions = new HashMap<>();
+  public SelectExpressionVisitor(Tuple tuple, ArrayList<Column> schema) {
+    this.condition = true;
+    this.tuple = tuple;
+    this.stack = new Stack<>();
+    this.columns = schema;
   }
 
   /**
-   * Returns an expression on the provided table
+   * Returns a boolean on whether the predicate was satisfied by the tuple.
    *
-   * @param t A table with an associated expression
-   * @return An expression that references a table t
+   * @return True if the expression evalutes to true for the current tuple, otherwise false.
    */
-  public Expression getConditions(Table t) {
-    return conditions.get(t);
+  public boolean conditionSatisfied() {
+    return condition;
   }
 
   /**
-   * A helper function to add an expression to the associated hashmap entry. If a hashmap entry
-   * already exists, this function combines the two using a conjunction.
+   * Visits and evaluates each part of the expression
    *
-   * @param e An expression to be tracked
-   * @param t The table which e references
-   */
-  private void concatHelper(Expression e, Table t) {
-    if (conditions.containsKey(t)) {
-      Expression newExpression =
-          new AndExpression().withLeftExpression(conditions.get(t)).withRightExpression(e);
-      conditions.put(t, newExpression);
-    } else conditions.put(t, e);
-  }
-
-  /**
-   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
-   * visits its sub-expressions if it does not
-   *
-   * @param andExpression The expression to be evaluated
+   * @param andExpression The expression to be visited
    */
   @Override
   public void visit(AndExpression andExpression) {
-    ExpressionSorter visitor = new ExpressionSorter();
-    andExpression.accept(visitor);
-
-    if (visitor.onSingleTable()) concatHelper(andExpression, visitor.getTable());
-    else {
+    boolean left;
+    boolean right;
+    try {
       andExpression.getLeftExpression().accept(this);
+      left = condition;
+    } catch (IndexOutOfBoundsException e) {
+      left = true;
+    }
+
+    try {
       andExpression.getRightExpression().accept(this);
+      right = condition;
+    } catch (IndexOutOfBoundsException e) {
+      right = true;
+    }
+
+    condition = left && right;
+  }
+
+  /**
+   * Visits a column and selects relevant elements
+   *
+   * @param tableColumn The column to be visited
+   */
+  @Override
+  public void visit(Column tableColumn) {
+    String name = tableColumn.getColumnName();
+    String tableName = tableColumn.getTable().getName();
+    for (int i = 0; i < columns.size(); i++) {
+      String name2 = columns.get(i).getColumnName();
+
+      Table t = columns.get(i).getTable();
+      String tableName2 = t.getAlias() != null ? t.getAlias().getName() : t.getName();
+      // check if the column in the tuple is the same as the one in the expression
+      if (name.equals(name2) && tableName.equals(tableName2)) {
+        stack.push((long) tuple.getElementAtIndex(i));
+        return;
+      }
     }
   }
 
-  // Not used
-  @Override
-  public void visit(Column tableColumn) {
-    // not important
-  }
-
-  // Not used
+  /**
+   * Visits a LongValue and pushes it onto the stack
+   *
+   * @param longValue The LongValue to be visited
+   */
   @Override
   public void visit(LongValue longValue) {
-    // not important
+    stack.push(longValue.getValue());
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
-   * visits its sub-expressions if it does not
+   * Visits and evaluates all parts of the expression
    *
-   * @param equalsTo The expression to be evaluated
+   * @param equalsTo The expression to be visited
    */
   @Override
   public void visit(EqualsTo equalsTo) {
-    ExpressionSorter visitor = new ExpressionSorter();
-    equalsTo.accept(visitor);
+    equalsTo.getLeftExpression().accept(this);
+    equalsTo.getRightExpression().accept(this);
 
-    concatHelper(equalsTo, visitor.getTable());
+    long right = stack.pop();
+    long left = stack.pop();
+
+    condition = left == right;
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
-   * visits its sub-expressions if it does not
+   * Visits and evaluates all parts of the expression
    *
-   * @param notEqualsTo The expression to be evaluated
+   * @param notEqualsTo The expression to be visited
    */
   @Override
   public void visit(NotEqualsTo notEqualsTo) {
-    ExpressionSorter visitor = new ExpressionSorter();
-    notEqualsTo.accept(visitor);
+    notEqualsTo.getLeftExpression().accept(this);
+    notEqualsTo.getRightExpression().accept(this);
 
-    concatHelper(notEqualsTo, visitor.getTable());
+    long right = stack.pop();
+    long left = stack.pop();
+
+    condition = left != right;
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
-   * visits its sub-expressions if it does not
+   * Visits and evaluates all parts of the expression
    *
-   * @param greaterThan The expression to be evaluated
+   * @param greaterThan The expression to be visited
    */
   @Override
   public void visit(GreaterThan greaterThan) {
-    ExpressionSorter visitor = new ExpressionSorter();
-    greaterThan.accept(visitor);
+    greaterThan.getLeftExpression().accept(this);
+    greaterThan.getRightExpression().accept(this);
 
-    concatHelper(greaterThan, visitor.getTable());
+    long right = stack.pop();
+    long left = stack.pop();
+
+    condition = left > right;
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
-   * visits its sub-expressions if it does not
+   * Visits and evaluates all parts of the expression
    *
-   * @param greaterThanEquals The expression to be evaluated
+   * @param greaterThanEquals The expression to be visited
    */
   @Override
   public void visit(GreaterThanEquals greaterThanEquals) {
-    ExpressionSorter visitor = new ExpressionSorter();
-    greaterThanEquals.accept(visitor);
+    greaterThanEquals.getLeftExpression().accept(this);
+    greaterThanEquals.getRightExpression().accept(this);
 
-    concatHelper(greaterThanEquals, visitor.getTable());
+    long right = stack.pop();
+    long left = stack.pop();
+
+    condition = left >= right;
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
-   * visits its sub-expressions if it does not
+   * Visits and evaluates all parts of the expression
    *
-   * @param minorThan The expression to be evaluated
+   * @param minorThan The expression to be visited
    */
   @Override
   public void visit(MinorThan minorThan) {
-    ExpressionSorter visitor = new ExpressionSorter();
-    minorThan.accept(visitor);
+    minorThan.getLeftExpression().accept(this);
+    minorThan.getRightExpression().accept(this);
+    long right = stack.pop();
+    long left = stack.pop();
 
-    concatHelper(minorThan, visitor.getTable());
+    condition = left < right;
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
-   * visits its sub-expressions if it does not
+   * Visits and evaluates all parts of the expression
    *
-   * @param minorThanEquals The expression to be evaluated
+   * @param minorThanEquals The expression to be visited
    */
   @Override
   public void visit(MinorThanEquals minorThanEquals) {
-    ExpressionSorter visitor = new ExpressionSorter();
-    minorThanEquals.accept(visitor);
+    minorThanEquals.getLeftExpression().accept(this);
+    minorThanEquals.getRightExpression().accept(this);
+    long right = stack.pop();
+    long left = stack.pop();
 
-    concatHelper(minorThanEquals, visitor.getTable());
+    condition = left <= right;
   }
 
   // unused operators

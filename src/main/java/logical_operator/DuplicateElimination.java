@@ -1,6 +1,6 @@
 package logical_operator;
 
-import common.PhysicalPlanBuilder;
+import visitors.PhysicalPlanBuilder;
 
 /**
  * A class to represent a duplicate elimination operator on a relation. This is the logical operator

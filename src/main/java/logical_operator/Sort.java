@@ -1,8 +1,8 @@
 package logical_operator;
 
-import common.PhysicalPlanBuilder;
 import java.util.List;
 import net.sf.jsqlparser.schema.Column;
+import visitors.PhysicalPlanBuilder;
 
 /**
  * A class to represent a sort operator on a relation. This is a logical sort operator taht

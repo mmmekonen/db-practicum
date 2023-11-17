@@ -1,8 +1,8 @@
 package logical_operator;
 
-import common.PhysicalPlanBuilder;
 import java.util.List;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import visitors.PhysicalPlanBuilder;
 
 /**
  * A class to represent a projection operator on a relation. This is the logical representation of

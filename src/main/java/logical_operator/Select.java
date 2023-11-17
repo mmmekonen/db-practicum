@@ -1,7 +1,7 @@
 package logical_operator;
 
-import common.PhysicalPlanBuilder;
 import net.sf.jsqlparser.expression.Expression;
+import visitors.PhysicalPlanBuilder;
 
 /**
  * A class to represent a select operator on a relation. This is the logical representation of the

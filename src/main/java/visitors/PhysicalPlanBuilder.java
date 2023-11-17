@@ -1,8 +1,9 @@
-package common;
+package visitors;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import common.DBCatalog;
 import logical_operator.DuplicateElimination;
 import logical_operator.Join;
 import logical_operator.Projection;

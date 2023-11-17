@@ -1,9 +1,9 @@
 package physical_operator;
 
-import common.SelectExpressionVisitor;
 import common.Tuple;
 import java.util.ArrayList;
 import net.sf.jsqlparser.expression.Expression;
+import visitors.SelectExpressionVisitor;
 
 /**
  * A class to represent a block-nested loop join. It loads blocks of tuples into the buffer and

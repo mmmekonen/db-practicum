@@ -1,6 +1,6 @@
 package logical_operator;
 
-import common.PhysicalPlanBuilder;
+import visitors.PhysicalPlanBuilder;
 
 /**
  * Abstract class to represent logical operators. Every operator has a reference to an outputSchema

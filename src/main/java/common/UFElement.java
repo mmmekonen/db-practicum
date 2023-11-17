@@ -1,45 +1,52 @@
 package common;
 
-import java.util.HashSet;
-import java.util.Set;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
-public class UFElement {
-    
-    private HashSet<String> attributes;
-    Integer upperBound;
-    Integer lowerBound;
+public class UFElement implements Cloneable {
 
-    public UFElement() {
-        attributes = new HashSet<>();
+    enum BoundType {
+        UPPER,
+        LOWER,
+        EQUALS
     }
     
-    public Set<String> getAttributes() {
+    private ArrayList<String> attributes;
+    long upperBound;
+    long lowerBound;
+
+    public UFElement(String attr) {
+        this.attributes = new ArrayList<>();
+        attributes.add(attr);
+        this.upperBound = Long.MAX_VALUE;
+        this.lowerBound = Long.MIN_VALUE;
+    }
+    
+    public List<String> getAttributes() {
         return attributes;
     }
 
-    public Integer getLowerBound() {
-        return lowerBound;
-    }
-
-    public Integer getUpperBound() {
-        return upperBound;
-    }
-
-    public Integer getEqualityCon() {
-        if (upperBound.equals(lowerBound)) return upperBound;
+    public Long getEqualityCon() {
+        if (upperBound == lowerBound) return upperBound;
         else return null;
     }
 
-    public void addAttribute(String attr, Integer upperBound, Integer lowerBound, Integer equalCon) {
+    public void addAttribute(String attr, long bound, BoundType type) {
         attributes.add(attr);
-        if (upperBound < this.upperBound) this.upperBound = upperBound;
-        if (lowerBound > this.lowerBound) this.lowerBound = lowerBound;
-        if (equalCon != null) {
-            this.upperBound = equalCon;
-            this.lowerBound = equalCon;
+        if (type == BoundType.UPPER) this.upperBound = Math.min(bound, upperBound);
+        else if (type == BoundType.LOWER) this.lowerBound = Math.max(bound, lowerBound);
+        else if (type == BoundType.EQUALS) {
+            this.upperBound = bound;
+            this.lowerBound = bound;
         }
     }
 
+    public void union(UFElement other) {
+        this.attributes.addAll(other.attributes);
+        this.upperBound = Math.min(other.upperBound, this.upperBound);
+        this.lowerBound = Math.max(other.lowerBound, this.lowerBound);
+    }
 
 }

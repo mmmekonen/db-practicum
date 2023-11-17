@@ -1,5 +1,9 @@
-package common;
+package visitors;
 
+
+import common.UFElement;
+import common.UFElement.BoundType;
+import common.SelectUF;
 import net.sf.jsqlparser.expression.AllValue;
 import net.sf.jsqlparser.expression.AnalyticExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -12,7 +16,6 @@ import net.sf.jsqlparser.expression.ConnectByRootOperator;
 import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.ExtractExpression;
 import net.sf.jsqlparser.expression.Function;
@@ -91,82 +94,28 @@ import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 /**
- * A class to spilt a selection condition into a part that can be handled by an
- * IndexScan and the
- * part that cannot. This class uses the visitor pattern to traverse the
- * original expression and
- * determines whether each subexpression contains a column that has an index.
+ * A class to evaluate the WHERE clause of queries. Given a tuple and its column schema, it uses a
+ * visitor pattern to evaluate the accepted Expression on the current tuple. The final result can be
+ * accessed through the conditionSatisfied function.
  */
-public class IndexExpressionSplitter implements ExpressionVisitor {
+public class ComparisonExtractor implements ExpressionVisitor {
 
-  // private Expression indexConditions;
-  private Integer lowkey;
-  private Integer highkey;
-  private int keyValue;
-  private boolean equalsCondition;
-  private Expression selectConditions;
-  private boolean hasIndex = false;
-  private String indexColumn;
+    private SelectUF parent;
+    String att1;
+    String att2;
+    long val;
+    boolean valOnRight;
 
-  /**
-   * Creates an empty IndexExpressionSplitter object that keeps track of the
-   * expressions that can be
-   * evaluated with an index and those that can't for a given column of a table.
-   *
-   * @param column The column with the index on it.
-   */
-  public IndexExpressionSplitter(String column) {
-    indexColumn = column;
-  }
 
-  // /**
-  // * Returns the condition that can be handled by an index.
-  // *
-  // * @return an Expression meant to be used by an Index Scan Operator.
-  // */
-  // public Expression getIndexConditions() {
-  // return indexConditions;
-  // }
 
   /**
-   * Gets the lowkey for the conditions that can be done by the IndexScan.
+   * Creates an expression visitor using a Tuple and an ArrayList of Columns.
    *
-   * @return an Integer for the lowkey (may be null).
+   * @param tuple a Tuple of integers.
+   * @param schema ArrayList of columns which correspond to the respective tuple values.
    */
-  public Integer getLowKey() {
-    return lowkey;
-  }
-
-  /**
-   * Gets the highkey for the conditions that can be done by the IndexScan.
-   *
-   * @return an Integer for the highkey (may be null).
-   */
-  public Integer getHighKey() {
-    return highkey;
-  }
-
-  /**
-   * Returns the conditions that cannot be handled by an index.
-   *
-   * @return an Expression meant to be used by a Selection Operator.
-   */
-  public Expression getSelectConditions() {
-    return selectConditions;
-  }
-
-  /**
-   * A helper function to add an expression to the select expressions. If a
-   * expression already
-   * exists, this function combines the two using a conjunction.
-   *
-   * @param e the expression to add
-   */
-  private void concatHelper(Expression e) {
-    if (selectConditions != null) {
-      selectConditions = new AndExpression().withLeftExpression(selectConditions).withRightExpression(e);
-    } else
-      selectConditions = e;
+  public ComparisonExtractor(SelectUF parent) {
+    this.parent = parent;
   }
 
   /**
@@ -176,185 +125,132 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
    */
   @Override
   public void visit(AndExpression andExpression) {
+    
     andExpression.getLeftExpression().accept(this);
     andExpression.getRightExpression().accept(this);
+    
   }
 
   /**
-   * Visits a column and determines whether an index exists for it. If so, it
-   * updates hasIndex to
-   * true.
+   * Visits a column and selects relevant elements
    *
    * @param tableColumn The column to be visited
    */
+
   @Override
   public void visit(Column tableColumn) {
-    String name = tableColumn.getColumnName();
-    // String tableName = table;
-
-    if (indexColumn.equals(name)) {
-      // mark true if index exists
-      hasIndex = true;
-    } else {
-      hasIndex = false;
-    }
-  }
+    if (att1 != null) att2 = tableColumn.getColumnName();
+    else att1 = tableColumn.getColumnName();
+  } 
 
   /**
-   * Visits a long value and stores that value in a variable.
+   * Visits a LongValue and pushes it onto the stack
    *
-   * @param longValue the value being visited
+   * @param longValue The LongValue to be visited
    */
+  
   @Override
   public void visit(LongValue longValue) {
-    keyValue = (int) longValue.getValue();
-  }
+    val = longValue.getValue();
+    if (att1 != null) valOnRight = true;
+} 
+
+    private void clear() {
+        att1 = null;
+        att2 = null;
+        val = 0;
+        valOnRight = false;
+    }
 
   /**
-   * Visits and evaluates all parts of the expression. If one is a column with an
-   * index on it, add
-   * this expression to indexConditions, otherwise, add it to selectConditions.
+   * Visits and evaluates all parts of the expression
    *
    * @param equalsTo The expression to be visited
    */
   @Override
   public void visit(EqualsTo equalsTo) {
+    clear();
+
     equalsTo.getLeftExpression().accept(this);
     equalsTo.getRightExpression().accept(this);
 
-    if (hasIndex) {
-      equalsCondition = true;
-      highkey = keyValue;
-      lowkey = keyValue;
-    } else {
-      concatHelper(equalsTo);
-    }
+    UFElement temp = new UFElement();
+    temp.addAttribute(att1);
+    temp.addAttribute(att2);
+    parent.add(temp);
   }
 
   /**
-   * Adds the expression to selectConditions as it can't be handled by an index.
+   * Visits and evaluates all parts of the expression
    *
    * @param notEqualsTo The expression to be visited
    */
   @Override
   public void visit(NotEqualsTo notEqualsTo) {
-    concatHelper(notEqualsTo);
+    throw new UnsupportedOperationException("Unimplemented method 'visit'");
   }
 
   /**
-   * Visits and evaluates all parts of the expression. If one is a column with an
-   * index on it, add
-   * this expression to indexConditions, otherwise, add it to selectConditions.
+   * Visits and evaluates all parts of the expression
    *
    * @param greaterThan The expression to be visited
    */
   @Override
   public void visit(GreaterThan greaterThan) {
+    clear();
     greaterThan.getLeftExpression().accept(this);
-    int left = keyValue;
     greaterThan.getRightExpression().accept(this);
-    int right = keyValue;
 
-    if (hasIndex) {
-      if (!equalsCondition) {
-        if (left == right) {
-          // left value, right column
-          highkey = highkey == null ? left - 1 : Math.min(highkey.intValue(), left - 1);
-        } else {
-          // right value, left column
-          lowkey = lowkey == null ? right + 1 : Math.max(lowkey.intValue(), right + 1);
-        }
-      }
-    } else {
-      concatHelper(greaterThan);
-    }
+    UFElement temp = new UFElement();
+    temp.addAttribute(att1, valOnRight ? val++ : val--, valOnRight ? BoundType.LOWER : BoundType.UPPER);
+    parent.add(temp);
   }
 
   /**
-   * Visits and evaluates all parts of the expression. If one is a column with an
-   * index on it, add
-   * this expression to indexConditions, otherwise, add it to selectConditions.
+   * Visits and evaluates all parts of the expression
    *
    * @param greaterThanEquals The expression to be visited
    */
   @Override
   public void visit(GreaterThanEquals greaterThanEquals) {
+    clear();
     greaterThanEquals.getLeftExpression().accept(this);
-    int left = keyValue;
     greaterThanEquals.getRightExpression().accept(this);
-    int right = keyValue;
 
-    if (hasIndex) {
-      if (!equalsCondition) {
-        if (left == right) {
-          // left value, right column
-          highkey = highkey == null ? left : Math.min(highkey.intValue(), left);
-        } else {
-          // right value, left column
-          lowkey = lowkey == null ? right : Math.max(lowkey.intValue(), right);
-        }
-      }
-    } else {
-      concatHelper(greaterThanEquals);
-    }
+    UFElement temp = new UFElement();
+    temp.addAttribute(att1, val, valOnRight ? BoundType.LOWER : BoundType.UPPER);
+    parent.add(temp);
   }
 
   /**
-   * Visits and evaluates all parts of the expression. If one is a column with an
-   * index on it, add
-   * this expression to indexConditions, otherwise, add it to selectConditions.
+   * Visits and evaluates all parts of the expression
    *
    * @param minorThan The expression to be visited
    */
   @Override
   public void visit(MinorThan minorThan) {
     minorThan.getLeftExpression().accept(this);
-    int left = keyValue;
     minorThan.getRightExpression().accept(this);
-    int right = keyValue;
-
-    if (hasIndex) {
-      if (!equalsCondition) {
-        if (left == right) {
-          // left value, right column
-          lowkey = lowkey == null ? left + 1 : Math.max(lowkey.intValue(), left + 1);
-        } else {
-          // right value, left column
-          highkey = highkey == null ? right - 1 : Math.min(highkey.intValue(), right - 1);
-        }
-      }
-    } else {
-      concatHelper(minorThan);
-    }
+    
+    UFElement temp = new UFElement();
+    temp.addAttribute(att1, valOnRight ? val-- : val++, valOnRight ? BoundType.UPPER : BoundType.LOWER);
+    parent.add(temp);
   }
 
   /**
-   * Visits and evaluates all parts of the expression. If one is a column with an
-   * index on it, add
-   * this expression to indexConditions, otherwise, add it to selectConditions.
+   * Visits and evaluates all parts of the expression
    *
    * @param minorThanEquals The expression to be visited
    */
   @Override
   public void visit(MinorThanEquals minorThanEquals) {
+    clear();
     minorThanEquals.getLeftExpression().accept(this);
-    int left = keyValue;
     minorThanEquals.getRightExpression().accept(this);
-    int right = keyValue;
-
-    if (hasIndex) {
-      if (!equalsCondition) {
-        if (left == right) {
-          // left value, right column
-          lowkey = lowkey == null ? left : Math.max(lowkey.intValue(), left);
-        } else {
-          // right value, left column
-          highkey = highkey == null ? right : Math.min(highkey.intValue(), right);
-        }
-      }
-    } else {
-      concatHelper(minorThanEquals);
-    }
+    
+    UFElement temp = new UFElement();
+    temp.addAttribute(att1, val, valOnRight ? BoundType.UPPER : BoundType.LOWER);
+    parent.add(temp);
   }
 
   // unused operators
@@ -609,7 +505,7 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
   }
 
   @Override
-  public void visit(UserVariable var) {
+  public void visit(UserVariable vvar) {
     throw new UnsupportedOperationException("Unimplemented method 'visit'");
   }
 

@@ -1,7 +1,7 @@
 package logical_operator;
 
-import common.PhysicalPlanBuilder;
 import net.sf.jsqlparser.expression.Alias;
+import visitors.PhysicalPlanBuilder;
 
 /**
  * A class to represent the a scan operator on a table. This is the logical representation of the

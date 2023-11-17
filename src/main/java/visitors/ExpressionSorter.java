@@ -1,198 +1,81 @@
-package common;
+package visitors;
 
-import java.util.ArrayList;
-import java.util.Stack;
-import net.sf.jsqlparser.expression.AllValue;
-import net.sf.jsqlparser.expression.AnalyticExpression;
-import net.sf.jsqlparser.expression.AnyComparisonExpression;
-import net.sf.jsqlparser.expression.ArrayConstructor;
-import net.sf.jsqlparser.expression.ArrayExpression;
-import net.sf.jsqlparser.expression.CaseExpression;
-import net.sf.jsqlparser.expression.CastExpression;
-import net.sf.jsqlparser.expression.CollateExpression;
-import net.sf.jsqlparser.expression.ConnectByRootOperator;
-import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
-import net.sf.jsqlparser.expression.DateValue;
-import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.expression.ExtractExpression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.HexValue;
-import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.JdbcNamedParameter;
-import net.sf.jsqlparser.expression.JdbcParameter;
-import net.sf.jsqlparser.expression.JsonAggregateFunction;
-import net.sf.jsqlparser.expression.JsonExpression;
-import net.sf.jsqlparser.expression.JsonFunction;
-import net.sf.jsqlparser.expression.KeepExpression;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.MySQLGroupConcat;
-import net.sf.jsqlparser.expression.NextValExpression;
-import net.sf.jsqlparser.expression.NotExpression;
-import net.sf.jsqlparser.expression.NullValue;
-import net.sf.jsqlparser.expression.NumericBind;
-import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
-import net.sf.jsqlparser.expression.OracleHint;
-import net.sf.jsqlparser.expression.OracleNamedFunctionParameter;
-import net.sf.jsqlparser.expression.OverlapsCondition;
-import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.expression.RowConstructor;
-import net.sf.jsqlparser.expression.RowGetExpression;
-import net.sf.jsqlparser.expression.SafeCastExpression;
-import net.sf.jsqlparser.expression.SignedExpression;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.TimeKeyExpression;
-import net.sf.jsqlparser.expression.TimeValue;
-import net.sf.jsqlparser.expression.TimestampValue;
-import net.sf.jsqlparser.expression.TimezoneExpression;
-import net.sf.jsqlparser.expression.TryCastExpression;
-import net.sf.jsqlparser.expression.UserVariable;
-import net.sf.jsqlparser.expression.ValueListExpression;
-import net.sf.jsqlparser.expression.VariableAssignment;
-import net.sf.jsqlparser.expression.WhenClause;
-import net.sf.jsqlparser.expression.XMLSerializeExpr;
-import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseAnd;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseLeftShift;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseOr;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseRightShift;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseXor;
-import net.sf.jsqlparser.expression.operators.arithmetic.Concat;
-import net.sf.jsqlparser.expression.operators.arithmetic.Division;
-import net.sf.jsqlparser.expression.operators.arithmetic.IntegerDivision;
-import net.sf.jsqlparser.expression.operators.arithmetic.Modulo;
-import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
-import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
+import java.util.*;
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
-import net.sf.jsqlparser.expression.operators.relational.Between;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
-import net.sf.jsqlparser.expression.operators.relational.FullTextSearch;
-import net.sf.jsqlparser.expression.operators.relational.GeometryDistance;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsBooleanExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsDistinctExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
-import net.sf.jsqlparser.expression.operators.relational.JsonOperator;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.Matches;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
-import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
-import net.sf.jsqlparser.expression.operators.relational.SimilarToExpression;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
-/**
- * A class to evaluate the WHERE clause of queries. Given a tuple and its column schema, it uses a
- * visitor pattern to evaluate the accepted Expression on the current tuple. The final result can be
- * accessed through the conditionSatisfied function.
- */
-public class SelectExpressionVisitor implements ExpressionVisitor {
+public class ExpressionSorter implements ExpressionVisitor {
 
-  // the final condition
-  private boolean condition;
+  private HashSet<Table> tables;
+  private Table latestTable;
 
-  // the current tuple the expression is being evaluated on
-  private Tuple tuple;
-
-  // stack contianing the current values to use in the expression
-  private Stack<Long> stack;
-
-  // the columns corresponding to each tuple position
-  private ArrayList<Column> columns;
-
-  /**
-   * Creates an expression visitor using a Tuple and an ArrayList of Columns.
-   *
-   * @param tuple a Tuple of integers.
-   * @param schema ArrayList of columns which correspond to the respective tuple values.
-   */
-  public SelectExpressionVisitor(Tuple tuple, ArrayList<Column> schema) {
-    this.condition = true;
-    this.tuple = tuple;
-    this.stack = new Stack<>();
-    this.columns = schema;
+  /** Creates an empty ExpressionSorter */
+  public ExpressionSorter() {
+    this.tables = new HashSet<>();
+    this.latestTable = null;
   }
 
   /**
-   * Returns a boolean on whether the predicate was satisfied by the tuple.
+   * The ExpressionSorter will keep track of how many tables it references, and can return this
+   * boolean
    *
-   * @return True if the expression evalutes to true for the current tuple, otherwise false.
+   * @return true iff the expression references a single table
    */
-  public boolean conditionSatisfied() {
-    return condition;
+  public boolean onSingleTable() {
+    return tables.size() == 1;
   }
 
   /**
-   * Visits and evaluates each part of the expression
+   * If the expression only references one table, this will return that table, otherwise it will
+   * return null
+   *
+   * @return null or a table
+   */
+  public Table getTable() {
+    if (onSingleTable()) return latestTable;
+    else return null;
+  }
+
+  /**
+   * Visits all parts of the expression
    *
    * @param andExpression The expression to be visited
    */
   @Override
   public void visit(AndExpression andExpression) {
-    boolean left;
-    boolean right;
-    try {
-      andExpression.getLeftExpression().accept(this);
-      left = condition;
-    } catch (IndexOutOfBoundsException e) {
-      left = true;
-    }
+    andExpression.getLeftExpression().accept(this);
 
-    try {
-      andExpression.getRightExpression().accept(this);
-      right = condition;
-    } catch (IndexOutOfBoundsException e) {
-      right = true;
-    }
-
-    condition = left && right;
+    andExpression.getRightExpression().accept(this);
   }
 
   /**
-   * Visits a column and selects relevant elements
+   * Adds the table from which the column originates to the set of tables tracked by the object
    *
    * @param tableColumn The column to be visited
    */
   @Override
   public void visit(Column tableColumn) {
-    String name = tableColumn.getColumnName();
-    String tableName = tableColumn.getTable().getName();
-    for (int i = 0; i < columns.size(); i++) {
-      String name2 = columns.get(i).getColumnName();
-
-      Table t = columns.get(i).getTable();
-      String tableName2 = t.getAlias() != null ? t.getAlias().getName() : t.getName();
-      // check if the column in the tuple is the same as the one in the expression
-      if (name.equals(name2) && tableName.equals(tableName2)) {
-        stack.push((long) tuple.getElementAtIndex(i));
-        return;
-      }
-    }
+    tables.add(tableColumn.getTable());
+    latestTable = tableColumn.getTable();
   }
 
-  /**
-   * Visits a LongValue and pushes it onto the stack
-   *
-   * @param longValue The LongValue to be visited
-   */
+  // not used
   @Override
   public void visit(LongValue longValue) {
-    stack.push(longValue.getValue());
+    // :)
   }
 
   /**
-   * Visits and evaluates all parts of the expression
+   * Visits all parts of the expression
    *
    * @param equalsTo The expression to be visited
    */
@@ -200,15 +83,10 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
   public void visit(EqualsTo equalsTo) {
     equalsTo.getLeftExpression().accept(this);
     equalsTo.getRightExpression().accept(this);
-
-    long right = stack.pop();
-    long left = stack.pop();
-
-    condition = left == right;
   }
 
   /**
-   * Visits and evaluates all parts of the expression
+   * Visits all parts of the expression
    *
    * @param notEqualsTo The expression to be visited
    */
@@ -216,15 +94,10 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
   public void visit(NotEqualsTo notEqualsTo) {
     notEqualsTo.getLeftExpression().accept(this);
     notEqualsTo.getRightExpression().accept(this);
-
-    long right = stack.pop();
-    long left = stack.pop();
-
-    condition = left != right;
   }
 
   /**
-   * Visits and evaluates all parts of the expression
+   * Visits all parts of the expression
    *
    * @param greaterThan The expression to be visited
    */
@@ -232,15 +105,10 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
   public void visit(GreaterThan greaterThan) {
     greaterThan.getLeftExpression().accept(this);
     greaterThan.getRightExpression().accept(this);
-
-    long right = stack.pop();
-    long left = stack.pop();
-
-    condition = left > right;
   }
 
   /**
-   * Visits and evaluates all parts of the expression
+   * Visits all parts of the expression
    *
    * @param greaterThanEquals The expression to be visited
    */
@@ -248,15 +116,10 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
   public void visit(GreaterThanEquals greaterThanEquals) {
     greaterThanEquals.getLeftExpression().accept(this);
     greaterThanEquals.getRightExpression().accept(this);
-
-    long right = stack.pop();
-    long left = stack.pop();
-
-    condition = left >= right;
   }
 
   /**
-   * Visits and evaluates all parts of the expression
+   * Visits all parts of the expression
    *
    * @param minorThan The expression to be visited
    */
@@ -264,14 +127,10 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
   public void visit(MinorThan minorThan) {
     minorThan.getLeftExpression().accept(this);
     minorThan.getRightExpression().accept(this);
-    long right = stack.pop();
-    long left = stack.pop();
-
-    condition = left < right;
   }
 
   /**
-   * Visits and evaluates all parts of the expression
+   * Visits all parts of the expression
    *
    * @param minorThanEquals The expression to be visited
    */
@@ -279,10 +138,6 @@ public class SelectExpressionVisitor implements ExpressionVisitor {
   public void visit(MinorThanEquals minorThanEquals) {
     minorThanEquals.getLeftExpression().accept(this);
     minorThanEquals.getRightExpression().accept(this);
-    long right = stack.pop();
-    long left = stack.pop();
-
-    condition = left <= right;
   }
 
   // unused operators
