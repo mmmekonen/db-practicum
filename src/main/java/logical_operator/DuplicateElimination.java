@@ -1,9 +1,10 @@
 package logical_operator;
 
-import visitors.PhysicalPlanBuilder;
+import common.PhysicalPlanBuilder;
 
 /**
- * A class to represent a duplicate elimination operator on a relation. This is the logical operator
+ * A class to represent a duplicate elimination operator on a relation. This is
+ * the logical operator
  * for the physical operator DuplicateEliminationOperator.
  */
 public class DuplicateElimination extends LogicalOperator {
@@ -12,7 +13,8 @@ public class DuplicateElimination extends LogicalOperator {
   private LogicalOperator child;
 
   /**
-   * Creates a logical duplicate elimination operator using a LogicalOperator as its child.
+   * Creates a logical duplicate elimination operator using a LogicalOperator as
+   * its child.
    *
    * @param child The operator's child operator.
    */

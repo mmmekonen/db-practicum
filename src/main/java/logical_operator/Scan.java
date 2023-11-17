@@ -1,10 +1,11 @@
 package logical_operator;
 
 import net.sf.jsqlparser.expression.Alias;
-import visitors.PhysicalPlanBuilder;
+import common.PhysicalPlanBuilder;
 
 /**
- * A class to represent the a scan operator on a table. This is the logical representation of the
+ * A class to represent the a scan operator on a table. This is the logical
+ * representation of the
  * physical scan operator, ScanOperator.
  */
 public class Scan extends LogicalOperator {
@@ -19,7 +20,7 @@ public class Scan extends LogicalOperator {
    * Creates a logical scan operator using a table name and an alias.
    *
    * @param tableName The name of the table to scan.
-   * @param alias The alias of the table.
+   * @param alias     The alias of the table.
    */
   public Scan(String tableName, Alias alias) {
     this.tableName = tableName;

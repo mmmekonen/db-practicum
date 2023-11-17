@@ -1,9 +1,8 @@
-package visitors;
+package common;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import common.DBCatalog;
 import logical_operator.DuplicateElimination;
 import logical_operator.Join;
 import logical_operator.Projection;
@@ -12,6 +11,7 @@ import logical_operator.Select;
 import logical_operator.Sort;
 import net.sf.jsqlparser.expression.Expression;
 import physical_operator.*;
+import visitors.IndexExpressionSplitter;
 
 /**
  * A class to translate a logical operators into a relational algebra query plan
@@ -37,8 +37,8 @@ public class PhysicalPlanBuilder {
 
   // the root of the physical query plan
   Operator root;
-  JOIN join;
-  SORT sort = SORT.EXTERNAL;
+  JOIN join = JOIN.BNLJ;
+  SORT sort = SORT.IN_MEMORY; // TODO: could change
   int joinBuffer = 5;
   int sortBuffer = 3;
 

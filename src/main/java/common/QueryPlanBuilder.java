@@ -15,7 +15,6 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import physical_operator.Operator;
 import visitors.ExpressionSplitter;
-import visitors.PhysicalPlanBuilder;
 
 /**
  * Class to translate a JSQLParser statement into a relational algebra query

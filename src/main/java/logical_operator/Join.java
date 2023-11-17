@@ -1,11 +1,13 @@
 package logical_operator;
 
 import net.sf.jsqlparser.expression.Expression;
-import visitors.PhysicalPlanBuilder;
+import common.PhysicalPlanBuilder;
 
 /**
- * A class to represent a join. This is the logical representation of the physical join operator.
- * The physical join operator can either be a tuple-nested loop join, a block-nested loop join, or a
+ * A class to represent a join. This is the logical representation of the
+ * physical join operator.
+ * The physical join operator can either be a tuple-nested loop join, a
+ * block-nested loop join, or a
  * sort-merge join.
  */
 public class Join extends LogicalOperator {
@@ -20,12 +22,14 @@ public class Join extends LogicalOperator {
   private Expression expression;
 
   /**
-   * Creates a logical join operator that concatenates two other operators together using a
+   * Creates a logical join operator that concatenates two other operators
+   * together using a
    * tuple-nested loop join.
    *
-   * @param left_op One logical operator to be joined.
-   * @param right_op Another logical operator to be joined.
-   * @param expression An expression that dictates what combinations of tuples are valid.
+   * @param left_op    One logical operator to be joined.
+   * @param right_op   Another logical operator to be joined.
+   * @param expression An expression that dictates what combinations of tuples are
+   *                   valid.
    */
   public Join(LogicalOperator left_op, LogicalOperator right_op, Expression expression) {
     this.leftChild = left_op;
