@@ -16,24 +16,24 @@ import org.junit.jupiter.api.Test;
 import physical_operator.InMemorySortOperator;
 import physical_operator.ScanOperator;
 
-public class P3IndexTests {
+public class P3FailedTests {
   private static String expectedPath;
   private static String outputPath;
-  private static String tempDir = "src/test/resources/samples/temp";
+  private static String tempDir = "src/test/resources/failed_tests/tempSort";
 
   @BeforeAll
   static void setupBeforeAllTests() throws IOException, JSQLParserException {
 
-    ClassLoader classLoader = P3IndexTests.class.getClassLoader();
-    String path = Objects.requireNonNull(classLoader.getResource("samples/input")).getPath();
+    ClassLoader classLoader = P3FailedTests.class.getClassLoader();
+    String path = Objects.requireNonNull(classLoader.getResource("failed_tests/input")).getPath();
 
     DBCatalog db = DBCatalog.getInstance();
     db.setDataDirectory(path + "/db");
     db.setSortDirectory(tempDir);
     db.setIndexInfo();
 
-    expectedPath = "src/test/resources/samples/expected_indexes";
-    outputPath = "src/test/resources/samples/input/db/indexes";
+    expectedPath = "src/test/resources/failed_tests/expected_indexes";
+    outputPath = "src/test/resources/failed_tests/input/db/indexes";
 
     // make indexes
     ArrayList<String> tables = new ArrayList<>();
@@ -44,7 +44,7 @@ public class P3IndexTests {
       ArrayList<String> info = db.getIndexInfo().get(tables.get(i));
 
       TreeIndex t = new TreeIndex(
-          "src/test/resources/samples/input", tables.get(i), db.findColumnIndex(tables.get(i), info.get(0)), info);
+          "src/test/resources/failed_tests/input", tables.get(i), db.findColumnIndex(tables.get(i), info.get(0)), info);
     }
 
     // ArrayList<String> tables = new ArrayList<>();
@@ -59,9 +59,8 @@ public class P3IndexTests {
     // temp.add(new Column(new Table(null, tables.get(i)), info.get(0)));
     // InMemorySortOperator op = new InMemorySortOperator(base, temp);
 
-    // TreeIndex t =
-    // new TreeIndex(
-    // "src/test/resources/samples/input",
+    // TreeIndex t = new TreeIndex(
+    // "src/test/resources/failed_tests/input",
     // tables.get(i),
     // db.findColumnIndex(tables.get(i), info.get(0)),
     // info);
@@ -136,6 +135,7 @@ public class P3IndexTests {
     return result;
   }
 
+  // test sizes
   @Test
   public void testIndex1Size() throws ExecutionControl.NotImplementedException {
     testSizeHelper("Boats.E");
@@ -143,9 +143,25 @@ public class P3IndexTests {
 
   @Test
   public void testIndex2Size() throws ExecutionControl.NotImplementedException {
+    testSizeHelper("Reserves.G");
+  }
+
+  @Test
+  public void testIndex3Size() throws ExecutionControl.NotImplementedException {
     testSizeHelper("Sailors.A");
   }
 
+  @Test
+  public void testIndex4Size() throws ExecutionControl.NotImplementedException {
+    testSizeHelper("Table1.K");
+  }
+
+  @Test
+  public void testIndex5Size() throws ExecutionControl.NotImplementedException {
+    testSizeHelper("Table2.N");
+  }
+
+  // test full files
   @Test
   public void testIndex1Full() throws ExecutionControl.NotImplementedException {
     testFullEqualityHelper("Boats.E");
@@ -153,9 +169,25 @@ public class P3IndexTests {
 
   @Test
   public void testIndex2Full() throws ExecutionControl.NotImplementedException {
+    testFullEqualityHelper("Reserves.G");
+  }
+
+  @Test
+  public void testIndex3Full() throws ExecutionControl.NotImplementedException {
     testFullEqualityHelper("Sailors.A");
   }
 
+  @Test
+  public void testIndex4Full() throws ExecutionControl.NotImplementedException {
+    testFullEqualityHelper("Table1.K");
+  }
+
+  @Test
+  public void testIndex5Full() throws ExecutionControl.NotImplementedException {
+    testFullEqualityHelper("Table2.N");
+  }
+
+  // test by page
   @Test
   public void testIndex1ByPage() throws ExecutionControl.NotImplementedException {
     testPageEqualityHelper("Boats.E");
@@ -163,6 +195,21 @@ public class P3IndexTests {
 
   @Test
   public void testIndex2ByPage() throws ExecutionControl.NotImplementedException {
+    testPageEqualityHelper("Reserves.G");
+  }
+
+  @Test
+  public void testIndex3ByPage() throws ExecutionControl.NotImplementedException {
     testPageEqualityHelper("Sailors.A");
+  }
+
+  @Test
+  public void testIndex4ByPage() throws ExecutionControl.NotImplementedException {
+    testPageEqualityHelper("Table1.K");
+  }
+
+  @Test
+  public void testIndex5ByPage() throws ExecutionControl.NotImplementedException {
+    testPageEqualityHelper("Table2.N");
   }
 }
