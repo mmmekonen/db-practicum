@@ -21,26 +21,26 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import physical_operator.Operator;
 
-public class P2UnitTests {
+public class P2FailedTests2a {
   private static List<Statement> statementList;
   private static QueryPlanBuilder queryPlanBuilder;
   private static Statements statements;
   private static String expectedPath;
   private static File outputDir;
-  private static String tempDir = "src/test/resources/samples/temp";
+  private static String tempDir = "src/test/resources/failed_tests/2a/temp";
 
   @BeforeAll
   static void setupBeforeAllTests() throws IOException, JSQLParserException {
 
-    ClassLoader classLoader = P2UnitTests.class.getClassLoader();
-    String path = Objects.requireNonNull(classLoader.getResource("samples/input")).getPath();
+    ClassLoader classLoader = P2FailedTests2a.class.getClassLoader();
+    String path = Objects.requireNonNull(classLoader.getResource("failed_tests/2a/input")).getPath();
 
     DBCatalog.getInstance().setDataDirectory(path + "/db");
     DBCatalog.getInstance().setSortDirectory(tempDir);
 
-    expectedPath = "src/test/resources/samples/expected";
+    expectedPath = "src/test/resources/failed_tests/2a/expected";
 
-    String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
+    String queriesFile = Objects.requireNonNull(classLoader.getResource("failed_tests/2a/input/queries.sql")).getPath();
     // for windows machine
     if (queriesFile.contains(":")) {
       queriesFile = queriesFile.substring(3);
@@ -50,7 +50,7 @@ public class P2UnitTests {
     queryPlanBuilder = new QueryPlanBuilder();
     statementList = statements.getStatements();
 
-    outputDir = new File("src/test/resources/samples/output");
+    outputDir = new File("src/test/resources/failed_tests/2a/output");
     for (File file : (outputDir.listFiles()))
       file.delete(); // clean output directory
   }
@@ -122,65 +122,4 @@ public class P2UnitTests {
     Operator plan = queryPlanBuilder.buildPlan(statementList.get(4));
     testHelper(plan, 5);
   }
-
-  @Test
-  public void testQuery6() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(5));
-    testHelper(plan, 6);
-  }
-
-  @Test
-  public void testQuery7() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(6));
-    testHelper(plan, 7);
-  }
-
-  @Test
-  public void testQuery8() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(7));
-    testHelper(plan, 8);
-  }
-
-  @Test
-  public void testQuery9() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(8));
-    testHelper(plan, 9);
-  }
-
-  @Test
-  public void testQuery10() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(9));
-    testHelper(plan, 10);
-  }
-
-  @Test
-  public void testQuery11() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(10));
-    testHelper(plan, 11);
-  }
-
-  @Test
-  public void testQuery12() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(11));
-    testHelper(plan, 12);
-  }
-
-  @Test
-  public void testQuery13() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(12));
-    testHelper(plan, 13);
-  }
-
-  @Test
-  public void testQuery14() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(13));
-    testHelper(plan, 14);
-  }
-
-  @Test
-  public void testQuery15() throws ExecutionControl.NotImplementedException {
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(14));
-    testHelper(plan, 15);
-  }
-
 }

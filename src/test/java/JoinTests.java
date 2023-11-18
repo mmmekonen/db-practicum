@@ -42,9 +42,9 @@ public class JoinTests {
 
     String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries2.sql")).getPath();
     // for windows machine
-    // if (queriesFile.contains(":")) {
-    // queriesFile = queriesFile.substring(3);
-    // }
+    if (queriesFile.contains(":")) {
+      queriesFile = queriesFile.substring(3);
+    }
 
     statements = CCJSqlParserUtil.parseStatements(Files.readString(Path.of(queriesFile)));
     queryPlanBuilder = new QueryPlanBuilder();
