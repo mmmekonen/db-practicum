@@ -69,6 +69,7 @@ public class Compiler {
 
       // gather statistics
       gatherStats();
+      db.setStats();
       logger.info("Created database statistics");
 
       // Set up indexes
