@@ -7,7 +7,7 @@ import java.util.List;
 
 public class UFElement implements Cloneable {
 
-    enum BoundType {
+    public enum BoundType {
         UPPER,
         LOWER,
         EQUALS
@@ -17,9 +17,8 @@ public class UFElement implements Cloneable {
     long upperBound;
     long lowerBound;
 
-    public UFElement(String attr) {
+    public UFElement() {
         this.attributes = new ArrayList<>();
-        attributes.add(attr);
         this.upperBound = Long.MAX_VALUE;
         this.lowerBound = Long.MIN_VALUE;
     }
@@ -41,6 +40,10 @@ public class UFElement implements Cloneable {
             this.upperBound = bound;
             this.lowerBound = bound;
         }
+    }
+
+    public void addAttribute(String attr) {
+        attributes.add(attr);
     }
 
     public void union(UFElement other) {
