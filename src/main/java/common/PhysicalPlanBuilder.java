@@ -38,7 +38,7 @@ public class PhysicalPlanBuilder {
   // the root of the physical query plan
   Operator root;
   JOIN join = JOIN.BNLJ;
-  SORT sort = SORT.IN_MEMORY; // TODO: could change
+  SORT sort = SORT.EXTERNAL;
   int joinBuffer = 5;
   int sortBuffer = 3;
 
