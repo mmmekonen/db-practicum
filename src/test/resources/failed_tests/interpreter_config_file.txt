@@ -1,5 +1,5 @@
-./1/input
-./1/output
-./1/tempSort
+src/test/resources/failed_tests/input
+src/test/resources/failed_tests/output
+src/test/resources/failed_tests/tempSort
 1
 0

@@ -8,13 +8,9 @@ import java.util.Arrays;
 import java.util.Objects;
 import jdk.jshell.spi.ExecutionControl;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import physical_operator.InMemorySortOperator;
-import physical_operator.ScanOperator;
 
 public class P3FailedTests {
   private static String expectedPath;
@@ -43,8 +39,12 @@ public class P3FailedTests {
 
       ArrayList<String> info = db.getIndexInfo().get(tables.get(i));
 
-      TreeIndex t = new TreeIndex(
-          "src/test/resources/failed_tests/input", tables.get(i), db.findColumnIndex(tables.get(i), info.get(0)), info);
+      TreeIndex t =
+          new TreeIndex(
+              "src/test/resources/failed_tests/input",
+              tables.get(i),
+              db.findColumnIndex(tables.get(i), info.get(0)),
+              info);
     }
 
     // ArrayList<String> tables = new ArrayList<>();

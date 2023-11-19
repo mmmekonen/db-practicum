@@ -58,10 +58,6 @@ public class Compiler {
 
     // Set up indexes
     try {
-      if (outputToFiles) {
-        for (File file : (new File(outputDir).listFiles())) file.delete(); // clean output directory
-      }
-
       if (buildIndexes == 1) {
         logger.info("Building indexes...");
         ArrayList<String> tables = new ArrayList<>();
@@ -81,6 +77,11 @@ public class Compiler {
 
       // check if building queries
       if (evalQueries == 1) {
+        if (outputToFiles) {
+          for (File file : (new File(outputDir).listFiles()))
+            file.delete(); // clean output directory
+        }
+
         String str = Files.readString(Path.of(inputDir + "/queries.sql"));
         Statements statements = CCJSqlParserUtil.parseStatements(str);
         QueryPlanBuilder queryPlanBuilder = new QueryPlanBuilder();
