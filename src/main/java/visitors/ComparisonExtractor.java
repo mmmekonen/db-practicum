@@ -1,6 +1,5 @@
 package visitors;
 
-
 import common.UFElement;
 import common.UFElement.BoundType;
 import common.SelectUF;
@@ -94,25 +93,26 @@ import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 /**
- * A class to evaluate the WHERE clause of queries. Given a tuple and its column schema, it uses a
- * visitor pattern to evaluate the accepted Expression on the current tuple. The final result can be
+ * A class to evaluate the WHERE clause of queries. Given a tuple and its column
+ * schema, it uses a
+ * visitor pattern to evaluate the accepted Expression on the current tuple. The
+ * final result can be
  * accessed through the conditionSatisfied function.
  */
 public class ComparisonExtractor implements ExpressionVisitor {
 
-    private SelectUF parent;
-    Column att1;
-    Column att2;
-    long val;
-    boolean valOnRight;
-
-
+  private SelectUF parent;
+  Column att1;
+  Column att2;
+  long val;
+  boolean valOnRight;
 
   /**
    * Creates an expression visitor using a Tuple and an ArrayList of Columns.
    *
-   * @param tuple a Tuple of integers.
-   * @param schema ArrayList of columns which correspond to the respective tuple values.
+   * @param tuple  a Tuple of integers.
+   * @param schema ArrayList of columns which correspond to the respective tuple
+   *               values.
    */
   public ComparisonExtractor(SelectUF parent) {
     this.parent = parent;
@@ -125,10 +125,10 @@ public class ComparisonExtractor implements ExpressionVisitor {
    */
   @Override
   public void visit(AndExpression andExpression) {
-    
+
     andExpression.getLeftExpression().accept(this);
     andExpression.getRightExpression().accept(this);
-    
+
   }
 
   /**
@@ -139,28 +139,31 @@ public class ComparisonExtractor implements ExpressionVisitor {
 
   @Override
   public void visit(Column tableColumn) {
-    if (att1 != null) att2 = tableColumn;
-    else att1 = tableColumn;
-  } 
+    if (att1 != null)
+      att2 = tableColumn;
+    else
+      att1 = tableColumn;
+  }
 
   /**
    * Visits a LongValue and pushes it onto the stack
    *
    * @param longValue The LongValue to be visited
    */
-  
+
   @Override
   public void visit(LongValue longValue) {
     val = longValue.getValue();
-    if (att1 != null) valOnRight = true;
-} 
+    if (att1 != null)
+      valOnRight = true;
+  }
 
-    private void clear() {
-        att1 = null;
-        att2 = null;
-        val = 0;
-        valOnRight = false;
-    }
+  private void clear() {
+    att1 = null;
+    att2 = null;
+    val = 0;
+    valOnRight = false;
+  }
 
   /**
    * Visits and evaluates all parts of the expression
@@ -202,7 +205,7 @@ public class ComparisonExtractor implements ExpressionVisitor {
     greaterThan.getRightExpression().accept(this);
 
     UFElement temp = new UFElement();
-    temp.addAttribute(att1, valOnRight ? val++ : val--, valOnRight ? BoundType.LOWER : BoundType.UPPER);
+    temp.addAttribute(att1, valOnRight ? ++val : --val, valOnRight ? BoundType.LOWER : BoundType.UPPER);
     parent.add(temp);
   }
 
@@ -231,9 +234,9 @@ public class ComparisonExtractor implements ExpressionVisitor {
   public void visit(MinorThan minorThan) {
     minorThan.getLeftExpression().accept(this);
     minorThan.getRightExpression().accept(this);
-    
+
     UFElement temp = new UFElement();
-    temp.addAttribute(att1, valOnRight ? val-- : val++, valOnRight ? BoundType.UPPER : BoundType.LOWER);
+    temp.addAttribute(att1, valOnRight ? --val : ++val, valOnRight ? BoundType.UPPER : BoundType.LOWER);
     parent.add(temp);
   }
 
@@ -247,7 +250,7 @@ public class ComparisonExtractor implements ExpressionVisitor {
     clear();
     minorThanEquals.getLeftExpression().accept(this);
     minorThanEquals.getRightExpression().accept(this);
-    
+
     UFElement temp = new UFElement();
     temp.addAttribute(att1, val, valOnRight ? BoundType.UPPER : BoundType.LOWER);
     parent.add(temp);
