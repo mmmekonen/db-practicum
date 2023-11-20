@@ -43,7 +43,7 @@ public class DBCatalog {
   private DBCatalog() {
     tables = new HashMap<>();
     indexInfo = new HashMap<>();
-    stats = new HashMap<>();
+    this.stats = new HashMap<>();
   }
 
   /**
@@ -120,6 +120,7 @@ public class DBCatalog {
    */
   public void setStats() {
     try {
+      System.out.println("setting stats");
       Scanner s = new Scanner(new File(dbDirectory + "/stats.txt"));
       while (s.hasNextLine()) {
         String[] params = s.nextLine().split("[, ]");
@@ -132,6 +133,13 @@ public class DBCatalog {
     } catch (Exception e) {
       System.out.println(e + ": Could not find stats file");
     }
+
+    System.out.println("stats1: " + stats);
+  }
+
+  public ArrayList<String> getTableStats(String tableName) {
+    System.out.println("stats: " + this.stats);
+    return stats.get(tableName);
   }
 
   /**
