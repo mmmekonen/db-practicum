@@ -2,7 +2,11 @@ package common;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +38,7 @@ public class DBCatalog {
   private HashMap<String, ArrayList<String>> stats;
   private HashMap<String, HashMap<String, ArrayList<Integer>>> indexInfo;
   private static DBCatalog db;
+  private HashMap<String, ArrayList<Integer>> tableStats;
 
   private String dbDirectory;
   private String sortDirectory;
@@ -43,7 +48,8 @@ public class DBCatalog {
   private DBCatalog() {
     tables = new HashMap<>();
     indexInfo = new HashMap<>();
-    this.stats = new HashMap<>();
+    stats = new HashMap<>();
+    tableStats = new HashMap<>();
   }
 
   /**
@@ -138,7 +144,7 @@ public class DBCatalog {
   }
 
   public ArrayList<String> getTableStats(String tableName) {
-    System.out.println("stats: " + this.stats);
+    System.out.println("stats: " + stats);
     return stats.get(tableName);
   }
 
@@ -236,4 +242,75 @@ public class DBCatalog {
     }
     return schema.indexOf(columnName);
   }
+
+  public void setNumPages(String table, int pid, int tuples) {
+    tableStats.put(table, new ArrayList<>(List.of(pid, tuples)));
+  }
+
+  public ArrayList<Integer> getTabInfo(String table) {
+    return tableStats.get(table);
+  }
+
+  public int getNumLeavesOfIndex(String columnName) {
+    String path = getIndexDirectory() + "/" + columnName;
+    FileInputStream fileInputStream = null;
+    try {
+      fileInputStream = new FileInputStream(path);
+    } catch (Exception e) {
+      System.out.println(e);
+    }
+    FileChannel fileChannel = fileInputStream.getChannel();
+    ByteBuffer buffer = ByteBuffer.allocate(4096);
+
+    // read the information at byte 4
+    buffer.clear();
+    try {
+      fileChannel.read(buffer);
+    } catch (Exception e) {
+      System.out.println(e);
+    }
+    buffer.flip();
+    int numLeaves = buffer.getInt(4);
+
+    System.out.println("leaves: " + numLeaves);
+
+    // close the file
+    try {
+      fileInputStream.close();
+    } catch (Exception e) {
+      System.out.println(e);
+    }
+
+    return numLeaves;
+
+  }
+
+  public int getAttributesPerTable(String tableName) {
+    String p = dbDirectory + "/data/" + tableName;
+    FileInputStream fileInputStream = null;
+    try {
+      fileInputStream = new FileInputStream(p);
+    } catch (Exception e) {
+      System.out.println(e);
+    }
+    FileChannel fileChannel = fileInputStream.getChannel();
+    ByteBuffer buffer = ByteBuffer.allocate(4096);
+    buffer.clear();
+    try {
+      if (fileChannel.read(buffer) != -1) {
+        buffer.flip();
+        fileInputStream.close();
+        int att = buffer.getInt();
+        System.out.println("att: " + att);
+        return att;
+      } else {
+        fileInputStream.close();
+        return -1;
+      }
+    } catch (Exception e) {
+      System.out.println(e);
+    }
+    return -1;
+  }
+
 }
