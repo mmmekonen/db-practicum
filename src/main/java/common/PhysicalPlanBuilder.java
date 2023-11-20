@@ -41,7 +41,7 @@ public class PhysicalPlanBuilder extends PlanBuilder {
   SORT sort = SORT.EXTERNAL;
   int joinBuffer = 5;
   int sortBuffer = 3;
-  HashMap<String, Double> reductionInfo = new HashMap<>();
+  HashMap<String, HashMap<String, Double>> reductionInfo = new HashMap<>();
 
   /**
    * Creates a PhysicalPlanBuilder.
@@ -107,7 +107,10 @@ public class PhysicalPlanBuilder extends PlanBuilder {
 
     columnName = columnName.split("\\.")[1];
     boolean useIndex = ((double) lowestCost.get(1) == 1.0) ? true : false;
-    this.reductionInfo = (HashMap<String, Double>) lowestCost.get(3);
+
+    String tname = (scanOp.getAlias() == null) ? scanOp.getAlias().getName() : scanOp.getTableName();
+
+    this.reductionInfo.put(tname, (HashMap<String, Double>) lowestCost.get(3));
 
     System.out.println("r info: " + reductionInfo);
     System.out.println("columnName: " + columnName);
