@@ -101,8 +101,8 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 public class ComparisonExtractor implements ExpressionVisitor {
 
     private SelectUF parent;
-    String att1;
-    String att2;
+    Column att1;
+    Column att2;
     long val;
     boolean valOnRight;
 
@@ -139,8 +139,8 @@ public class ComparisonExtractor implements ExpressionVisitor {
 
   @Override
   public void visit(Column tableColumn) {
-    if (att1 != null) att2 = tableColumn.getColumnName();
-    else att1 = tableColumn.getColumnName();
+    if (att1 != null) att2 = tableColumn;
+    else att1 = tableColumn;
   } 
 
   /**

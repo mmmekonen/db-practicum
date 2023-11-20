@@ -1,6 +1,7 @@
 package physical_operator;
 
 import common.Tuple;
+import common.UFElement;
 import net.sf.jsqlparser.expression.Expression;
 import visitors.SelectExpressionVisitor;
 
@@ -16,6 +17,8 @@ public class SelectOperator extends Operator {
   // the expression this operator applies to each tuple
   private Expression expression;
 
+  private UFElement element;
+
   /**
    * Creates a select operator using an Operator as its child and an Expression to evaluate each
    * tuple by.
@@ -27,6 +30,12 @@ public class SelectOperator extends Operator {
     super(child.outputSchema);
     this.child = child;
     this.expression = expression;
+  }
+
+  public SelectOperator(Operator child, UFElement element) {
+    super(child.outputSchema);
+    this.child = child;
+    this.element = element;
   }
 
   /** Resets the cursor to the beginning of the operator */
@@ -48,8 +57,15 @@ public class SelectOperator extends Operator {
       if (tuple == null) {
         return tuple;
       }
-      expression.accept(visitor);
-      satisfied = visitor.conditionSatisfied();
+      if (expression != null) {
+        expression.accept(visitor);
+        satisfied = visitor.conditionSatisfied();
+      } else if (element != null) {
+        satisfied = element.satisfied(tuple, outputSchema);
+      } else {
+        System.out.println("how did you manage this?");
+      }
+      
       if (!satisfied) {
         tuple = child.getNextTuple();
         visitor = new SelectExpressionVisitor(tuple, child.outputSchema);

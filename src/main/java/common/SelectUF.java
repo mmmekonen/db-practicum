@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import visitors.ComparisonExtractor;
 
 public class SelectUF {
@@ -17,15 +23,12 @@ public class SelectUF {
         
     }
 
-    public boolean contains(String attr) {
-        return elements.containsKey(attr);
-    }
-
     public void add(UFElement e) {
         ArrayList<String> temp = new ArrayList<>(e.getAttributes());
         for (String s : temp) {
-                this.find(s).union(e);
-                e = this.find(s);
+            if (elements.containsKey(s)) {
+                elements.get(s).union(e);
+                e = elements.get(s);
             } else {
                 elements.put(s, e);
             }
@@ -34,8 +37,8 @@ public class SelectUF {
 
     }
 
-    public UFElement find(String att) {
-        return elements.get(att);
+    public UFElement find(Column attr) {
+        return elements.get(attr.toString());
     }
 
     public void union(String att1, String att2) {
@@ -48,6 +51,28 @@ public class SelectUF {
         for(int i = 0; i < attrList2.size(); i++) {
             elements.put(attrList2.get(i), result);
         }
+    }
+
+    public Expression getWhere(Table table) {
+        ArrayList<Column> cols = DBCatalog.getInstance().getTableSchema(table.getDBLinkName());
+        ArrayList<Expression> conditions = new ArrayList<>();
+        for (Column c : cols) {
+            if (this.find(c) != null) {
+                GreaterThanEquals lower = new GreaterThanEquals()
+                .withLeftExpression(c).withRightExpression(new LongValue(find(c).lowerBound));
+                MinorThanEquals upper = new MinorThanEquals()
+                .withLeftExpression(c).withRightExpression(new LongValue(find(c).upperBound));
+                conditions.add(new AndExpression().withLeftExpression(lower).withRightExpression(upper));
+            }
+        }
+        if (!conditions.isEmpty()) {
+            Expression e = conditions.remove(0);
+            while (!conditions.isEmpty()) {
+                e = new AndExpression().withLeftExpression(e).withRightExpression(conditions.remove(0));
+            }
+            return e;
+        }
+        return null;
     }
 
 }
