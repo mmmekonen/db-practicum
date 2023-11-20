@@ -20,7 +20,7 @@ public class SelectUF {
         elements = new HashMap<>();
         ComparisonExtractor c = new ComparisonExtractor(this);
         e.accept(c);
-        
+
     }
 
     public void add(UFElement e) {
@@ -33,7 +33,6 @@ public class SelectUF {
                 elements.put(s, e);
             }
         }
-        
 
     }
 
@@ -42,13 +41,14 @@ public class SelectUF {
     }
 
     public void union(String att1, String att2) {
-        if (elements.get(att1) == elements.get(att2)) return;
+        if (elements.get(att1) == elements.get(att2))
+            return;
         UFElement result = elements.get(att1);
         ArrayList<String> attrList2 = new ArrayList<>(elements.get(att2).getAttributes());
 
         result.union(elements.get(att2));
-        
-        for(int i = 0; i < attrList2.size(); i++) {
+
+        for (int i = 0; i < attrList2.size(); i++) {
             elements.put(attrList2.get(i), result);
         }
     }
@@ -58,14 +58,25 @@ public class SelectUF {
         ArrayList<Expression> conditions = new ArrayList<>();
         for (Column c : cols) {
             if (this.find(c) != null) {
-                GreaterThanEquals lower = new GreaterThanEquals()
-                .withLeftExpression(c).withRightExpression(new LongValue(find(c).lowerBound));
-                MinorThanEquals upper = new MinorThanEquals()
-                .withLeftExpression(c).withRightExpression(new LongValue(find(c).upperBound));
-                conditions.add(new AndExpression().withLeftExpression(lower).withRightExpression(upper));
+                UFElement element = find(c);
+                if (element.lowerBound != null && element.upperBound != null) {
+                    GreaterThanEquals lower = new GreaterThanEquals()
+                            .withLeftExpression(c).withRightExpression(new LongValue(find(c).lowerBound));
+                    MinorThanEquals upper = new MinorThanEquals()
+                            .withLeftExpression(c).withRightExpression(new LongValue(find(c).upperBound));
+                    conditions.add(new AndExpression().withLeftExpression(lower).withRightExpression(upper));
+                } else if (element.lowerBound != null) {
+                    conditions.add(new GreaterThanEquals()
+                            .withLeftExpression(c).withRightExpression(new LongValue(find(c).lowerBound)));
+                } else if (element.upperBound != null) {
+                    conditions.add(new MinorThanEquals()
+                            .withLeftExpression(c).withRightExpression(new LongValue(find(c).upperBound)));
+                }
             }
         }
-        if (!conditions.isEmpty()) {
+        if (!conditions.isEmpty())
+
+        {
             Expression e = conditions.remove(0);
             while (!conditions.isEmpty()) {
                 e = new AndExpression().withLeftExpression(e).withRightExpression(conditions.remove(0));
