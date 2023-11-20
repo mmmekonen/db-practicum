@@ -49,4 +49,11 @@ public class Scan extends LogicalOperator {
   public Alias getAlias() {
     return alias;
   }
+
+  /**
+   * @return A string representation of the operator
+   */
+  public String toString() {
+    return "Leaf[" + tableName + "]";
+  }
 }
