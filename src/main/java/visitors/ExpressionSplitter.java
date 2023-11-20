@@ -416,7 +416,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
   }
 
   @Override
-  public void visit(UserVariable var) {
+  public void visit(UserVariable vvar) {
     throw new UnsupportedOperationException("Unimplemented method 'visit'");
   }
 

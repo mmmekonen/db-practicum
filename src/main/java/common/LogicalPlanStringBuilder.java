@@ -1,14 +1,6 @@
 package common;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import logical_operator.DuplicateElimination;
-import logical_operator.Join;
-import logical_operator.Projection;
-import logical_operator.Scan;
-import logical_operator.Select;
-import logical_operator.Sort;
+import logical_operator.*;
 
 
 
@@ -80,8 +72,7 @@ public class LogicalPlanStringBuilder extends PlanBuilder {
     }
     plan.append(joinOp).append("\n");
     depth++;
-    joinOp.getLeftChild().accept(this);
-    joinOp.getRightChild().accept(this);
+    for(LogicalOperator op : joinOp.getChildren()) op.accept(this);
     depth--;
   }
 

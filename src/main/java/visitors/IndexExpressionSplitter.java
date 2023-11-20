@@ -99,7 +99,6 @@ import net.sf.jsqlparser.statement.select.SubSelect;
  */
 public class IndexExpressionSplitter implements ExpressionVisitor {
 
-  // private Expression indexConditions;
   private Integer lowkey;
   private Integer highkey;
   private int keyValue;
@@ -119,14 +118,6 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
     indexColumn = column;
   }
 
-  // /**
-  // * Returns the condition that can be handled by an index.
-  // *
-  // * @return an Expression meant to be used by an Index Scan Operator.
-  // */
-  // public Expression getIndexConditions() {
-  // return indexConditions;
-  // }
 
   /**
    * Gets the lowkey for the conditions that can be done by the IndexScan.
@@ -190,7 +181,6 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
   @Override
   public void visit(Column tableColumn) {
     String name = tableColumn.getColumnName();
-    // String tableName = table;
 
     if (indexColumn.equals(name)) {
       // mark true if index exists
@@ -609,7 +599,7 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
   }
 
   @Override
-  public void visit(UserVariable var) {
+  public void visit(UserVariable vvar) {
     throw new UnsupportedOperationException("Unimplemented method 'visit'");
   }
 

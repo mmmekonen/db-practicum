@@ -1,7 +1,7 @@
 package common;
 
 import java.util.*;
-import logical_operator.LogicalOperator;
+import logical_operator.*;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -14,7 +14,6 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import physical_operator.Operator;
-import visitors.ExpressionSplitter;
 
 /**
  * Class to translate a JSQLParser statement into a relational algebra query
@@ -45,8 +44,7 @@ public class QueryPlanBuilder {
 
   SelectUF conditions;
 
-  public QueryPlanBuilder() {
-  }
+ 
 
   /**
    * Method to translate statement to logical query plan
@@ -60,7 +58,7 @@ public class QueryPlanBuilder {
     Select select = (Select) stmt;
     PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
     Table table = (Table) plainSelect.getFromItem();
-    Expression where = (Expression) plainSelect.getWhere();
+    Expression where = plainSelect.getWhere();
     ArrayList<SelectItem> selects = (ArrayList<SelectItem>) plainSelect.getSelectItems();
     List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
     Distinct distinct = plainSelect.getDistinct();
@@ -94,9 +92,7 @@ public class QueryPlanBuilder {
 
     PhysicalPlanBuilder builder = new PhysicalPlanBuilder(join);
     rootOperator.accept(builder);
-    Operator physicalPlan = builder.getRoot();
-
-    return physicalPlan;
+    return builder.getRoot();
   }
 
   /**
@@ -112,9 +108,7 @@ public class QueryPlanBuilder {
 
     PhysicalPlanBuilder builder = new PhysicalPlanBuilder();
     rootOperator.accept(builder);
-    Operator physicalPlan = builder.getRoot();
-
-    return physicalPlan;
+    return builder.getRoot();
   }
 
   /**
@@ -177,7 +171,7 @@ public class QueryPlanBuilder {
       }
       return new logical_operator.Sort(child, columns);
     } else if (distinct != null) {
-      return new logical_operator.Sort(child, new ArrayList<Column>(0));
+      return new logical_operator.Sort(child, new ArrayList<>(0));
     } else {
       return child;
     }
@@ -188,7 +182,6 @@ public class QueryPlanBuilder {
    * together all tables
    * specified in the statement
    *
-   * @param original The first table specified in the statement
    * @param joins    The tables to be joined onto the original table
    * @param where    An expression that specifies the conditions by which to join
    *                 the tables together
@@ -197,31 +190,10 @@ public class QueryPlanBuilder {
    *         in the joined tables
    */
   private LogicalOperator joinHelper(Table original, List<Join> joins, Expression where) {
-
-    if (where == null) {
-      LogicalOperator root = selectHelper(original);
-
-      for (int i = 0; i < joins.size(); i++) {
-        Table joinTable = (Table) joins.get(i).getRightItem();
-
-        root = new logical_operator.Join(root, selectHelper(joinTable), null, conditions);
-      }
-
-      return root;
-    }
-
-    ExpressionSplitter e = new ExpressionSplitter();
-    where.accept(e);
-
-    LogicalOperator root = selectHelper(original);
-
-    for (int i = 0; i < joins.size(); i++) {
-      Table joinTable = (Table) joins.get(i).getRightItem();
-
-      root = new logical_operator.Join(root, selectHelper(joinTable), where, conditions);
-    }
-
-    return root;
+    ArrayList<LogicalOperator> children = new ArrayList<>();
+    children.add(selectHelper(original));
+    for (Join j : joins) children.add(selectHelper((Table) j.getRightItem()));
+    return new logical_operator.Join(children, where, conditions);
   }
 
   /**

@@ -1,6 +1,9 @@
 package logical_operator;
 
 import net.sf.jsqlparser.expression.Expression;
+
+import java.util.*;
+
 import common.*;
 
 /**
@@ -12,11 +15,7 @@ import common.*;
  */
 public class Join extends LogicalOperator {
 
-  // the logical left child operator
-  private LogicalOperator leftChild;
-
-  // the logical right child operator
-  private LogicalOperator rightChild;
+  private ArrayList<LogicalOperator> children;
 
   // the expression to check if the tuples should be joined
   private Expression expression;
@@ -29,14 +28,12 @@ public class Join extends LogicalOperator {
    * together using a
    * tuple-nested loop join.
    *
-   * @param left_op    One logical operator to be joined.
-   * @param right_op   Another logical operator to be joined.
+   * @param children    One logical operator to be joined.
    * @param expression An expression that dictates what combinations of tuples are
    *                   valid.
    */
-  public Join(LogicalOperator left_op, LogicalOperator right_op, Expression expression, SelectUF uf) {
-    this.leftChild = left_op;
-    this.rightChild = right_op;
+  public Join(Collection<LogicalOperator> children, Expression expression, SelectUF uf) {
+    this.children = new ArrayList<>(children);
     this.expression = expression;
     this.uf = uf;
   }
@@ -46,22 +43,8 @@ public class Join extends LogicalOperator {
     builder.visit(this);
   }
 
-  /**
-   * Returns the left logical child operator of this operator.
-   *
-   * @return a logical operator.
-   */
-  public LogicalOperator getLeftChild() {
-    return leftChild;
-  }
-
-  /**
-   * Returns the right logical child operator of this operator.
-   *
-   * @return a logical operator.
-   */
-  public LogicalOperator getRightChild() {
-    return rightChild;
+  public List<LogicalOperator> getChildren() {
+    return children;
   }
 
   /**
