@@ -40,14 +40,14 @@ public class P3UnitTests {
     ClassLoader classLoader = P3UnitTests.class.getClassLoader();
     String path = Objects.requireNonNull(classLoader.getResource("samples/input")).getPath();
 
-    gatherStats(path, DBCatalog.getInstance());
-
     System.out.println("path is " + path);
 
     DBCatalog.getInstance().setDataDirectory(path + "/db");
     DBCatalog.getInstance().setSortDirectory(tempDir);
     DBCatalog.getInstance().setIndexDirectory("src/test/resources/samples/expected_indexes");
     DBCatalog.getInstance().setIndexInfo();
+
+    gatherStats(path, DBCatalog.getInstance());
     DBCatalog.getInstance().setStats();
 
     String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
@@ -120,6 +120,8 @@ public class P3UnitTests {
         pid++;
         System.out.println("there are " + pid + " pages in " + table);
         System.out.println("there are " + len + " tuples in " + table);
+
+        DBCatalog.getInstance().setNumPages(table, pid, len);
 
         // write to file
         if (newline) {

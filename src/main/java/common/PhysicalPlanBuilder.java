@@ -41,6 +41,7 @@ public class PhysicalPlanBuilder extends PlanBuilder {
   SORT sort = SORT.EXTERNAL;
   int joinBuffer = 5;
   int sortBuffer = 3;
+  HashMap<String, Double> reductionInfo = new HashMap<>();
 
   /**
    * Creates a PhysicalPlanBuilder.
@@ -92,10 +93,27 @@ public class PhysicalPlanBuilder extends PlanBuilder {
     // if index exists on table
     DBCatalog db = DBCatalog.getInstance();
     HashMap<String, ArrayList<Integer>> indexInfo = db.getIndexInfo().get(scanOp.getTableName());
-    // TODO: decide column to use index for
-    String columnName = null;
-    // TODO determine if using indexes
-    if (/* db.useIndexes() && */ indexInfo != null) {
+
+    OptimalSelection optimalSelection = new OptimalSelection();
+
+    System.out.println("selectOp.getExpression(): " + selectOp.getExpression());
+    System.out.println("scanOp.getTableName(): " + scanOp.getTableName());
+    System.out.println("indexInfo: " + indexInfo);
+
+    ArrayList<Object> lowestCost = optimalSelection.getOptimalColumn(selectOp.getExpression(), scanOp.getTableName(),
+        indexInfo);
+
+    String columnName = (String) lowestCost.get(0);
+
+    columnName = columnName.split("\\.")[1];
+    boolean useIndex = ((double) lowestCost.get(1) == 1.0) ? true : false;
+    this.reductionInfo = (HashMap<String, Double>) lowestCost.get(3);
+
+    System.out.println("r info: " + reductionInfo);
+    System.out.println("columnName: " + columnName);
+    System.out.println("useIndex: " + useIndex);
+
+    if (useIndex) {
       IndexExpressionSplitter splitter = new IndexExpressionSplitter(columnName);
       selectOp.getExpression().accept(splitter);
 
