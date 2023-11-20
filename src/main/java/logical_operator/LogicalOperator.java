@@ -12,10 +12,7 @@ import common.PlanBuilder;
  * set appropriately.
  */
 public abstract class LogicalOperator {
-
-  public LogicalOperator() {
-  }
-
+  
   /**
    * Visits the operator in the physical plan builder to create a physical
    * operator from this
