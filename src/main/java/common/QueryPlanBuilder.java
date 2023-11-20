@@ -43,6 +43,8 @@ import visitors.ExpressionSplitter;
  */
 public class QueryPlanBuilder {
 
+  SelectUF conditions;
+
   public QueryPlanBuilder() {
   }
 
@@ -63,11 +65,12 @@ public class QueryPlanBuilder {
     List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
     Distinct distinct = plainSelect.getDistinct();
     List<Join> joins = plainSelect.getJoins();
+    this.conditions = new SelectUF(where);
 
     // make logical query plan
     LogicalOperator rootOperator;
     if (joins == null)
-      rootOperator = selectHelper(table, where);
+      rootOperator = selectHelper(table);
     else
       rootOperator = joinHelper(table, joins, where);
     rootOperator = projectionHelper(rootOperator, selects);
@@ -125,13 +128,10 @@ public class QueryPlanBuilder {
    *         next tuple in the
    *         table that matches the specified conditions
    */
-  private LogicalOperator selectHelper(Table table, Expression where) {
-    if (where == null) {
-      return new logical_operator.Scan(table.getName(), table.getAlias());
-    } else {
-      return new logical_operator.Select(
-          new logical_operator.Scan(table.getName(), table.getAlias()), where);
-    }
+  private LogicalOperator selectHelper(Table table) {
+    
+    return new logical_operator.Select(new logical_operator.Scan(table.getName(), table.getAlias()), conditions.getWhere(table));
+    
   }
 
   /**
@@ -199,12 +199,12 @@ public class QueryPlanBuilder {
   private LogicalOperator joinHelper(Table original, List<Join> joins, Expression where) {
 
     if (where == null) {
-      LogicalOperator root = selectHelper(original, null);
+      LogicalOperator root = selectHelper(original);
 
       for (int i = 0; i < joins.size(); i++) {
         Table joinTable = (Table) joins.get(i).getRightItem();
 
-        root = new logical_operator.Join(root, selectHelper(joinTable, null), null);
+        root = new logical_operator.Join(root, selectHelper(joinTable), null);
       }
 
       return root;
@@ -213,13 +213,13 @@ public class QueryPlanBuilder {
     ExpressionSplitter e = new ExpressionSplitter();
     where.accept(e);
 
-    LogicalOperator root = selectHelper(original, e.getConditions(original));
+    LogicalOperator root = selectHelper(original);
 
     for (int i = 0; i < joins.size(); i++) {
       Table joinTable = (Table) joins.get(i).getRightItem();
 
       root = new logical_operator.Join(
-          root, selectHelper(joinTable, e.getConditions(joinTable)), where);
+          root, selectHelper(joinTable), where);
     }
 
     return root;
