@@ -22,10 +22,12 @@ public class OptimalSelection {
   private HashMap<String, ArrayList<Integer>> costs;
   private HashMap<String, ArrayList<Integer>> columnInfo;
   public String tableName;
+  private DBCatalog dbCatalog;
 
   public OptimalSelection() {
     this.costs = new HashMap<>();
     this.columnInfo = new HashMap<>();
+    this.dbCatalog = DBCatalog.getInstance();
   }
 
   public ArrayList<Expression> getBinaryExpressions(Expression e) {
@@ -79,6 +81,8 @@ public class OptimalSelection {
 
     for (String column : columnInfo.keySet()) {
 
+      System.out.println("column: " + column);
+      
       // pages
       int p = 0;
       // tuples
@@ -147,7 +151,9 @@ public class OptimalSelection {
   }
 
   public void updateRange(String column, Integer value, Expression expression) {
-    ArrayList<String> tableStats = DBCatalog.getInstance().getTableStats(tableName);
+    // ArrayList<String> tableStats =
+    // DBCatalog.getInstance().getTableStats(tableName);
+    ArrayList<String> tableStats = dbCatalog.getTableStats(tableName);
     ArrayList<Integer> range = new ArrayList<>();
 
     System.out.println("ts: " + tableStats);
