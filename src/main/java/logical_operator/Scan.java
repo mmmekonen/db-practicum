@@ -1,7 +1,7 @@
 package logical_operator;
 
 import net.sf.jsqlparser.expression.Alias;
-import common.PhysicalPlanBuilder;
+import common.*;
 
 /**
  * A class to represent the a scan operator on a table. This is the logical
@@ -28,7 +28,7 @@ public class Scan extends LogicalOperator {
   }
 
   @Override
-  public void accept(PhysicalPlanBuilder builder) {
+  public void accept(PlanBuilder builder) {
     builder.visit(this);
   }
 

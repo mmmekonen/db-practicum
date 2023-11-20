@@ -26,7 +26,7 @@ public class UFElement {
     }
 
     public Long getEqualityCon() {
-        if (upperBound == lowerBound)
+        if (upperBound.equals(lowerBound))
             return upperBound;
         else
             return null;
@@ -66,5 +66,9 @@ public class UFElement {
             }
         }
         return false;
+    }
+
+    public String toString() {
+        return "[" + attributes + ", equals " + getEqualityCon() + ", min " + lowerBound + ", max " + upperBound + "]";
     }
 }

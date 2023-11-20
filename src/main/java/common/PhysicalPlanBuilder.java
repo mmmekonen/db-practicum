@@ -22,7 +22,7 @@ import visitors.IndexExpressionSplitter;
  * operators used
  * depends on the values in the config file.
  */
-public class PhysicalPlanBuilder {
+public class PhysicalPlanBuilder extends PlanBuilder {
 
   enum JOIN {
     TNLJ,

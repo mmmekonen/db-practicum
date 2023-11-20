@@ -2,7 +2,7 @@ package logical_operator;
 
 import java.util.List;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import common.PhysicalPlanBuilder;
+import common.*;
 
 /**
  * A class to represent a projection operator on a relation. This is the logical
@@ -30,7 +30,7 @@ public class Projection extends LogicalOperator {
   }
 
   @Override
-  public void accept(PhysicalPlanBuilder builder) {
+  public void accept(PlanBuilder builder) {
     builder.visit(this);
   }
 

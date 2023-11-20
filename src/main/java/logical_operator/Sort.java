@@ -2,7 +2,7 @@ package logical_operator;
 
 import java.util.List;
 import net.sf.jsqlparser.schema.Column;
-import common.PhysicalPlanBuilder;
+import common.*;
 
 /**
  * A class to represent a sort operator on a relation. This is a logical sort
@@ -33,7 +33,7 @@ public class Sort extends LogicalOperator {
   }
 
   @Override
-  public void accept(PhysicalPlanBuilder builder) {
+  public void accept(PlanBuilder builder) {
     builder.visit(this);
   }
 

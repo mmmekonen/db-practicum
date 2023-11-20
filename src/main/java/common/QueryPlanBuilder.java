@@ -204,7 +204,7 @@ public class QueryPlanBuilder {
       for (int i = 0; i < joins.size(); i++) {
         Table joinTable = (Table) joins.get(i).getRightItem();
 
-        root = new logical_operator.Join(root, selectHelper(joinTable), null);
+        root = new logical_operator.Join(root, selectHelper(joinTable), null, conditions);
       }
 
       return root;
@@ -218,8 +218,7 @@ public class QueryPlanBuilder {
     for (int i = 0; i < joins.size(); i++) {
       Table joinTable = (Table) joins.get(i).getRightItem();
 
-      root = new logical_operator.Join(
-          root, selectHelper(joinTable), where);
+      root = new logical_operator.Join(root, selectHelper(joinTable), where, conditions);
     }
 
     return root;
@@ -242,5 +241,12 @@ public class QueryPlanBuilder {
       return new logical_operator.DuplicateElimination(child);
     } else
       return child;
+  }
+
+  public String stringBuilder(Statement stmnt) {
+    LogicalOperator lop = logicalPlan(stmnt);
+    LogicalPlanStringBuilder sb = new LogicalPlanStringBuilder();
+    lop.accept(sb);
+    return sb.toString();
   }
 }
