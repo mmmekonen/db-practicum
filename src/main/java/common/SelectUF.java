@@ -86,4 +86,12 @@ public class SelectUF {
         return null;
     }
 
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        for (UFElement e : elements.values()) {
+            result.append(e).append("\n");
+        }
+        return result.toString();
+    }
+
 }

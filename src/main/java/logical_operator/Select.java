@@ -1,7 +1,7 @@
 package logical_operator;
 
 import net.sf.jsqlparser.expression.Expression;
-import common.PhysicalPlanBuilder;
+import common.*;
 
 /**
  * A class to represent a select operator on a relation. This is the logical
@@ -48,7 +48,7 @@ public class Select extends LogicalOperator {
   }
 
   @Override
-  public void accept(PhysicalPlanBuilder builder) {
+  public void accept(PlanBuilder builder) {
     builder.visit(this);
   }
 

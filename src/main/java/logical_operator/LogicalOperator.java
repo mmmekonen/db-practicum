@@ -1,6 +1,6 @@
 package logical_operator;
 
-import common.PhysicalPlanBuilder;
+import common.PlanBuilder;
 
 /**
  * Abstract class to represent logical operators. Every operator has a reference
@@ -23,5 +23,6 @@ public abstract class LogicalOperator {
    *
    * @param builder the physical plan builder for the query.
    */
-  public abstract void accept(PhysicalPlanBuilder builder);
+  public abstract void accept(PlanBuilder builder);
+
 }

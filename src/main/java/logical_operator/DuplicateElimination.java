@@ -1,6 +1,6 @@
 package logical_operator;
 
-import common.PhysicalPlanBuilder;
+import common.*;
 
 /**
  * A class to represent a duplicate elimination operator on a relation. This is
@@ -23,7 +23,7 @@ public class DuplicateElimination extends LogicalOperator {
   }
 
   @Override
-  public void accept(PhysicalPlanBuilder builder) {
+  public void accept(PlanBuilder builder) {
     builder.visit(this);
   }
 

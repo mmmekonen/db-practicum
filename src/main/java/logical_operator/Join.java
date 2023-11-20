@@ -1,7 +1,7 @@
 package logical_operator;
 
 import net.sf.jsqlparser.expression.Expression;
-import common.PhysicalPlanBuilder;
+import common.*;
 
 /**
  * A class to represent a join. This is the logical representation of the
@@ -21,6 +21,9 @@ public class Join extends LogicalOperator {
   // the expression to check if the tuples should be joined
   private Expression expression;
 
+  //the union-find object corresponding to the join
+  private SelectUF uf;
+
   /**
    * Creates a logical join operator that concatenates two other operators
    * together using a
@@ -31,14 +34,15 @@ public class Join extends LogicalOperator {
    * @param expression An expression that dictates what combinations of tuples are
    *                   valid.
    */
-  public Join(LogicalOperator left_op, LogicalOperator right_op, Expression expression) {
+  public Join(LogicalOperator left_op, LogicalOperator right_op, Expression expression, SelectUF uf) {
     this.leftChild = left_op;
     this.rightChild = right_op;
     this.expression = expression;
+    this.uf = uf;
   }
 
   @Override
-  public void accept(PhysicalPlanBuilder builder) {
+  public void accept(PlanBuilder builder) {
     builder.visit(this);
   }
 
@@ -67,5 +71,12 @@ public class Join extends LogicalOperator {
    */
   public Expression getExpression() {
     return expression;
+  }
+
+  /**
+   * @return A string representation of the operator (does not include the union-find elements)
+   */
+  public String toString() {
+    return "Join[" + expression + "]\n" + uf;
   }
 }
