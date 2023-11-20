@@ -47,6 +47,15 @@ public class OptimalSelection {
 
     this.tableName = tableName;
     ArrayList<Expression> binaryExpressions = getBinaryExpressions(expression);
+
+    for (Expression e : binaryExpressions) {
+      if (e == null) {
+        System.out.println("null");
+      } else {
+        System.out.println(e.toString());
+      }
+    }
+
     for (Expression e : binaryExpressions) {
       Expression left = ((BinaryExpression) e).getLeftExpression();
       Expression right = ((BinaryExpression) e).getRightExpression();
@@ -82,41 +91,75 @@ public class OptimalSelection {
     for (String column : columnInfo.keySet()) {
 
       System.out.println("column: " + column);
-      
-      // pages
-      int p = 0;
-      // tuples
-      int t = 0;
-      // leaves
-      int l = 0;
 
-      ArrayList<Integer> allRange = columnInfo.get(column);
-      int range = allRange.get(1) - allRange.get(0) + 1;
+      String c1 = column.split("\\.")[1];
 
-      // reduction factor
-      int r = range / t;
+      boolean hasIndex = indexInfo.containsKey(c1);
 
-      // clustered
-      boolean clustered = false;
+      System.out.println(indexInfo);
+
+      System.out.println("hasIndex: " + hasIndex);
 
       double indexCost = 0;
 
-      // index cost
-      if (clustered) {
-        indexCost = 3 + p * r;
+      if (hasIndex) {
+
+        ArrayList<Integer> tabInf = dbCatalog.getTabInfo(tableName);
+
+        // pages
+        int p = tabInf.get(0);
+        // tuples
+        int t = tabInf.get(1);
+        // leaves
+        int l = dbCatalog.getNumLeavesOfIndex(column);
+
+        ArrayList<Integer> allRange = columnInfo.get(column);
+        int range = allRange.get(1) - allRange.get(0) + 1;
+
+        // reduction factor
+        double r = (double) range / (double) t;
+
+        
+
+        // clustered
+        boolean clustered = indexInfo.get(c1).get(0) == 1;
+
+        System.out.println("p: " + p);
+        System.out.println("t: " + t);
+        System.out.println("l: " + l);
+        System.out.println("r: " + r);
+        System.out.println("range: " + range);
+        System.out.println("clustered: " + clustered);
+
+        // index cost
+        if (clustered) {
+          indexCost = 3 + p * r;
+        } else {
+          indexCost = 3 + l * r + p * r;
+        }
       } else {
-        indexCost = 3 + l * r + p * r;
+        indexCost = Integer.MAX_VALUE;
       }
 
-      // size of tuple
-      int s = 0;
+      ArrayList<String> tableStats = dbCatalog.getTableStats(tableName);
+
+      // size of the tuples
+      int s = DBCatalog.getInstance().getAttributesPerTable(tableName);
       // tuples in base table
-      int tb = 0;
+      int tb = (int) Double.parseDouble(tableStats.get(0));
+
+      System.out.println("s: " + s);
+      System.out.println("tb: " + tb);
 
       // non index cost
       double nonIndexCost = 0;
 
-      nonIndexCost = (tb * s) / 4096;
+      nonIndexCost = ((double) (tb * s)) / ((double) 4096);
+
+      System.out.println("______________________");
+      System.out.println("indexCost: " + indexCost);
+      System.out.println("nonIndexCost: " + nonIndexCost);
+      System.out.println("______________________");
 
       // if the non index cost is higher
       if (nonIndexCost > indexCost) {
@@ -147,22 +190,28 @@ public class OptimalSelection {
       }
     }
 
+    System.out.println(lowestCost);
+
     return lowestCost;
   }
 
   public void updateRange(String column, Integer value, Expression expression) {
+
     // ArrayList<String> tableStats =
     // DBCatalog.getInstance().getTableStats(tableName);
     ArrayList<String> tableStats = dbCatalog.getTableStats(tableName);
     ArrayList<Integer> range = new ArrayList<>();
 
     System.out.println("ts: " + tableStats);
+    System.out.println(columnInfo);
+    System.out.println(column);
 
     if (columnInfo.containsKey(column)) {
       range = columnInfo.get(column);
     } else {
       for (int i = 0; i < tableStats.size(); i++) {
-        String col = column.split(".")[1];
+        String col = column.split("\\.")[1];
+
         if (tableStats.get(i).equals(col)) {
           range.add(Integer.valueOf(tableStats.get(i + 1)));
           range.add(Integer.valueOf(tableStats.get(i + 2)));
