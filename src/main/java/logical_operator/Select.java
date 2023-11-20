@@ -51,4 +51,11 @@ public class Select extends LogicalOperator {
   public void accept(PhysicalPlanBuilder builder) {
     builder.visit(this);
   }
+
+  /**
+   * @return A string representation of the operator
+   */
+  public String toString() {
+    return "Select" + "[" + expression.toString() + "]";
+  }
 }

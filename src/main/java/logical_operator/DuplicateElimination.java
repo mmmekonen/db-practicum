@@ -35,4 +35,11 @@ public class DuplicateElimination extends LogicalOperator {
   public LogicalOperator getChild() {
     return child;
   }
+
+  /**
+   * @return A string representation of the operator
+   */
+  public String toString() {
+    return "DupElim";
+  }
 }

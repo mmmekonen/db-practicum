@@ -54,4 +54,11 @@ public class Sort extends LogicalOperator {
   public List<Column> getOrderByElements() {
     return orderbyElements;
   }
+
+  /**
+   * @return A string representation of the operator
+   */
+  public String toString() {
+    return "Sort" + orderbyElements.toString();
+  }
 }
