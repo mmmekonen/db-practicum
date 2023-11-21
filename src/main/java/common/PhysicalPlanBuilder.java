@@ -2,9 +2,11 @@ package common;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import logical_operator.DuplicateElimination;
 import logical_operator.Join;
+import logical_operator.LogicalOperator;
 import logical_operator.Projection;
 import logical_operator.Scan;
 import logical_operator.Select;
@@ -165,73 +167,87 @@ public class PhysicalPlanBuilder extends PlanBuilder {
    * @param joinOp a logical Join operator.
    */
   public void visit(Join joinOp) {
-    joinOp.getLeftChild().accept(this);
-    Operator left = root;
-    joinOp.getRightChild().accept(this);
-    Operator right = root;
-
-    if (join == JOIN.TNLJ) {
-      // System.out.println("TNLJ");
-      root = new TNLJOperator(left, right, joinOp.getExpression());
+    List<LogicalOperator> children = joinOp.getChildren();
+    ArrayList<Operator> opChildren = new ArrayList<>();
+    for (LogicalOperator child : children) {
+      child.accept(this);
+      opChildren.add(root);
     }
-    if (join == JOIN.BNLJ) {
-      // System.out.println("BNLJ");
-      root = new BNLJOperator(left, right, joinOp.getExpression(), joinBuffer);
+
+    DetermineJoinOrder determineOrder = new DetermineJoinOrder(opChildren, null/* TODO: Put select uf here */,
+        reductionInfo);
+    ArrayList<Operator> order = determineOrder.finalOrder();
+    Operator left = order.get(0);
+    for (int i = 1; i < order.size(); i++) {
+      left = new BNLJOperator(left, order.get(i), null/** TODO: put expression here */
+          , joinBuffer);
     }
-    if (join == JOIN.SMJ) {
-      // unimplemented
 
-      // ArrayList<Integer> leftOrder = new ArrayList<>();
-      // ArrayList<Integer> rightOrder = new ArrayList<>();
-      // ArrayList<Column> rightOrderCols = new ArrayList<>();
-      // ArrayList<Column> leftOrderCols = new ArrayList<>();
+    // old code
 
-      // ExpressionVisitor visitorL = new
-      // OrderByElementExtractor(left.getOutputSchema());
-      // joinOp.getExpression().accept(visitorL);
-      // leftOrder = ((OrderByElementExtractor) visitorL).getOrderByElements();
-      // leftOrderCols = ((OrderByElementExtractor)
-      // visitorL).getOrderByElementsColumns();
+    // if (join == JOIN.TNLJ) {
+    // // System.out.println("TNLJ");
+    // root = new TNLJOperator(left, right, joinOp.getExpression());
+    // }
+    // if (join == JOIN.BNLJ) {
+    // // System.out.println("BNLJ");
+    // root = new BNLJOperator(left, right, joinOp.getExpression(), joinBuffer);
+    // }
+    // if (join == JOIN.SMJ) {
+    // unimplemented
 
-      // ExpressionVisitor visitorR = new
-      // OrderByElementExtractor(right.getOutputSchema());
-      // joinOp.getExpression().accept(visitorR);
-      // rightOrder = ((OrderByElementExtractor) visitorR).getOrderByElements();
-      // rightOrderCols = ((OrderByElementExtractor)
-      // visitorR).getOrderByElementsColumns();
+    // ArrayList<Integer> leftOrder = new ArrayList<>();
+    // ArrayList<Integer> rightOrder = new ArrayList<>();
+    // ArrayList<Column> rightOrderCols = new ArrayList<>();
+    // ArrayList<Column> leftOrderCols = new ArrayList<>();
 
-      // // System.out.println("");
+    // ExpressionVisitor visitorL = new
+    // OrderByElementExtractor(left.getOutputSchema());
+    // joinOp.getExpression().accept(visitorL);
+    // leftOrder = ((OrderByElementExtractor) visitorL).getOrderByElements();
+    // leftOrderCols = ((OrderByElementExtractor)
+    // visitorL).getOrderByElementsColumns();
 
-      // // System.out.println(joinOp.getExpression().toString());
-      // // System.out.println(leftOrder);
-      // // System.out.println(rightOrder);
-      // // System.out.println(leftOrderCols);
-      // // System.out.println(rightOrderCols);
-      // // System.out.println(right);
-      // // System.out.println(left);
-      // // System.out.println(left.outputSchema);
-      // // System.out.println(right.outputSchema);
+    // ExpressionVisitor visitorR = new
+    // OrderByElementExtractor(right.getOutputSchema());
+    // joinOp.getExpression().accept(visitorR);
+    // rightOrder = ((OrderByElementExtractor) visitorR).getOrderByElements();
+    // rightOrderCols = ((OrderByElementExtractor)
+    // visitorR).getOrderByElementsColumns();
 
-      // // System.out.println("");
+    // // System.out.println("");
 
-      // if (sort == SORT.IN_MEMORY) {
-      // // if (left.outputSchema != null)
-      // left = new InMemorySortOperator(left, leftOrderCols);
-      // // if (right.outputSchema != null)
-      // right = new InMemorySortOperator(right, rightOrderCols);
-      // }
-      // if (sort == SORT.EXTERNAL) {
-      // // if (left.outputSchema != null)
-      // left = new ExternalSortOperator(left, leftOrderCols, sortBuffer);
-      // // if (right.outputSchema != null)
-      // right = new ExternalSortOperator(right, rightOrderCols, sortBuffer);
-      // }
+    // // System.out.println(joinOp.getExpression().toString());
+    // // System.out.println(leftOrder);
+    // // System.out.println(rightOrder);
+    // // System.out.println(leftOrderCols);
+    // // System.out.println(rightOrderCols);
+    // // System.out.println(right);
+    // // System.out.println(left);
+    // // System.out.println(left.outputSchema);
+    // // System.out.println(right.outputSchema);
 
-      // root = new SMJOperator(joinOp.getExpression(), left, right, leftOrder,
-      // rightOrder);
+    // // System.out.println("");
 
-      // // System.out.println("");
-    }
+    // if (sort == SORT.IN_MEMORY) {
+    // // if (left.outputSchema != null)
+    // left = new InMemorySortOperator(left, leftOrderCols);
+    // // if (right.outputSchema != null)
+    // right = new InMemorySortOperator(right, rightOrderCols);
+    // }
+    // if (sort == SORT.EXTERNAL) {
+    // // if (left.outputSchema != null)
+    // left = new ExternalSortOperator(left, leftOrderCols, sortBuffer);
+    // // if (right.outputSchema != null)
+    // right = new ExternalSortOperator(right, rightOrderCols, sortBuffer);
+    // }
+
+    // root = new SMJOperator(joinOp.getExpression(), left, right, leftOrder,
+    // rightOrder);
+
+    // // System.out.println("");
+    // }
+
   }
 
   /**

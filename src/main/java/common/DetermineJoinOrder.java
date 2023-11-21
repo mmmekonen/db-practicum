@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import logical_operator.Join;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import physical_operator.Operator;
@@ -51,6 +50,11 @@ public class DetermineJoinOrder {
     }
 
     /** TODO */
+    public ArrayList<Operator> finalOrder() {
+        return bestPlan.get(new HashSet<>(allTables));
+    }
+
+    /** TODO */
     private void findJoinOrder(HashSet<Operator> set) {
         // for size == 1, just relation, no cost
         if (set.size() == 1) {
@@ -70,9 +74,10 @@ public class DetermineJoinOrder {
                 temp.add(t);
 
                 // smaller one on left
-                if (sizeOfRelation(temp) < lowest)
+                if (sizeOfRelation(temp) < lowest) {
                     best.add(0, t);
-                else
+                    lowest = sizeMap.get(temp);
+                } else
                     best.add(t);
             }
 
@@ -87,14 +92,14 @@ public class DetermineJoinOrder {
             // get all possible left relations and
             // loop through them to determine cost/best left relation
             for (Operator t : set) {
-                HashSet<Operator> rightRelation = new HashSet<>(set);
-                rightRelation.remove(t);
+                HashSet<Operator> leftRelation = new HashSet<>(set);
+                leftRelation.remove(t);
 
-                int totalCost = costMap.get(rightRelation) + sizeOfRelation(rightRelation);
+                int totalCost = costMap.get(leftRelation) + sizeOfRelation(leftRelation);
                 if (totalCost < lowestCost) {
                     // set lowest cost and new best plan
                     lowestCost = totalCost;
-                    plan = new ArrayList<Operator>(bestPlan.get(rightRelation));
+                    plan = new ArrayList<Operator>(bestPlan.get(leftRelation));
                     plan.add(t);
                 }
             }
@@ -168,7 +173,7 @@ public class DetermineJoinOrder {
                         }
                     }
                 }
-                total *= Math.max(V(left, outerAttributes), V(right, col));
+                total *= Math.max(V(left, outerAttributes), V(right, col.getColumnName()));
             }
         }
 
@@ -182,7 +187,7 @@ public class DetermineJoinOrder {
     }
 
     /** TODO */
-    private int V(HashSet<Operator> plan, Column attribute) {
+    private int V(HashSet<Operator> plan, String attribute) {
         // for selections or two tables, adjust for # of tuples
         // no v-value is zero, round up to 1
 
@@ -196,7 +201,7 @@ public class DetermineJoinOrder {
         int aMin = Integer.MIN_VALUE;
         int aMax = Integer.MAX_VALUE;
         for (int i = 1; i < stats.size(); i += 3) {
-            if (stats.get(i) == attribute.getColumnName()) {
+            if (stats.get(i) == attribute) {
                 aMin = Integer.valueOf(stats.get(i + 1));
                 aMax = Integer.valueOf(stats.get(i + 2));
                 break;
@@ -218,10 +223,10 @@ public class DetermineJoinOrder {
         // add to map and return
         HashMap<String, Integer> planVMap = vMap.get(plan);
         if (planVMap != null) {
-            planVMap.put(attribute.getColumnName(), vVal);
+            planVMap.put(attribute, vVal);
         } else {
             planVMap = new HashMap<>();
-            planVMap.put(attribute.getColumnName(), vVal);
+            planVMap.put(attribute, vVal);
             vMap.put(plan, planVMap);
         }
         return vVal;
@@ -234,8 +239,14 @@ public class DetermineJoinOrder {
         for (Operator op : attributes.keySet()) {
             HashSet<Operator> temp = new HashSet<>();
             temp.add(op);
-            values.add(vMap.get(temp).get(attributes.get(op)));
+            if (vMap.get(temp) != null && vMap.get(temp).get(attributes.get(op)) != null) {
+                values.add(vMap.get(temp).get(attributes.get(op)));
+            } else {
+                values.add(V(temp, attributes.get(op)));
+            }
         }
+
+        // get min vValue
         int vVal = Collections.min(values);
 
         // check 0 and clamp down
