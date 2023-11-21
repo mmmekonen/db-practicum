@@ -128,7 +128,9 @@ public class OptimalSelection {
         // tuples
         int t = tabInf.get(1);
         // leaves
-        int l = dbCatalog.getNumLeavesOfIndex(column);
+
+        String indexName = tableName + "." + c1;
+        int l = dbCatalog.getNumLeavesOfIndex(indexName);
 
         ArrayList<Integer> allRange = columnInfo.get(column);
         int range = allRange.get(1) - allRange.get(0) + 1;
@@ -218,7 +220,7 @@ public class OptimalSelection {
     lowestCost.add(reductionInfo);
 
     System.out.println(lowestCost);
-
+    System.out.println("RETURNING");
     return lowestCost;
   }
 
