@@ -182,6 +182,7 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       left = new BNLJOperator(left, order.get(i), null/** TODO: put expression here */
           , joinBuffer);
     }
+    root = left;
 
     // old code
 
