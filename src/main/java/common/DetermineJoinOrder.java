@@ -12,7 +12,27 @@ import net.sf.jsqlparser.schema.Table;
 import physical_operator.Operator;
 import physical_operator.ScanOperator;
 
-/** TODO */
+/**
+ * A class to determine the optimal join order for joins in the current query.
+ * Creates a left deep join plan with the lowest cost relations as the outside
+ * relation. The cost of each join is calculated as the cost of its outer
+ * relation times the estimated size of the outer relation. To calculate the
+ * estimated size for each relation, if it is a base table, then the size the
+ * total number of tuples in the table. If it is a selection, then the size is
+ * the number of tuples in the relation times the product of all the reduction
+ * factors on that table. The size of any combination of tables (a join) was
+ * determined using the size of the outer table times the size of the inner
+ * table. This size was then divided by the maximum V-Values calculated for
+ * attributes that had equality join conditions on each other (as found in the
+ * given union-find). To calculate the V-Values, if the relation was a base
+ * table, it used the max - min + 1 for the possible values in that table for
+ * the specified attribute (found in stats.txt file). For a selection, it's the
+ * same except that value is multiplied by the reduction factors for that table.
+ * For any join of relations, the V-Value was calculated as the minimum V-Value
+ * from all the attributes in that relation that are in the equality condition.
+ * Finally, all V-Values are checked to make sure that they are >= 1 and are <=
+ * the estimated size of each table.
+ */
 public class DetermineJoinOrder {
 
     private ArrayList<Operator> allTables;
@@ -27,7 +47,16 @@ public class DetermineJoinOrder {
     // actual best plan order
     HashMap<HashSet<Operator>, ArrayList<Operator>> bestPlan;
 
-    /** TODO */
+    /**
+     * Creates a DetermineJoinOrder object that creates the optimal join order using
+     * the given child operators, a union-find, and the reduction factors for those
+     * operators.
+     * 
+     * @param ops           An ArrayList of operators.
+     * @param unionFind     A SelectUF object.
+     * @param reductionInfo A HashMap of the reduction factors for the given
+     *                      operators.
+     */
     public DetermineJoinOrder(ArrayList<Operator> ops, SelectUF unionFind,
             HashMap<String, HashMap<String, Double>> reductionInfo) {
         allTables = ops;
@@ -49,12 +78,20 @@ public class DetermineJoinOrder {
         }
     }
 
-    /** TODO */
+    /**
+     * Returns the final join order.
+     * 
+     * @return an ArrayList of operators.
+     */
     public ArrayList<Operator> finalOrder() {
         return bestPlan.get(new HashSet<>(allTables));
     }
 
-    /** TODO */
+    /**
+     * Finds the optimal join order for the given set of operators.
+     * 
+     * @param set a HashSet of operators.
+     */
     private void findJoinOrder(HashSet<Operator> set) {
         // for size == 1, just relation, no cost
         if (set.size() == 1) {
@@ -111,7 +148,12 @@ public class DetermineJoinOrder {
         }
     }
 
-    /** TODO */
+    /**
+     * Calculates and stores the size of the given relation.
+     * 
+     * @param plan a HashSet of operators representing a relation.
+     * @return an int of the estimated size of the relation.
+     */
     private int sizeOfRelation(HashSet<Operator> plan) {
         // only consider equality conditions for joins (in unionfind)
         // if no equality conditions, act as cross product - size of relations
@@ -186,7 +228,14 @@ public class DetermineJoinOrder {
         return result;
     }
 
-    /** TODO */
+    /**
+     * Calculates and stores the V-Value of the given operator and attribute.
+     * This method is meant to be used for single tables only.
+     * 
+     * @param plan      a HashSet of an Operator.
+     * @param attribute a String of the attribute to calculate the V-Value for.
+     * @return an int of the V-Value.
+     */
     private int V(HashSet<Operator> plan, String attribute) {
         // for selections or two tables, adjust for # of tuples
         // no v-value is zero, round up to 1
@@ -232,7 +281,15 @@ public class DetermineJoinOrder {
         return vVal;
     }
 
-    /** TODO */
+    /**
+     * Calculates and stores the V-Value of the given operator and attribute.
+     * This method is meant to be used for joined relations only.
+     * 
+     * @param plan       a HashSet of Operators.
+     * @param attributes a HashMap<Operator,String> for the attributes from the
+     *                   given relation.
+     * @return an int of the V-Value.
+     */
     private int V(HashSet<Operator> plan, HashMap<Operator, String> attributes) {
         // 2 or more relations
         ArrayList<Integer> values = new ArrayList<>();
@@ -255,7 +312,15 @@ public class DetermineJoinOrder {
         return vVal;
     }
 
-    /** TOOD */
+    /**
+     * Creates a subset of a certain size using the given tables.
+     * 
+     * @param tables     an ArrayList of operators to use for subsets.
+     * @param subsetSize the size of the subsets to make.
+     * @param index      the current index in tables.
+     * @param inProgress a HashSet of operators that is currently being made.
+     * @param subsets    an ArrayList of HashSets to store the subsets in.
+     */
     private void createSubsets(ArrayList<Operator> tables, int subsetSize, int index, HashSet<Operator> inProgress,
             ArrayList<HashSet<Operator>> subsets) {
         if (inProgress.size() == subsetSize) {
