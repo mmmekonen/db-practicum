@@ -1,12 +1,15 @@
 package common;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 import logical_operator.Join;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import physical_operator.Operator;
 import physical_operator.ScanOperator;
 
@@ -15,6 +18,7 @@ public class DetermineJoinOrder {
 
     private ArrayList<Operator> allTables;
     private SelectUF uf;
+    private HashMap<String, HashMap<String, Double>> reductionInfo;
     // cost of best plan
     HashMap<HashSet<Operator>, Integer> costMap;
     // expected output size of each relation
@@ -25,12 +29,11 @@ public class DetermineJoinOrder {
     HashMap<HashSet<Operator>, ArrayList<Operator>> bestPlan;
 
     /** TODO */
-    public DetermineJoinOrder(Join join) {
-        // TODO: determine tables in the join
-
-        // TODO: get unionfind from join
-
-        // TODO: get reduction factors?
+    public DetermineJoinOrder(ArrayList<Operator> ops, SelectUF unionFind,
+            HashMap<String, HashMap<String, Double>> reductionInfo) {
+        allTables = ops;
+        uf = unionFind;
+        this.reductionInfo = reductionInfo;
 
         // iterate through all subsets
         ArrayList<HashSet<Operator>> currSubsets = new ArrayList<>();
@@ -123,10 +126,14 @@ public class DetermineJoinOrder {
             } else {
                 // compute the size of R as the size of the base table multiplied by the product
                 // of all the reduction factors on all the attributes mentioned in the selection
-
-                // TODO: get reduction factors
-                int reductionfactors = 0;
-                int size = reductionfactors * numTuples;
+                Table table = op.outputSchema.get(0).getTable();
+                String name = table.getAlias() != null ? table.getAlias().getName() : table.getName();
+                Collection<Double> reductionfactors = reductionInfo.get(name).values();
+                int size = 1;
+                for (Double num : reductionfactors) {
+                    size *= num;
+                }
+                size *= numTuples;
                 // check 0
                 size = size > 0 ? size : 1;
                 sizeMap.put(plan, size);
@@ -138,7 +145,7 @@ public class DetermineJoinOrder {
         ArrayList<Operator> outerRelation = bestPlan.get(plan);
         int n = outerRelation.size();
         HashSet<Operator> left = new HashSet<>(outerRelation.subList(0, n - 1));
-        HashSet<Operator> right = new HashSet<>(outerRelation.subList(plan.size() - 1, n));
+        HashSet<Operator> right = new HashSet<>(outerRelation.subList(n - 1, n));
 
         // get sizes of relations
         int sizeLeft = sizeMap.get(left);
@@ -147,25 +154,21 @@ public class DetermineJoinOrder {
         // for attribute in corresponding unionfinds, calc v-values for each left and
         // right, get max(left, right), multiply all maxes
         int total = 1;
-        for (Column col : left.iterator().next().outputSchema) {
+        for (Column col : right.iterator().next().outputSchema) {
             UFElement ufe;
             if ((ufe = uf.find(col)) != null) {
                 List<String> attributes = ufe.getAttributes();
-                boolean found = false;
-                // TODO: check this
-                for (Operator op : right) {
-                    if (found)
-                        break;
+                HashMap<Operator, String> outerAttributes = new HashMap<>();
+                for (Operator op : left) {
                     for (Column col2 : op.outputSchema) {
                         String tableName = col2.getTable().getAlias() != null ? col2.getTable().getAlias().getName()
                                 : col2.getTable().getName();
                         if (attributes.contains(tableName + "." + col2.getColumnName())) {
-                            total *= Math.max(V(left, col2), V(right, col));
-                            found = true;
-                            break;
+                            outerAttributes.put(op, col2.getColumnName());
                         }
                     }
                 }
+                total *= Math.max(V(left, outerAttributes), V(right, col));
             }
         }
 
@@ -184,53 +187,61 @@ public class DetermineJoinOrder {
         // no v-value is zero, round up to 1
 
         // single relation
-        if (plan.size() == 1) {
-            DBCatalog db = DBCatalog.getInstance();
-            Operator op = plan.iterator().next();
-            String tableName = op.outputSchema.get(0).getTable().getName();
-            ArrayList<String> stats = db.getStats().get(tableName);
+        DBCatalog db = DBCatalog.getInstance();
+        Operator op = plan.iterator().next();
+        String tableName = op.outputSchema.get(0).getTable().getName();
+        ArrayList<String> stats = db.getStats().get(tableName);
 
-            // get min and max for attribute
-            int aMin = Integer.MIN_VALUE;
-            int aMax = Integer.MAX_VALUE;
-            for (int i = 1; i < stats.size(); i += 3) {
-                if (stats.get(i) == attribute.getColumnName()) {
-                    aMin = Integer.valueOf(stats.get(i + 1));
-                    aMax = Integer.valueOf(stats.get(i + 2));
-                    break;
-                }
+        // get min and max for attribute
+        int aMin = Integer.MIN_VALUE;
+        int aMax = Integer.MAX_VALUE;
+        for (int i = 1; i < stats.size(); i += 3) {
+            if (stats.get(i) == attribute.getColumnName()) {
+                aMin = Integer.valueOf(stats.get(i + 1));
+                aMax = Integer.valueOf(stats.get(i + 2));
+                break;
             }
-
-            // calc range
-            int vVal = aMax - aMin + 1;
-
-            if (!(op instanceof ScanOperator)) {
-                // if selection, max - min + 1 for attribute and adjust min and max for
-                // reduction factors from selection
-                // TODO: get reduction factors
-                int reductionfactors = 0;
-                vVal *= reductionfactors;
-            }
-
-            // check for 0
-            vVal = vVal > 0 ? vVal : 1;
-
-            // add to map and return
-            HashMap<String, Integer> planVMap = vMap.get(plan);
-            if (planVMap != null) {
-                planVMap.put(attribute.getColumnName(), vVal);
-            } else {
-                planVMap = new HashMap<>();
-                planVMap.put(attribute.getColumnName(), vVal);
-                vMap.put(plan, planVMap);
-            }
-            return vVal;
-        } else {
-            // TODO: 2 or more relations
-
         }
 
-        return 1;
+        // calc range
+        int vVal = aMax - aMin + 1;
+
+        if (!(op instanceof ScanOperator)) {
+            // if selection, max - min + 1 for attribute and adjust min and max for
+            // reduction factors from selection
+            vVal = vVal > sizeMap.get(plan) ? sizeMap.get(plan) : vVal;
+        }
+
+        // check for 0
+        vVal = vVal > 0 ? vVal : 1;
+
+        // add to map and return
+        HashMap<String, Integer> planVMap = vMap.get(plan);
+        if (planVMap != null) {
+            planVMap.put(attribute.getColumnName(), vVal);
+        } else {
+            planVMap = new HashMap<>();
+            planVMap.put(attribute.getColumnName(), vVal);
+            vMap.put(plan, planVMap);
+        }
+        return vVal;
+    }
+
+    /** TODO */
+    private int V(HashSet<Operator> plan, HashMap<Operator, String> attributes) {
+        // 2 or more relations
+        ArrayList<Integer> values = new ArrayList<>();
+        for (Operator op : attributes.keySet()) {
+            HashSet<Operator> temp = new HashSet<>();
+            temp.add(op);
+            values.add(vMap.get(temp).get(attributes.get(op)));
+        }
+        int vVal = Collections.min(values);
+
+        // check 0 and clamp down
+        vVal = vVal > sizeMap.get(plan) ? sizeMap.get(plan) : vVal > 0 ? vVal : 1;
+
+        return vVal;
     }
 
     /** TOOD */
