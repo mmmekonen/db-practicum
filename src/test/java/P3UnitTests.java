@@ -23,6 +23,7 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import physical_operator.Operator;
 import physical_operator.ScanOperator;
@@ -81,6 +82,19 @@ public class P3UnitTests {
     } catch (IOException e) {
       e.printStackTrace();
       System.out.println("hi");
+    }
+  }
+
+  @BeforeEach
+  public void clearTempDir() {
+    // clean temp directory before each query
+    for (File file : (new File(tempDir).listFiles())) {
+      if (file.isDirectory()) {
+        for (File f : file.listFiles()) {
+          f.delete();
+        }
+      }
+      file.delete();
     }
   }
 

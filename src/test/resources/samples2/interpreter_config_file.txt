@@ -1,0 +1,3 @@
+src/test/resources/samples2/input
+src/test/resources/samples2/output
+src/test/resources/samples2/temp
