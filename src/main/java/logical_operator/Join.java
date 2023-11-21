@@ -20,7 +20,7 @@ public class Join extends LogicalOperator {
   // the expression to check if the tuples should be joined
   private Expression expression;
 
-  //the union-find object corresponding to the join
+  // the union-find object corresponding to the join
   private SelectUF uf;
 
   /**
@@ -28,7 +28,7 @@ public class Join extends LogicalOperator {
    * together using a
    * tuple-nested loop join.
    *
-   * @param children    One logical operator to be joined.
+   * @param children   One logical operator to be joined.
    * @param expression An expression that dictates what combinations of tuples are
    *                   valid.
    */
@@ -57,7 +57,17 @@ public class Join extends LogicalOperator {
   }
 
   /**
-   * @return A string representation of the operator (does not include the union-find elements)
+   * Returns the union-find of this operator.
+   *
+   * @return a SelectUF object.
+   */
+  public SelectUF getUnionFind() {
+    return uf;
+  }
+
+  /**
+   * @return A string representation of the operator (does not include the
+   *         union-find elements)
    */
   public String toString() {
     return "Join[" + expression + "]\n" + uf;

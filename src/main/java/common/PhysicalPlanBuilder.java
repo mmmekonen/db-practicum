@@ -174,13 +174,12 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       opChildren.add(root);
     }
 
-    DetermineJoinOrder determineOrder = new DetermineJoinOrder(opChildren, null/* TODO: Put select uf here */,
+    DetermineJoinOrder determineOrder = new DetermineJoinOrder(opChildren, joinOp.getUnionFind(),
         reductionInfo);
     ArrayList<Operator> order = determineOrder.finalOrder();
     Operator left = order.get(0);
     for (int i = 1; i < order.size(); i++) {
-      left = new BNLJOperator(left, order.get(i), null/** TODO: put expression here */
-          , joinBuffer);
+      left = new BNLJOperator(left, order.get(i), joinOp.getExpression(), joinBuffer);
     }
     root = left;
 
