@@ -54,9 +54,10 @@ public class SelectUF {
     }
 
     public Expression getWhere(Table table) {
-        ArrayList<Column> cols = DBCatalog.getInstance().getTableSchema(table.getDBLinkName());
+        ArrayList<Column> cols = DBCatalog.getInstance().getTableSchema(table.getName());
         ArrayList<Expression> conditions = new ArrayList<>();
         for (Column c : cols) {
+            c.setTable(table);
             if (this.find(c) != null) {
                 UFElement element = find(c);
                 if (element.lowerBound != null && element.upperBound != null) {

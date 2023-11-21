@@ -110,7 +110,7 @@ public class PhysicalPlanBuilder extends PlanBuilder {
     columnName = columnName.split("\\.")[1];
     boolean useIndex = ((double) lowestCost.get(1) == 1.0) ? true : false;
 
-    String tname = (scanOp.getAlias() == null) ? scanOp.getAlias().getName() : scanOp.getTableName();
+    String tname = (scanOp.getAlias() != null) ? scanOp.getAlias().getName() : scanOp.getTableName();
 
     this.reductionInfo.put(tname, (HashMap<String, Double>) lowestCost.get(3));
 
