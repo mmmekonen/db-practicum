@@ -4,13 +4,14 @@ Jeffery Lipson (jal496), Maelat Mekonen (mmm432), Richard Fischer (rtf48)
 ## Top-Level Class
 Compiler.java
 
-## Index Scan Operator
-For the index scan operator, the lowkey and highkey are set in the constructor. If highkey is null, it is set to the max int value. If lowkey is null, we start from the first data entry (which will be on page 1). If lowkey is not null, we deserialize the tree, starting at the address of the root node. From this, depending on wether or not the node is an index or a leaf node, we search the indexes/leaves until we find a key that is greater than or equal to the lowkey (then we are at the data entry we need to start at). This will only search indexes and leaves that we would possibly use, and does not deserialize the whole tree. In the construction of the index scan operator, we scan the index file to find out if the index is clustered or unclustered. Then, in the calls to getNextTuple(), we check if the index is clustered or not. If clustered, we simply call getNextTuple() on a scan operator of the sorted file. If unclustered, we get the next rid and get the tuple at that corresponding pageID, tupleID. 
+## Selection Pushing
+an explanation of where the implementation is found (i.e. which classes/methods perform it), as well as an explanation of your logic
 
-## PhysicalPlanBuilder
-For determining which portion of selection can and can't be handled by an index, an ExpressionVisitor, called IndexExpressionSplitter, is used to split the select expression into a lowkey and highkey pair as well as an expression to use for the full scan selection. For each column, it checks whether there is an index on that column and stores that result in a boolean variable. For each long value, it store the value of the long in a variable. For each type of expression (<, <=, >, >=, ==), the ExpressionVisitor determines checks if there is a column with an index on it. If there is no index, the expression is added onto the existing expression for the full scan (the part that IndexScan can't handle), otherwise, the lowkey and highkey values are determined using long value that was stored earlier. For the not equals expression (!=), the expression is just added onto the full scan conditions. Before the entire expression is split, PhysicalPlanBuilder determines if it can use indexes and if an index exists on the table. If either of these are false, then the plan works as in P2 where a normal Scan operator and Select operator are created. If indexes can be used and one exists, then the select expression is split with the ExpressionVisitor as described earlier and the builder checks the lowkey, highkey, and select conditions made by the visitor. If both the lowkey and highkey are null, the builder creates a Scan and Select Operator,else if there are no full scan select conditions, the builder creates only an IndexScan, otherwise, the builder creates an IndexScan as the child of a Select operator with the lowkey and highkey passed into IndexScan and the full scan selection conditions passed into Select.
+## Implementation For Each Logical Selection Operator
+an explanation of where the implementation is found (i.e. which classes/methods perform it), as well as an explanation of your logic
 
-## Other Information - SMJ
-Unfortunately, we were unable to fully implement the SMJ operator. However, the external sort maintains a 
-bounded state by ensuring that only as many tuples as can fit in the buffer (specified by the user) are stored in 
-main memory at any given time.
+## Join Order
+The code that determines the optimal Join order can be found in DetermineJoinOrder.java. There, above the class definition, is a comment explaining all of the logic for determining the join order.
+
+## Implementation For Each Join Operator
+Our Join Operator implementation can be found in PhysicalPlanBuilder.java under the Join visitor method. We decided to use BNLJ for all of our Join Operators as we saw in P2's benchmarking that it consistently ran faster than TNLJ on all queries tested. SMJ is not used as a Join Operator in our implementation as our SMJ implementation currently does not produce correct query results.

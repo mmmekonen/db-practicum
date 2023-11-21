@@ -15,23 +15,29 @@ import physical_operator.ScanOperator;
 /**
  * A class to determine the optimal join order for joins in the current query.
  * Creates a left deep join plan with the lowest cost relations as the outside
- * relation. The cost of each join is calculated as the cost of its outer
- * relation times the estimated size of the outer relation. To calculate the
- * estimated size for each relation, if it is a base table, then the size the
- * total number of tuples in the table. If it is a selection, then the size is
- * the number of tuples in the relation times the product of all the reduction
- * factors on that table. The size of any combination of tables (a join) was
- * determined using the size of the outer table times the size of the inner
- * table. This size was then divided by the maximum V-Values calculated for
- * attributes that had equality join conditions on each other (as found in the
- * given union-find). To calculate the V-Values, if the relation was a base
- * table, it used the max - min + 1 for the possible values in that table for
- * the specified attribute (found in stats.txt file). For a selection, it's the
- * same except that value is multiplied by the reduction factors for that table.
- * For any join of relations, the V-Value was calculated as the minimum V-Value
- * from all the attributes in that relation that are in the equality condition.
- * Finally, all V-Values are checked to make sure that they are >= 1 and are <=
- * the estimated size of each table.
+ * relation. The algorithm starts with the smallest possible subsets for a join
+ * (single tables) and works its way up until it finds the optimal join order
+ * for the entire join. For a single table, the cost is zero and the optimal
+ * join is just the table itself. For a join of two relations, the cost is also
+ * zero and the optimal join order is with the smaller table as the outer
+ * relation. The cost of each larger join is calculated as the cost of its
+ * outer relation times the estimated size of the outer relation. The cost of
+ * the outer relation is previously computed in a prior iteration of the
+ * algorithm. To calculate the estimated size for each relation, if it is a base
+ * table, then the size is the total number of tuples in the table. If it is a
+ * selection, then the size is the number of tuples in the relation times the
+ * product of all the reduction factors on that table. The size of any
+ * combination of tables (a join) was determined using the size of the outer
+ * table times the size of the inner table divided by the product of the maximum
+ * V-Values calculated for attributes that had equality join conditions on each
+ * other (as found in the given union-find). To calculate the V-Values, if the
+ * relation was a base table, it used the max - min + 1 for the possible values
+ * in that table for the specified attribute (found in stats.txt file). For a
+ * selection, it's the same except that value is multiplied by the reduction
+ * factors for that table. For any join of relations, the V-Value was calculated
+ * as the minimum V-Value from all the attributes in that relation that are in
+ * the equality condition. Finally, all V-Values are checked to make sure that
+ * they are >= 1 and are <= the estimated size of each table.
  */
 public class DetermineJoinOrder {
 
