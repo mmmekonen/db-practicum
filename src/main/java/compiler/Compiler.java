@@ -16,8 +16,11 @@ import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Set;
 
+import javax.xml.crypto.Data;
+
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Database;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 import org.apache.logging.log4j.*;
@@ -159,6 +162,7 @@ public class Compiler {
       HashMap<Integer, Integer> min = new HashMap<>();
       HashMap<Integer, Integer> max = new HashMap<>();
       int len = 0;
+      int pid = 0;
 
       // whether or not to write a newline in stats.txt
       boolean newline = false;
@@ -174,7 +178,12 @@ public class Compiler {
                 max.get(i) == null ? tuple.getElementAtIndex(i) : Math.max(max.get(i), tuple.getElementAtIndex(i)));
           }
           len++;
+          pid = tuple.getPID();
         }
+
+        pid++;
+        DBCatalog.getInstance().setNumPages(table, pid, len);
+
         // write to file
         if (newline) {
           bw.newLine();
