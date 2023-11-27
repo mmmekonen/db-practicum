@@ -51,11 +51,11 @@ public class UFElement {
     public void union(UFElement other) {
         this.attributes.addAll(other.attributes);
         this.upperBound = this.upperBound != null
-                ? other.upperBound != null ? Math.min(other.upperBound, this.upperBound) : this.upperBound
-                : other.upperBound;
+                ? (other.upperBound != null ? Math.min(other.upperBound, this.upperBound) : this.upperBound)
+                : (other.upperBound != null ? other.upperBound : Long.MAX_VALUE);
         this.lowerBound = this.lowerBound != null
-                ? other.lowerBound != null ? Math.max(other.lowerBound, this.lowerBound) : this.lowerBound
-                : other.lowerBound;
+                ? (other.lowerBound != null ? Math.max(other.lowerBound, this.lowerBound) : this.lowerBound)
+                : (other.lowerBound != null ? other.lowerBound : Long.MIN_VALUE);
     }
 
     public boolean satisfied(Tuple tuple, List<Column> schema) {
