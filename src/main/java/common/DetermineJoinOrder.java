@@ -45,13 +45,13 @@ public class DetermineJoinOrder {
     private SelectUF uf;
     private HashMap<String, HashMap<String, Double>> reductionInfo;
     // cost of best plan
-    HashMap<HashSet<Operator>, Integer> costMap;
+    HashMap<HashSet<Operator>, Integer> costMap = new HashMap<>();
     // expected output size of each relation
-    HashMap<HashSet<Operator>, Integer> sizeMap;
+    HashMap<HashSet<Operator>, Integer> sizeMap = new HashMap<>();
     // v-values for relations
-    HashMap<HashSet<Operator>, HashMap<String, Integer>> vMap;
+    HashMap<HashSet<Operator>, HashMap<String, Integer>> vMap = new HashMap<>();
     // actual best plan order
-    HashMap<HashSet<Operator>, ArrayList<Operator>> bestPlan;
+    HashMap<HashSet<Operator>, ArrayList<Operator>> bestPlan = new HashMap<>();
 
     /**
      * Creates a DetermineJoinOrder object that creates the optimal join order using
@@ -71,7 +71,7 @@ public class DetermineJoinOrder {
 
         // iterate through all subsets
         ArrayList<HashSet<Operator>> currSubsets = new ArrayList<>();
-        for (int i = 1; i < allTables.size(); i++) {
+        for (int i = 1; i <= allTables.size(); i++) {
             createSubsets(allTables, i, 0, new HashSet<>(), currSubsets);
 
             // loop through them
@@ -120,8 +120,9 @@ public class DetermineJoinOrder {
                 if (sizeOfRelation(temp) < lowest) {
                     best.add(0, t);
                     lowest = sizeMap.get(temp);
-                } else
+                } else {
                     best.add(t);
+                }
             }
 
             // add plan to map
@@ -181,14 +182,15 @@ public class DetermineJoinOrder {
                 // of all the reduction factors on all the attributes mentioned in the selection
                 Table table = op.outputSchema.get(0).getTable();
                 String name = table.getAlias() != null ? table.getAlias().getName() : table.getName();
-                Collection<Double> reductionfactors = reductionInfo.get(name).values();
+                HashMap<String, Double> factorsByCol = reductionInfo.get(name);
+                Collection<Double> reductionfactors = factorsByCol != null ? factorsByCol.values() : new ArrayList<>(0);
                 int size = 1;
                 for (Double num : reductionfactors) {
                     size *= num;
                 }
                 size *= numTuples;
                 // check 0
-                size = size > 0 ? size : 1;
+                size = size >= 1 ? size : 1;
                 sizeMap.put(plan, size);
                 return size;
             }
@@ -207,29 +209,30 @@ public class DetermineJoinOrder {
         // for attribute in corresponding unionfinds, calc v-values for each left and
         // right, get max(left, right), multiply all maxes
         int total = 1;
-        for (Column col : right.iterator().next().outputSchema) {
+        ArrayList<Column> schema = right.iterator().next().outputSchema;
+        for (Column col : schema) {
             UFElement ufe;
             if ((ufe = uf.find(col)) != null) {
                 List<String> attributes = ufe.getAttributes();
                 HashMap<Operator, String> outerAttributes = new HashMap<>();
                 for (Operator op : left) {
                     for (Column col2 : op.outputSchema) {
-                        String tableName = col2.getTable().getAlias() != null ? col2.getTable().getAlias().getName()
-                                : col2.getTable().getName();
-                        if (attributes.contains(tableName + "." + col2.getColumnName())) {
+                        if (attributes.contains(col2.toString())) {
                             outerAttributes.put(op, col2.getColumnName());
                         }
                     }
                 }
-                total *= Math.max(V(left, outerAttributes), V(right, col.getColumnName()));
+                if (outerAttributes.keySet().size() != 0) {
+                    total *= Math.max(V(left, outerAttributes), V(right, col.getColumnName()));
+                }
             }
         }
 
         // calc and store result
         // size of relations multipled / max of V values per equality attribute
-        int result = sizeLeft * sizeRight / total;
+        int result = (sizeLeft * sizeRight) / total;
         // check 0
-        result = result > 0 ? result : 1;
+        result = result >= 1 ? result : 1;
         sizeMap.put(plan, result);
         return result;
     }
@@ -273,7 +276,7 @@ public class DetermineJoinOrder {
         }
 
         // check for 0
-        vVal = vVal > 0 ? vVal : 1;
+        vVal = vVal >= 1 ? vVal : 1;
 
         // add to map and return
         HashMap<String, Integer> planVMap = vMap.get(plan);

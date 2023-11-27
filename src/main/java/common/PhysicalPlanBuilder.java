@@ -96,50 +96,59 @@ public class PhysicalPlanBuilder extends PlanBuilder {
     DBCatalog db = DBCatalog.getInstance();
     HashMap<String, ArrayList<Integer>> indexInfo = db.getIndexInfo().get(scanOp.getTableName());
 
-    OptimalSelection optimalSelection = new OptimalSelection();
+    if (indexInfo != null) {
+      OptimalSelection optimalSelection = new OptimalSelection();
 
-    System.out.println("selectOp.getExpression(): " + selectOp.getExpression());
-    System.out.println("scanOp.getTableName(): " + scanOp.getTableName());
-    System.out.println("indexInfo: " + indexInfo);
+      System.out.println("selectOp.getExpression(): " + selectOp.getExpression());
+      System.out.println("scanOp.getTableName(): " + scanOp.getTableName());
+      System.out.println("indexInfo: " + indexInfo);
 
-    ArrayList<Object> lowestCost = optimalSelection.getOptimalColumn(selectOp.getExpression(), scanOp.getTableName(),
-        indexInfo);
+      ArrayList<Object> lowestCost = optimalSelection.getOptimalColumn(selectOp.getExpression(), scanOp.getTableName(),
+          indexInfo);
 
-    String columnName = (String) lowestCost.get(0);
+      boolean useIndex = false;
+      if (lowestCost.size() != 1) {
+        useIndex = ((double) lowestCost.get(1) == 1.0) ? true : false;
 
-    columnName = columnName.split("\\.")[1];
-    boolean useIndex = ((double) lowestCost.get(1) == 1.0) ? true : false;
+        String tname = (scanOp.getAlias() != null) ? scanOp.getAlias().getName() : scanOp.getTableName();
 
-    String tname = (scanOp.getAlias() != null) ? scanOp.getAlias().getName() : scanOp.getTableName();
+        this.reductionInfo.put(tname, (HashMap<String, Double>) lowestCost.get(3));
 
-    this.reductionInfo.put(tname, (HashMap<String, Double>) lowestCost.get(3));
+        // System.out.println("r info: " + reductionInfo);
+        // System.out.println("columnName: " + columnName);
+        // System.out.println("useIndex: " + useIndex);
+      }
 
-    System.out.println("r info: " + reductionInfo);
-    System.out.println("columnName: " + columnName);
-    System.out.println("useIndex: " + useIndex);
+      if (useIndex) {
+        String columnName = (String) lowestCost.get(0);
+        columnName = columnName.split("\\.")[1];
 
-    if (useIndex) {
-      IndexExpressionSplitter splitter = new IndexExpressionSplitter(columnName);
-      selectOp.getExpression().accept(splitter);
+        IndexExpressionSplitter splitter = new IndexExpressionSplitter(columnName);
+        selectOp.getExpression().accept(splitter);
 
-      // Expression indexExpression = splitter.getIndexConditions();
-      Integer lowkey = splitter.getLowKey();
-      Integer highkey = splitter.getHighKey();
-      Expression selectExpression = splitter.getSelectConditions();
+        // Expression indexExpression = splitter.getIndexConditions();
+        Integer lowkey = splitter.getLowKey();
+        Integer highkey = splitter.getHighKey();
+        Expression selectExpression = splitter.getSelectConditions();
 
-      if (lowkey == null && highkey == null) {
-        // full scan
-        root = new SelectOperator(
-            new ScanOperator(scanOp.getTableName(), scanOp.getAlias()), selectExpression);
-      } else if (selectExpression == null) {
-        // only indexScan operator, no selection
-        root = new IndexScanOperator(
-            scanOp.getTableName(), scanOp.getAlias(), columnName, lowkey, highkey);
+        if (lowkey == null && highkey == null) {
+          // full scan
+          root = new SelectOperator(
+              new ScanOperator(scanOp.getTableName(), scanOp.getAlias()), selectExpression);
+        } else if (selectExpression == null) {
+          // only indexScan operator, no selection
+          root = new IndexScanOperator(
+              scanOp.getTableName(), scanOp.getAlias(), columnName, lowkey, highkey);
+        } else {
+          // both indexscan and selection
+          Operator indexScanOp = new IndexScanOperator(
+              scanOp.getTableName(), scanOp.getAlias(), columnName, lowkey, highkey);
+          root = new SelectOperator(indexScanOp, selectExpression);
+        }
       } else {
-        // both indexscan and selection
-        Operator indexScanOp = new IndexScanOperator(
-            scanOp.getTableName(), scanOp.getAlias(), columnName, lowkey, highkey);
-        root = new SelectOperator(indexScanOp, selectExpression);
+        scanOp.accept(this);
+        Operator child = root;
+        root = new SelectOperator(child, selectOp.getExpression());
       }
     } else {
       scanOp.accept(this);
@@ -177,9 +186,11 @@ public class PhysicalPlanBuilder extends PlanBuilder {
     DetermineJoinOrder determineOrder = new DetermineJoinOrder(opChildren, joinOp.getUnionFind(),
         reductionInfo);
     ArrayList<Operator> order = determineOrder.finalOrder();
+
     Operator left = order.get(0);
     for (int i = 1; i < order.size(); i++) {
-      left = new BNLJOperator(left, order.get(i), joinOp.getExpression(), joinBuffer);
+      left = new BNLJOperator(left, order.get(i), joinOp.getExpression(),
+          joinBuffer);
     }
     root = left;
 

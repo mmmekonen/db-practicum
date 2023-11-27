@@ -38,7 +38,7 @@ public class OptimalSelection {
       AndExpression andExpression = (AndExpression) e;
       binaryExpressions.addAll(getBinaryExpressions(andExpression.getLeftExpression()));
       binaryExpressions.addAll(getBinaryExpressions(andExpression.getRightExpression()));
-    } else {
+    } else if (e != null) {
       binaryExpressions.add(e);
     }
     return binaryExpressions;
