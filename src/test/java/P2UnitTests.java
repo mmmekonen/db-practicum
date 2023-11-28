@@ -42,7 +42,7 @@ public class P2UnitTests {
     static void setupBeforeAllTests() throws IOException, JSQLParserException {
 
         ClassLoader classLoader = P2UnitTests.class.getClassLoader();
-        String path = Objects.requireNonNull(classLoader.getResource("samples2/input")).getPath();
+        String path = "src/test/resources/samples2/input";
 
         DBCatalog.getInstance().setDataDirectory(path + "/db");
         DBCatalog.getInstance().setSortDirectory(tempDir);
@@ -52,11 +52,7 @@ public class P2UnitTests {
         gatherStats(path, DBCatalog.getInstance());
         DBCatalog.getInstance().setStats();
 
-        String queriesFile = Objects.requireNonNull(classLoader.getResource("samples2/input/queries.sql")).getPath();
-        // for windows machine
-        if (queriesFile.contains(":")) {
-            queriesFile = queriesFile.substring(3);
-        }
+        String queriesFile = "src/test/resources/samples2/input/queries.sql";
 
         statements = CCJSqlParserUtil.parseStatements(Files.readString(Path.of(queriesFile)));
         queryPlanBuilder = new QueryPlanBuilder();

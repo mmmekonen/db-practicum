@@ -75,7 +75,6 @@ public class PhysicalPlanBuilder extends PlanBuilder {
     return root;
   }
 
-  
   /**
    * Replaces the logical Scan operator with a physical ScanOperator.
    *
@@ -156,7 +155,7 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       Operator child = root;
       root = new SelectOperator(child, selectOp.getExpression());
     }
-    
+
   }
 
   /**
@@ -232,15 +231,15 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       plan.append("-");
     }
     plan.append(op).append("\n");
-    for(Operator child : op.getChildren()) buildString(child, depth + 1, plan);
+    for (Operator child : op.getChildren())
+      buildString(child, depth + 1, plan);
   }
-
 
   public String toString() {
     StringBuilder plan = new StringBuilder();
     int depth = 0;
     buildString(root, depth, plan);
-    return plan.toString(); 
+    return plan.toString();
   }
 
 }
