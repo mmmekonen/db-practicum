@@ -213,7 +213,7 @@ public class DetermineJoinOrder {
         for (Column col : schema) {
             UFElement ufe;
             if ((ufe = uf.find(col)) != null) {
-                List<String> attributes = ufe.getAttributes();
+                List<String> attributes = ufe.attributes;
                 HashMap<Operator, String> outerAttributes = new HashMap<>();
                 for (Operator op : left) {
                     for (Column col2 : op.outputSchema) {

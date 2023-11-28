@@ -15,6 +15,7 @@ import net.sf.jsqlparser.expression.ConnectByRootOperator;
 import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.ExtractExpression;
 import net.sf.jsqlparser.expression.Function;
@@ -118,6 +119,10 @@ public class ComparisonExtractor implements ExpressionVisitor {
     this.parent = parent;
   }
 
+  private boolean onTwoCols() {
+    return att1 != null && att2 != null;
+  }
+
   /**
    * Visits and evaluates each part of the expression
    *
@@ -178,8 +183,13 @@ public class ComparisonExtractor implements ExpressionVisitor {
     equalsTo.getRightExpression().accept(this);
 
     UFElement temp = new UFElement();
-    temp.addAttribute(att1);
-    temp.addAttribute(att2);
+    if (onTwoCols()) {
+      temp.addAttribute(att1);
+      temp.addAttribute(att2);
+    } else {
+      temp.addAttribute(att1, val, BoundType.EQUALS);
+    }
+
     parent.add(temp);
   }
 
@@ -190,7 +200,22 @@ public class ComparisonExtractor implements ExpressionVisitor {
    */
   @Override
   public void visit(NotEqualsTo notEqualsTo) {
-    throw new UnsupportedOperationException("Unimplemented method 'visit'");
+    clear();
+
+    notEqualsTo.getLeftExpression().accept(this);
+    notEqualsTo.getRightExpression().accept(this);
+
+    UFElement temp = new UFElement();
+    if (onTwoCols()) {
+      temp.addAttribute(att1);
+      temp.addAttribute(att2);
+    } else {
+      temp.addAttribute(att1);
+    }
+
+    temp.addRemainder(notEqualsTo);
+
+    parent.add(temp);
   }
 
   /**
@@ -205,7 +230,14 @@ public class ComparisonExtractor implements ExpressionVisitor {
     greaterThan.getRightExpression().accept(this);
 
     UFElement temp = new UFElement();
-    temp.addAttribute(att1, valOnRight ? ++val : --val, valOnRight ? BoundType.LOWER : BoundType.UPPER);
+    if (onTwoCols()) {
+      temp.addAttribute(att1);
+      temp.addAttribute(att2);
+      temp.addRemainder(greaterThan);
+    } else {
+      temp.addAttribute(att1, valOnRight ? ++val : --val, valOnRight ? BoundType.LOWER : BoundType.UPPER);
+    }
+    
     parent.add(temp);
   }
 
@@ -221,7 +253,13 @@ public class ComparisonExtractor implements ExpressionVisitor {
     greaterThanEquals.getRightExpression().accept(this);
 
     UFElement temp = new UFElement();
-    temp.addAttribute(att1, val, valOnRight ? BoundType.LOWER : BoundType.UPPER);
+    if (onTwoCols()) {
+      temp.addAttribute(att1);
+      temp.addAttribute(att2);
+      temp.addRemainder(greaterThanEquals);
+    } else {
+      temp.addAttribute(att1, val, valOnRight ? BoundType.LOWER : BoundType.UPPER);
+    }
     parent.add(temp);
   }
 
@@ -236,7 +274,14 @@ public class ComparisonExtractor implements ExpressionVisitor {
     minorThan.getRightExpression().accept(this);
 
     UFElement temp = new UFElement();
-    temp.addAttribute(att1, valOnRight ? --val : ++val, valOnRight ? BoundType.UPPER : BoundType.LOWER);
+    if (onTwoCols()) {
+      temp.addAttribute(att1);
+      temp.addAttribute(att2);
+      temp.addRemainder(minorThan);
+    } else {
+      temp.addAttribute(att1, valOnRight ? --val : ++val, valOnRight ? BoundType.UPPER : BoundType.LOWER);
+    }
+    
     parent.add(temp);
   }
 
@@ -252,7 +297,13 @@ public class ComparisonExtractor implements ExpressionVisitor {
     minorThanEquals.getRightExpression().accept(this);
 
     UFElement temp = new UFElement();
-    temp.addAttribute(att1, val, valOnRight ? BoundType.UPPER : BoundType.LOWER);
+    if (onTwoCols()) {
+      temp.addAttribute(att1);
+      temp.addAttribute(att2);
+      temp.addRemainder(minorThanEquals);
+    } else {
+      temp.addAttribute(att1, val, valOnRight ? BoundType.UPPER : BoundType.LOWER);
+    }
     parent.add(temp);
   }
 

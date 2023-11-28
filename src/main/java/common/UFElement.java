@@ -1,9 +1,11 @@
 package common;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.schema.Column;
+import visitors.SelectExpressionVisitor;
 
 public class UFElement {
 
@@ -13,16 +15,14 @@ public class UFElement {
         EQUALS
     }
 
-    private ArrayList<String> attributes;
+    ArrayList<String> attributes;
+    ArrayList<Expression> remainder;
     Long upperBound;
     Long lowerBound;
 
     public UFElement() {
         this.attributes = new ArrayList<>();
-    }
-
-    public List<String> getAttributes() {
-        return attributes;
+        this.remainder = new ArrayList<>();
     }
 
     public Long getEqualityCon() {
@@ -30,6 +30,19 @@ public class UFElement {
             return upperBound;
         else
             return null;
+    }
+
+    public Expression getRemainder() {
+        Expression e = null;
+        if (!remainder.isEmpty()) {
+            e = remainder.get(0);
+            for (int i = 1; i < remainder.size(); i++) e = new AndExpression(e, remainder.get(i));
+        }
+        return e;
+    }
+
+    public void addRemainder(Expression e) {
+        remainder.add(e);
     }
 
     public void addAttribute(Column attr, long bound, BoundType type) {
@@ -56,13 +69,17 @@ public class UFElement {
         this.lowerBound = this.lowerBound != null
                 ? (other.lowerBound != null ? Math.max(other.lowerBound, this.lowerBound) : this.lowerBound)
                 : (other.lowerBound != null ? other.lowerBound : Long.MIN_VALUE);
+        this.remainder.addAll(other.remainder);
     }
 
     public boolean satisfied(Tuple tuple, List<Column> schema) {
+        SelectExpressionVisitor visitor = new SelectExpressionVisitor(tuple, schema);
+        this.getRemainder().accept(visitor);
         for (int i = 0; i < schema.size(); i++) {
             if (attributes.contains(schema.get(i).toString())) {
                 return tuple.getAllElements().get(i) > (lowerBound != null ? lowerBound : Long.MIN_VALUE)
-                        && tuple.getAllElements().get(i) < (upperBound != null ? upperBound : Long.MAX_VALUE);
+                        && tuple.getAllElements().get(i) < (upperBound != null ? upperBound : Long.MAX_VALUE)
+                        && visitor.conditionSatisfied();
             }
         }
         return false;

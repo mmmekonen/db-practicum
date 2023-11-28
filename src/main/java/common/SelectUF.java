@@ -24,7 +24,7 @@ public class SelectUF {
     }
 
     public void add(UFElement e) {
-        ArrayList<String> temp = new ArrayList<>(e.getAttributes());
+        ArrayList<String> temp = new ArrayList<>(e.attributes);
         for (String s : temp) {
             if (elements.containsKey(s)) {
                 elements.get(s).union(e);
@@ -44,7 +44,7 @@ public class SelectUF {
         if (elements.get(att1) == elements.get(att2))
             return;
         UFElement result = elements.get(att1);
-        ArrayList<String> attrList2 = new ArrayList<>(elements.get(att2).getAttributes());
+        ArrayList<String> attrList2 = new ArrayList<>(elements.get(att2).attributes);
 
         result.union(elements.get(att2));
 
@@ -60,6 +60,7 @@ public class SelectUF {
             c.setTable(table);
             if (this.find(c) != null) {
                 UFElement element = find(c);
+                if (element.getRemainder() != null) conditions.add(element.getRemainder());
                 if (element.lowerBound != null && element.upperBound != null) {
                     GreaterThanEquals lower = new GreaterThanEquals()
                             .withLeftExpression(c).withRightExpression(new LongValue(find(c).lowerBound));
@@ -76,7 +77,6 @@ public class SelectUF {
             }
         }
         if (!conditions.isEmpty())
-
         {
             Expression e = conditions.remove(0);
             while (!conditions.isEmpty()) {
