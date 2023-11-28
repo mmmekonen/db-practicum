@@ -2,6 +2,8 @@ package physical_operator;
 
 import common.Tuple;
 import java.util.ArrayList;
+import java.util.List;
+
 import net.sf.jsqlparser.expression.Expression;
 import visitors.SelectExpressionVisitor;
 
@@ -86,5 +88,16 @@ public class TNLJOperator extends Operator {
       rightTuple = right.getNextTuple();
       leftTuple = left.getNextTuple();
     }
+  }
+
+  public String toString() {
+    return "TNLJ[" + expression + "]";
+  }
+
+  public List<Operator> getChildren() {
+    ArrayList<Operator> temp = new ArrayList<>();
+    temp.add(left);
+    temp.add(right);
+    return temp;
   }
 }

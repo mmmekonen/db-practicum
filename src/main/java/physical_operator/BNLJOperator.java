@@ -2,6 +2,8 @@ package physical_operator;
 
 import common.Tuple;
 import java.util.ArrayList;
+import java.util.List;
+
 import net.sf.jsqlparser.expression.Expression;
 import visitors.SelectExpressionVisitor;
 
@@ -27,12 +29,12 @@ public class BNLJOperator extends Operator {
    * @param right_op Another operator to be joined.
    * @param expression An expression that dictates what combinations of tuples are valid.
    */
-  public BNLJOperator(Operator left_op, Operator right_op, Expression expression, int bufferPages) {
+  public BNLJOperator(Operator leftOp, Operator rightOp, Expression expression, int bufferPages) {
     super(null);
-    this.outputSchema = left_op.getOutputSchema();
-    this.outputSchema.addAll(right_op.getOutputSchema());
-    this.left = left_op;
-    this.right = right_op;
+    this.outputSchema = leftOp.getOutputSchema();
+    this.outputSchema.addAll(rightOp.getOutputSchema());
+    this.left = leftOp;
+    this.right = rightOp;
     this.expression = expression;
     this.leftTuple = left.getNextTuple();
     this.rightTuple = right.getNextTuple();
@@ -69,7 +71,7 @@ public class BNLJOperator extends Operator {
 
     boolean satisfied = false;
 
-    while (!satisfied && buffer[pointer] != null) {
+    while (buffer[pointer] != null) {
       ArrayList<Integer> combined = buffer[pointer].getAllElements();
       combined.addAll(rightTuple.getAllElements());
       tuple = new Tuple(combined);
@@ -105,4 +107,16 @@ public class BNLJOperator extends Operator {
       }
     }
   }
+
+  public String toString() {
+    return "BNLJ[" + expression + "]";
+  }
+
+  public List<Operator> getChildren() {
+    ArrayList<Operator> temp = new ArrayList<>();
+    temp.add(left);
+    temp.add(right);
+    return temp;
+  }
+  
 }

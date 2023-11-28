@@ -1,7 +1,7 @@
 package physical_operator;
 
 import common.Tuple;
-import java.util.ArrayList;
+import java.util.*;
 import net.sf.jsqlparser.expression.Expression;
 
 public class SMJOperator extends Operator {
@@ -15,6 +15,7 @@ public class SMJOperator extends Operator {
   public int leftIndex;
   public int rightIndex;
   public int index;
+  private Expression expression;
 
   /**
    * Constructor for the SMJ operator
@@ -43,6 +44,7 @@ public class SMJOperator extends Operator {
     this.leftIndex = 0;
     this.rightIndex = 0;
     this.index = -1;
+    this.expression = expression;
   }
 
   /**
@@ -126,9 +128,20 @@ public class SMJOperator extends Operator {
    * @return
    */
   public ArrayList<Integer> mergeTuples(Tuple leftTup, Tuple rightTup) {
-    ArrayList<Integer> mergedTuple = new ArrayList<Integer>();
+    ArrayList<Integer> mergedTuple = new ArrayList<>();
     mergedTuple.addAll(rightTup.getAllElements());
     mergedTuple.addAll(leftTup.getAllElements());
     return mergedTuple;
+  }
+
+  public String toString() {
+    return "SMJ[" + expression + "]";
+  }
+
+  public List<Operator> getChildren() {
+    ArrayList<Operator> temp = new ArrayList<>();
+    temp.add(left);
+    temp.add(right);
+    return temp;
   }
 }

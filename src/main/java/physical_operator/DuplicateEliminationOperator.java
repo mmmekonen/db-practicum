@@ -1,5 +1,8 @@
 package physical_operator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import common.Tuple;
 
 /**
@@ -46,4 +49,15 @@ public class DuplicateEliminationOperator extends Operator {
     }
     return null;
   }
+
+  public String toString() {
+    return "DupElim";
+  }
+
+  public List<Operator> getChildren() {
+    ArrayList<Operator> temp = new ArrayList<>();
+    temp.add(child);
+    return temp;
+  }
+
 }

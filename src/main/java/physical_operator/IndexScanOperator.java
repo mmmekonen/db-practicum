@@ -7,6 +7,8 @@ import common.TupleReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 
@@ -24,6 +26,8 @@ public class IndexScanOperator extends Operator {
   ArrayList<ArrayList<Integer>> dataEntries;
   public boolean notEndReached;
   public int indexColumnInt;
+  private String tableName;
+  private String attribute;
 
   /** Creates a new IndexScanOperator. */
   public IndexScanOperator(
@@ -32,6 +36,8 @@ public class IndexScanOperator extends Operator {
     this.lowkey = lowkey;
     this.highkey = highkey;
     this.scanner = new ScanOperator(tableName, alias);
+    this.tableName = tableName;
+    this.attribute = indexColumnName;
 
     ArrayList<Column> cols = DBCatalog.getInstance().getTableSchema(tableName);
     ArrayList<String> colNames = new ArrayList<String>();
@@ -168,5 +174,15 @@ public class IndexScanOperator extends Operator {
   @Override
   public void reset() {
     super.reset(0);
+  }
+
+  public String toString() {
+    return "IndexScan[" + tableName + "," + attribute + "," + highkey + "," + lowkey + "]";
+  }
+
+  public List<Operator> getChildren() {
+    ArrayList<Operator> temp = new ArrayList<>();
+    temp.add(scanner);
+    return temp;
   }
 }

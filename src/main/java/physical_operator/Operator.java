@@ -1,5 +1,6 @@
 package physical_operator;
 
+import common.PlanBuilder;
 import common.Tuple;
 import common.TupleWriter;
 import java.io.File;
@@ -105,4 +106,8 @@ public abstract class Operator {
       e.printStackTrace();
     }
   }
+
+  public abstract List<Operator> getChildren();
+
+
 }

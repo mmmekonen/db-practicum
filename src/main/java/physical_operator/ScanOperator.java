@@ -5,6 +5,9 @@ import common.Tuple;
 import common.TupleReader;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import net.sf.jsqlparser.expression.Alias;
 
 /**
@@ -16,6 +19,7 @@ public class ScanOperator extends Operator {
 
   private File dbFile;
   private TupleReader reader;
+  private String tableName;
 
   // explicit constructor
   /**
@@ -31,6 +35,7 @@ public class ScanOperator extends Operator {
 
     DBCatalog dbCatalog = DBCatalog.getInstance();
     this.dbFile = dbCatalog.getFileForTable(tableName);
+    this.tableName = tableName;
 
     try {
       this.reader = new TupleReader(dbFile);
@@ -61,11 +66,18 @@ public class ScanOperator extends Operator {
    */
   public Tuple getNextTuple() {
     try {
-      Tuple t = reader.readNextTuple();
-      return t;
+      return reader.readNextTuple();
     } catch (IOException e) {
       e.printStackTrace();
       return null;
     }
+  }
+
+  public String toString() {
+    return "TableScan[" + tableName + "]";
+  }
+
+  public List<Operator> getChildren() {
+    return new ArrayList<>();
   }
 }

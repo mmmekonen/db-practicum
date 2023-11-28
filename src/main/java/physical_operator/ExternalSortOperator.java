@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
@@ -31,7 +33,9 @@ public class ExternalSortOperator extends Operator {
   private File directory;
   private File sortedFile;
   private TupleReader readerSortedFile;
-  public HashMap<Integer, Integer> indexOrders;
+  private final ArrayList<Column> orderByElements;
+  private HashMap<Integer, Integer> indexOrders;
+  
 
   /**
    * Creates an external sort operator using an Operator, a List of Columns to order by, and a
@@ -45,9 +49,10 @@ public class ExternalSortOperator extends Operator {
     super(null);
 
     this.child = child;
+    this.orderByElements = new ArrayList<>(orderbyElements);
 
     indexOrders = new HashMap<>();
-    createSortOrder(orderbyElements);
+    createSortOrder();
 
     // create directory to work in
     try {
@@ -84,17 +89,21 @@ public class ExternalSortOperator extends Operator {
     this.outputSchema = schema;
   }
 
+  public Map<Integer, Integer> getIndexOrders() {
+    return indexOrders;
+  }
+
   /**
    * Determines the order to sort the tuples by.
    *
    * @param orderbyElements A List of Columns to sort by first.
    */
-  private void createSortOrder(List<Column> orderbyElements) {
+  private void createSortOrder() {
     // gives the index in the tuple by order preference (ie. indexOrders[i] = the
     // index in child.outputSchema that is i-th in the final order)
     int position = 0;
-    while (position < orderbyElements.size()) {
-      Column column = orderbyElements.get(position);
+    while (position < orderByElements.size()) {
+      Column column = orderByElements.get(position);
       for (int i = 0; i < child.outputSchema.size(); i++) {
         Table t = child.outputSchema.get(i).getTable();
         String tableName2 = t.getAlias() != null ? t.getAlias().getName() : t.getName();
@@ -121,7 +130,7 @@ public class ExternalSortOperator extends Operator {
    * @return whether or not the buffer was able to be filled.
    */
   private boolean fillBuffer() {
-    buffer = new ArrayList<Tuple>(bufferSize);
+    buffer = new ArrayList<>(bufferSize);
     boolean notEmpty = false;
     int i = 0;
     while (i < bufferSize && currTuple != null) {
@@ -217,7 +226,7 @@ public class ExternalSortOperator extends Operator {
       start = Math.min(start + numMerges, end);
       end++;
     }
-    sortedFile = new File(directory.toString() + "/" + start);
+    sortedFile = new File(directory, Integer.toString(start));
   }
 
   @Override
@@ -245,5 +254,15 @@ public class ExternalSortOperator extends Operator {
       e.printStackTrace();
       return null;
     }
+  }
+
+  public String toString() {
+    return "ExternalSort" + orderByElements;
+  }
+
+  public List<Operator> getChildren() {
+    ArrayList<Operator> temp = new ArrayList<>();
+    temp.add(child);
+    return temp;
   }
 }

@@ -1,5 +1,8 @@
 package physical_operator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import common.Tuple;
 import common.UFElement;
 import net.sf.jsqlparser.expression.Expression;
@@ -72,5 +75,15 @@ public class SelectOperator extends Operator {
       }
     }
     return tuple;
+  }
+
+  public String toString() {
+    return "Select[" + expression + "]";
+  }
+
+  public List<Operator> getChildren() {
+    ArrayList<Operator> temp = new ArrayList<>();
+    temp.add(child);
+    return temp;
   }
 }

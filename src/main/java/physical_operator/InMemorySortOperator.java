@@ -21,6 +21,10 @@ public class InMemorySortOperator extends Operator {
   // the index of the next tuple to get
   private int index = 0;
 
+  private List<Column> orderByElements;
+
+  private Operator child;
+
   /**
    * Creates an in-memory sort operator using an Operator and a List of Columns to order by.
    *
@@ -32,6 +36,8 @@ public class InMemorySortOperator extends Operator {
 
     // get all child tuples
     this.tuples = child.getAllTuples();
+    this.orderByElements = orderbyElements;
+    this.child = child;
 
     // gives the index in the tuple by order preference (ie. indexOrders[i] = the
     // index in child.outputSchema that is i-th in the final order)
@@ -83,10 +89,20 @@ public class InMemorySortOperator extends Operator {
    */
   @Override
   public Tuple getNextTuple() {
-    while (this.tuples.size() > this.index) {
+    if (this.tuples.size() > this.index) {
       this.index++;
       return this.tuples.get(this.index - 1);
     }
     return null;
+  }
+
+  public String toString() {
+    return "InMemorySort" + orderByElements;
+  }
+
+  public List<Operator> getChildren() {
+    ArrayList<Operator> temp = new ArrayList<>();
+    temp.add(child);
+    return temp;
   }
 }

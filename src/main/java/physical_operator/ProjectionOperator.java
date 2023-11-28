@@ -15,6 +15,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
  */
 public class ProjectionOperator extends Operator {
   private List<Integer> projectionColumnsIndices;
+  private List<SelectItem> selectItems;
   private Operator child;
 
   /**
@@ -26,6 +27,7 @@ public class ProjectionOperator extends Operator {
   public ProjectionOperator(List<SelectItem> selectItems, Operator child) {
     super(child.outputSchema);
     this.child = child;
+    this.selectItems = selectItems;
 
     this.projectionColumnsIndices = new ArrayList<>();
 
@@ -83,5 +85,15 @@ public class ProjectionOperator extends Operator {
       tupleValues.add(tuple.getElementAtIndex(projectionColumnsIndices.get(i)));
     }
     return new Tuple(tupleValues);
+  }
+
+  public String toString() {
+    return "Project" + selectItems;
+  }
+
+  public List<Operator> getChildren() {
+    ArrayList<Operator> temp = new ArrayList<>();
+    temp.add(child);
+    return temp;
   }
 }

@@ -75,6 +75,7 @@ public class PhysicalPlanBuilder extends PlanBuilder {
     return root;
   }
 
+  
   /**
    * Replaces the logical Scan operator with a physical ScanOperator.
    *
@@ -133,8 +134,8 @@ public class PhysicalPlanBuilder extends PlanBuilder {
 
         if (lowkey == null && highkey == null) {
           // full scan
-          root = new SelectOperator(
-              new ScanOperator(scanOp.getTableName(), scanOp.getAlias()), selectExpression);
+          ScanOperator child = new ScanOperator(scanOp.getTableName(), scanOp.getAlias());
+          root = new SelectOperator(child, selectExpression);
         } else if (selectExpression == null) {
           // only indexScan operator, no selection
           root = new IndexScanOperator(
@@ -155,6 +156,7 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       Operator child = root;
       root = new SelectOperator(child, selectOp.getExpression());
     }
+    
   }
 
   /**
@@ -193,72 +195,6 @@ public class PhysicalPlanBuilder extends PlanBuilder {
           joinBuffer);
     }
     root = left;
-
-    // old code
-
-    // if (join == JOIN.TNLJ) {
-    // // System.out.println("TNLJ");
-    // root = new TNLJOperator(left, right, joinOp.getExpression());
-    // }
-    // if (join == JOIN.BNLJ) {
-    // // System.out.println("BNLJ");
-    // root = new BNLJOperator(left, right, joinOp.getExpression(), joinBuffer);
-    // }
-    // if (join == JOIN.SMJ) {
-    // unimplemented
-
-    // ArrayList<Integer> leftOrder = new ArrayList<>();
-    // ArrayList<Integer> rightOrder = new ArrayList<>();
-    // ArrayList<Column> rightOrderCols = new ArrayList<>();
-    // ArrayList<Column> leftOrderCols = new ArrayList<>();
-
-    // ExpressionVisitor visitorL = new
-    // OrderByElementExtractor(left.getOutputSchema());
-    // joinOp.getExpression().accept(visitorL);
-    // leftOrder = ((OrderByElementExtractor) visitorL).getOrderByElements();
-    // leftOrderCols = ((OrderByElementExtractor)
-    // visitorL).getOrderByElementsColumns();
-
-    // ExpressionVisitor visitorR = new
-    // OrderByElementExtractor(right.getOutputSchema());
-    // joinOp.getExpression().accept(visitorR);
-    // rightOrder = ((OrderByElementExtractor) visitorR).getOrderByElements();
-    // rightOrderCols = ((OrderByElementExtractor)
-    // visitorR).getOrderByElementsColumns();
-
-    // // System.out.println("");
-
-    // // System.out.println(joinOp.getExpression().toString());
-    // // System.out.println(leftOrder);
-    // // System.out.println(rightOrder);
-    // // System.out.println(leftOrderCols);
-    // // System.out.println(rightOrderCols);
-    // // System.out.println(right);
-    // // System.out.println(left);
-    // // System.out.println(left.outputSchema);
-    // // System.out.println(right.outputSchema);
-
-    // // System.out.println("");
-
-    // if (sort == SORT.IN_MEMORY) {
-    // // if (left.outputSchema != null)
-    // left = new InMemorySortOperator(left, leftOrderCols);
-    // // if (right.outputSchema != null)
-    // right = new InMemorySortOperator(right, rightOrderCols);
-    // }
-    // if (sort == SORT.EXTERNAL) {
-    // // if (left.outputSchema != null)
-    // left = new ExternalSortOperator(left, leftOrderCols, sortBuffer);
-    // // if (right.outputSchema != null)
-    // right = new ExternalSortOperator(right, rightOrderCols, sortBuffer);
-    // }
-
-    // root = new SMJOperator(joinOp.getExpression(), left, right, leftOrder,
-    // rightOrder);
-
-    // // System.out.println("");
-    // }
-
   }
 
   /**
@@ -290,4 +226,21 @@ public class PhysicalPlanBuilder extends PlanBuilder {
 
     root = new DuplicateEliminationOperator(child);
   }
+
+  private void buildString(Operator op, int depth, StringBuilder plan) {
+    for (int i = 0; i < depth; i++) {
+      plan.append("-");
+    }
+    plan.append(op).append("\n");
+    for(Operator child : op.getChildren()) buildString(child, depth + 1, plan);
+  }
+
+
+  public String toString() {
+    StringBuilder plan = new StringBuilder();
+    int depth = 0;
+    buildString(root, depth, plan);
+    return plan.toString(); 
+  }
+
 }

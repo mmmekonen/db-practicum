@@ -16,11 +16,9 @@ import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Set;
 
-import javax.xml.crypto.Data;
 
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Database;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 import org.apache.logging.log4j.*;
@@ -114,9 +112,22 @@ public class Compiler {
           Operator plan = queryPlanBuilder.buildPlan(statement);
 
           if (outputToFiles) {
-            // TODO: output logical and physical query plans
-            File outfile = new File(outputDir + "/query" + counter);
             long timeElapsed = System.currentTimeMillis();
+
+            //output logical plan
+            File logicalPlanFile = new File(outputDir, "query" + counter + "_logicalplan");
+            FileWriter writer = new FileWriter(logicalPlanFile);
+            writer.write(queryPlanBuilder.stringBuilder(statement));
+            writer.close();
+
+            //output physical plan
+            File physicalPlanFile = new File(outputDir, "query" + counter + "_physicalplan");
+            writer = new FileWriter(physicalPlanFile);
+            writer.write(plan.toString());
+            writer.close();
+
+            //output data
+            File outfile = new File(outputDir, "query" + counter);
             plan.dump(outfile);
             timeElapsed = System.currentTimeMillis() - timeElapsed;
             logger.info("Query processing time: " + timeElapsed + "ms");
