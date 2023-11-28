@@ -8,8 +8,10 @@ import net.sf.jsqlparser.expression.Expression;
 import visitors.SelectExpressionVisitor;
 
 /**
- * A class to represent a block-nested loop join. It loads blocks of tuples into the buffer and
- * iterates over them, instead of making an I/O request for each individual tuple.
+ * A class to represent a block-nested loop join. It loads blocks of tuples into
+ * the buffer and
+ * iterates over them, instead of making an I/O request for each individual
+ * tuple.
  */
 public class BNLJOperator extends Operator {
 
@@ -22,12 +24,14 @@ public class BNLJOperator extends Operator {
   private int pointer;
 
   /**
-   * Creates a BNLJOperator object that concatenates two other operators together using a
+   * Creates a BNLJOperator object that concatenates two other operators together
+   * using a
    * tuple-nested loop join.
    *
-   * @param left_op One operator to be joined.
-   * @param right_op Another operator to be joined.
-   * @param expression An expression that dictates what combinations of tuples are valid.
+   * @param left_op    One operator to be joined.
+   * @param right_op   Another operator to be joined.
+   * @param expression An expression that dictates what combinations of tuples are
+   *                   valid.
    */
   public BNLJOperator(Operator leftOp, Operator rightOp, Expression expression, int bufferPages) {
     super(null);
@@ -65,7 +69,8 @@ public class BNLJOperator extends Operator {
    */
   public Tuple getNextTuple() {
 
-    if (buffer[pointer] == null || rightTuple == null) return null;
+    if (buffer[pointer] == null || rightTuple == null)
+      return null;
 
     Tuple tuple;
 
@@ -118,5 +123,5 @@ public class BNLJOperator extends Operator {
     temp.add(right);
     return temp;
   }
-  
+
 }

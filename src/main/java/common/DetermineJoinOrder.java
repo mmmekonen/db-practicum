@@ -209,21 +209,23 @@ public class DetermineJoinOrder {
         // for attribute in corresponding unionfinds, calc v-values for each left and
         // right, get max(left, right), multiply all maxes
         int total = 1;
-        ArrayList<Column> schema = right.iterator().next().outputSchema;
-        for (Column col : schema) {
-            UFElement ufe;
-            if ((ufe = uf.find(col)) != null) {
-                List<String> attributes = ufe.attributes;
-                HashMap<Operator, String> outerAttributes = new HashMap<>();
-                for (Operator op : left) {
-                    for (Column col2 : op.outputSchema) {
-                        if (attributes.contains(col2.toString())) {
-                            outerAttributes.put(op, col2.getColumnName());
+        if (uf != null) {
+            ArrayList<Column> schema = right.iterator().next().outputSchema;
+            for (Column col : schema) {
+                UFElement ufe;
+                if ((ufe = uf.find(col)) != null) {
+                    List<String> attributes = ufe.attributes;
+                    HashMap<Operator, String> outerAttributes = new HashMap<>();
+                    for (Operator op : left) {
+                        for (Column col2 : op.outputSchema) {
+                            if (attributes.contains(col2.toString())) {
+                                outerAttributes.put(op, col2.getColumnName());
+                            }
                         }
                     }
-                }
-                if (outerAttributes.keySet().size() != 0) {
-                    total *= Math.max(V(left, outerAttributes), V(right, col.getColumnName()));
+                    if (!outerAttributes.isEmpty()) {
+                        total *= Math.max(V(left, outerAttributes), V(right, col.getColumnName()));
+                    }
                 }
             }
         }

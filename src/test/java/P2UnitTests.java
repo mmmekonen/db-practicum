@@ -1,5 +1,6 @@
 import common.DBCatalog;
 import common.QueryPlanBuilder;
+import common.TreeIndex;
 import common.Tuple;
 
 import java.io.BufferedWriter;
@@ -32,7 +33,7 @@ public class P2UnitTests {
     private static List<Statement> statementList;
     private static QueryPlanBuilder queryPlanBuilder;
     private static Statements statements;
-    private static String expectedPath;
+    private static String expectedPath = "src/test/resources/samples2/expected";
     private static File outputDir;
     private static String tempDir = "src/test/resources/samples2/temp";
 
@@ -61,8 +62,23 @@ public class P2UnitTests {
         statementList = statements.getStatements();
 
         outputDir = new File("src/test/resources/samples2/output");
-        for (File file : (outputDir.listFiles()))
+        for (File file : (outputDir.listFiles())) {
             file.delete(); // clean output directory
+        }
+
+        // Set up indexes
+        ArrayList<String> tables = new ArrayList<>();
+        DBCatalog db = DBCatalog.getInstance();
+        tables.addAll(db.getIndexInfo().keySet());
+        for (int i = 0; i < tables.size(); i++) {
+            HashMap<String, ArrayList<Integer>> colmap = db.getIndexInfo().get(tables.get(i));
+            for (String col : colmap.keySet()) {
+                ArrayList<Integer> info = colmap.get(col);
+
+                TreeIndex t = new TreeIndex(
+                        path, tables.get(i), col, db.findColumnIndex(tables.get(i), col), info);
+            }
+        }
     }
 
     @BeforeEach
@@ -140,6 +156,47 @@ public class P2UnitTests {
         }
     }
 
+    private void testPageEqualityHelper(String filename) {
+        byte[] e;
+        byte[] o;
+        try {
+            e = Files.readAllBytes(Path.of(expectedPath + "/" + filename));
+            o = Files.readAllBytes(Path.of(outputDir + "/" + filename));
+            Assertions.assertEquals(e.length, o.length, "Unexpected number of rows.");
+
+            int expected[] = byteToIntArray(e);
+            int output[] = byteToIntArray(o);
+
+            for (int i = 0; i < expected.length; i += 1024) {
+                int[] ex = Arrays.copyOfRange(expected, i, i + 1024);
+                int[] op = Arrays.copyOfRange(output, i, i + 1024);
+
+                Assertions.assertEquals(
+                        Arrays.toString(Arrays.copyOfRange(expected, i, i + 1024)),
+                        Arrays.toString(Arrays.copyOfRange(output, i, i + 1024)),
+                        "Outputs are not equal at page " + i / 1024);
+            }
+        } catch (IOException exception) {
+            exception.printStackTrace();
+            // System.out.println("hi");
+        }
+    }
+
+    private int[] byteToIntArray(byte[] arr) {
+        int[] result = new int[arr.length / 4];
+
+        for (int i = 0; i < result.length; i++) {
+            int n = 0;
+            n += arr[3 + 4 * i];
+            n += arr[2 + 4 * i] * 256;
+            n += arr[1 + 4 * i] * 65536;
+            n += arr[0 + 4 * i] * 16777216;
+            result[i] = n;
+        }
+
+        return result;
+    }
+
     private void testHelper(Operator plan, int queryNum) {
         File outfile = new File(outputDir, "/query" + queryNum);
         plan.dump(outfile);
@@ -149,6 +206,7 @@ public class P2UnitTests {
         try {
             expected = Files.readAllBytes(Path.of(expectedPath + "/query" + queryNum));
             output = Files.readAllBytes(outfile.toPath());
+            testPageEqualityHelper("query" + queryNum);
             Assertions.assertEquals(expected.length, output.length, "Unexpected number of rows.");
             Assertions.assertTrue(Arrays.equals(output, expected), "Outputs are not equal.");
         } catch (IOException e) {

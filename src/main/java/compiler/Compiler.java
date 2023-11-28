@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Set;
 
-
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
@@ -114,19 +113,19 @@ public class Compiler {
           if (outputToFiles) {
             long timeElapsed = System.currentTimeMillis();
 
-            //output logical plan
+            // output logical plan
             File logicalPlanFile = new File(outputDir, "query" + counter + "_logicalplan");
             FileWriter writer = new FileWriter(logicalPlanFile);
             writer.write(queryPlanBuilder.stringBuilder(statement));
             writer.close();
 
-            //output physical plan
+            // output physical plan
             File physicalPlanFile = new File(outputDir, "query" + counter + "_physicalplan");
             writer = new FileWriter(physicalPlanFile);
             writer.write(plan.toString());
             writer.close();
 
-            //output data
+            // output data
             File outfile = new File(outputDir, "query" + counter);
             plan.dump(outfile);
             timeElapsed = System.currentTimeMillis() - timeElapsed;
