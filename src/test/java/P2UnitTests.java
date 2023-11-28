@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -183,17 +184,12 @@ public class P2UnitTests {
     }
 
     private int[] byteToIntArray(byte[] arr) {
+        ByteBuffer bb = ByteBuffer.wrap(arr);
         int[] result = new int[arr.length / 4];
 
         for (int i = 0; i < result.length; i++) {
-            int n = 0;
-            n += arr[3 + 4 * i];
-            n += arr[2 + 4 * i] * 256;
-            n += arr[1 + 4 * i] * 65536;
-            n += arr[0 + 4 * i] * 16777216;
-            result[i] = n;
+            result[i] = bb.getInt();
         }
-
         return result;
     }
 
