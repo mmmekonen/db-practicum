@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 
@@ -59,7 +58,8 @@ public class IndexScanOperator extends Operator {
     ArrayList<Integer> indexInfo = c.get(tableName).get(indexColumnName);
     this.clustered = indexInfo.get(0) == 1;
 
-    this.tree = new TreeIndex(catalog.getIndexDirectory() + '/' + tableName + '.' + indexColumnName);
+    this.tree =
+        new TreeIndex(catalog.getIndexDirectory() + '/' + tableName + '.' + indexColumnName);
     this.notEndReached = true;
 
     int[] header = tree.readNode3(0);

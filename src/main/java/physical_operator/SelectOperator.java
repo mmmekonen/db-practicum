@@ -1,10 +1,9 @@
 package physical_operator;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import common.Tuple;
 import common.UFElement;
+import java.util.ArrayList;
+import java.util.List;
 import net.sf.jsqlparser.expression.Expression;
 import visitors.SelectExpressionVisitor;
 
@@ -68,7 +67,7 @@ public class SelectOperator extends Operator {
       } else {
         System.out.println("how did you manage this?");
       }
-      
+
       if (!satisfied) {
         tuple = child.getNextTuple();
         visitor = new SelectExpressionVisitor(tuple, child.outputSchema);

@@ -1,8 +1,7 @@
 package visitors;
 
-import java.util.*;
-
 import common.Tuple;
+import java.util.*;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.*;
@@ -12,7 +11,6 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SubSelect;
-
 
 /**
  * A class to evaluate the WHERE clause of queries. Given a tuple and its column schema, it uses a

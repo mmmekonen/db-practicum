@@ -32,15 +32,19 @@ public class TreeIndex {
   /**
    * Class to create and read a B+ tree index
    *
-   * @param inputDir     The input directory, which contains information such as
-   *                     the tables and index
-   *                     configurations
-   * @param tableName    The name of the table to be indexed
-   * @param colName      The name of the column to be indexed
+   * @param inputDir The input directory, which contains information such as the tables and index
+   *     configurations
+   * @param tableName The name of the table to be indexed
+   * @param colName The name of the column to be indexed
    * @param indexElement The element on which the table will be indexed
-   * @param info         An arraylist containing the config data for the index
+   * @param info An arraylist containing the config data for the index
    */
-  public TreeIndex(String inputDir, String tableName, String colName, int indexElement, ArrayList<Integer> info) {
+  public TreeIndex(
+      String inputDir,
+      String tableName,
+      String colName,
+      int indexElement,
+      ArrayList<Integer> info) {
 
     this.file = new File(inputDir + "/db/indexes/" + tableName + "." + colName);
     this.order = info.get(1);
@@ -50,8 +54,7 @@ public class TreeIndex {
     schema.add(new Column(new Table(null, tableName), colName));
     InMemorySortOperator op = new InMemorySortOperator(base, schema);
 
-    if (info.get(0) == 1)
-      sortTable(op, inputDir + "/db/data/" + tableName);
+    if (info.get(0) == 1) sortTable(op, inputDir + "/db/data/" + tableName);
 
     base = new ScanOperator(tableName, null);
     op = new InMemorySortOperator(base, schema);
@@ -125,11 +128,10 @@ public class TreeIndex {
   }
 
   /**
-   * A helper function that sorts a relation, primarily so that a clustered index
-   * can later be built
+   * A helper function that sorts a relation, primarily so that a clustered index can later be built
    * on it
    *
-   * @param op       A sort operator which will be used to sort the table
+   * @param op A sort operator which will be used to sort the table
    * @param filepath The filepath of the table to be sorted
    */
   public static void sortTable(InMemorySortOperator op, String filepath) {
@@ -176,7 +178,7 @@ public class TreeIndex {
   /**
    * Deserializes a node
    *
-   * @param page        The page to be deserialized
+   * @param page The page to be deserialized
    * @param traverseKey The key to be used to traverse the tree
    * @return The data in a page, represented as an array of integers
    */
@@ -201,7 +203,7 @@ public class TreeIndex {
   /**
    * Deserializes an index node
    *
-   * @param page        The page to be deserialized
+   * @param page The page to be deserialized
    * @param traverseKey The key to be used to traverse the tree
    * @return The data in a page, represented as an array of integers
    */
@@ -330,8 +332,8 @@ public class TreeIndex {
    * Helper function to recursively create the index nodes of the table
    *
    * @param children The layer of nodes beneath the ones to be created
-   * @param nodes    A master list of nodes that tracks the entire tree
-   * @param order    The order of the tree
+   * @param nodes A master list of nodes that tracks the entire tree
+   * @param order The order of the tree
    * @return A newly created layer of nodes, represented as an arraylist
    */
   private ArrayList<int[]> indexNodeHelper(
@@ -344,22 +346,23 @@ public class TreeIndex {
         int[] n = indexNode(nodes, childrenStart + i, (children.size() - i) / 2);
         nodes.add(n);
         result.add(n);
-        int[] m = indexNode(
-            nodes,
-            childrenStart + i + (children.size() - i) / 2,
-            children.size() - (children.size() - i) / 2 - i);
+        int[] m =
+            indexNode(
+                nodes,
+                childrenStart + i + (children.size() - i) / 2,
+                children.size() - (children.size() - i) / 2 - i);
         nodes.add(m);
         result.add(m);
         break;
       } else {
-        int[] n = indexNode(nodes, childrenStart + i, Integer.min(2 * order + 1, children.size() - i));
+        int[] n =
+            indexNode(nodes, childrenStart + i, Integer.min(2 * order + 1, children.size() - i));
         nodes.add(n);
         result.add(n);
       }
     }
 
-    if (result.size() <= 1)
-      return result;
+    if (result.size() <= 1) return result;
     else {
       return indexNodeHelper(result, nodes, order);
     }
@@ -368,8 +371,8 @@ public class TreeIndex {
   /**
    * Creates a new index node
    *
-   * @param nodes       a master list of nodes that tracks the entire tree
-   * @param pointer     a pointer to the first child of the index node
+   * @param nodes a master list of nodes that tracks the entire tree
+   * @param pointer a pointer to the first child of the index node
    * @param numChildren the order of the tree to which the node belongs
    * @return an index node represented as an array of integers
    */
@@ -389,10 +392,9 @@ public class TreeIndex {
   }
 
   /**
-   * A helper function that traverses a subtree and finds the leftmost key it
-   * contains
+   * A helper function that traverses a subtree and finds the leftmost key it contains
    *
-   * @param addr  the address of the node on which to start
+   * @param addr the address of the node on which to start
    * @param nodes an arraylist containing all the nodes in the tree
    * @return the leftmost key in the tree
    */
@@ -407,14 +409,13 @@ public class TreeIndex {
   /**
    * Sequentially creates unclustered records from the table
    *
-   * @param op    A sorted operator
+   * @param op A sorted operator
    * @param index The column on which the index is to be created
    * @return A new record in the <key,list> format
    */
   private ArrayList<Integer> makeRecord(Operator op, int index) {
     ArrayList<Integer> result = new ArrayList<>();
-    if (nextTuple == null)
-      return null;
+    if (nextTuple == null) return null;
 
     result.add(nextTuple.getElementAtIndex(index));
     result.add(0);
@@ -454,7 +455,7 @@ public class TreeIndex {
   /**
    * Creates leaf nodes sequentially from a list of records
    *
-   * @param iter       an iterator on the list of records in the table
+   * @param iter an iterator on the list of records in the table
    * @param numRecords the number of records to be included in the leaf
    * @return a new leaf node represented as an array of integers
    */
@@ -497,9 +498,9 @@ public class TreeIndex {
   /**
    * Creates a header node containing the specified information
    *
-   * @param root   the address of the root node
+   * @param root the address of the root node
    * @param leaves the number of leaves in the tree
-   * @param order  the order of the tree
+   * @param order the order of the tree
    * @return a header node for the tree
    */
   private int[] headerNode(int root, int leaves, int order) {

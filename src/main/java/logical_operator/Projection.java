@@ -1,12 +1,11 @@
 package logical_operator;
 
+import common.*;
 import java.util.List;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import common.*;
 
 /**
- * A class to represent a projection operator on a relation. This is the logical
- * representation of
+ * A class to represent a projection operator on a relation. This is the logical representation of
  * the physical projection operator, ProjectionOperator.
  */
 public class Projection extends LogicalOperator {
@@ -18,11 +17,10 @@ public class Projection extends LogicalOperator {
   private LogicalOperator child;
 
   /**
-   * Creates a logical projection operator using a LogicalOperator and a List of
-   * SelectItems.
+   * Creates a logical projection operator using a LogicalOperator and a List of SelectItems.
    *
    * @param selectItems The select items to project on.
-   * @param child       The scan operator's child operator.
+   * @param child The scan operator's child operator.
    */
   public Projection(List<SelectItem> selectItems, LogicalOperator child) {
     this.selectItems = selectItems;

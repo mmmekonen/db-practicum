@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
@@ -35,7 +34,6 @@ public class ExternalSortOperator extends Operator {
   private TupleReader readerSortedFile;
   private final ArrayList<Column> orderByElements;
   private HashMap<Integer, Integer> indexOrders;
-  
 
   /**
    * Creates an external sort operator using an Operator, a List of Columns to order by, and a

@@ -1,14 +1,12 @@
 package logical_operator;
 
+import common.*;
 import java.util.List;
 import net.sf.jsqlparser.schema.Column;
-import common.*;
 
 /**
- * A class to represent a sort operator on a relation. This is a logical sort
- * operator taht
- * represents a physical sort operator. The physical sort operator is either an
- * in-memory sort or an
+ * A class to represent a sort operator on a relation. This is a logical sort operator taht
+ * represents a physical sort operator. The physical sort operator is either an in-memory sort or an
  * external sort.
  */
 public class Sort extends LogicalOperator {
@@ -20,12 +18,10 @@ public class Sort extends LogicalOperator {
   private List<Column> orderbyElements;
 
   /**
-   * Creates a logical sort operator using a LogicalOperator and a List of Columns
-   * to order by.
+   * Creates a logical sort operator using a LogicalOperator and a List of Columns to order by.
    *
-   * @param child           The scan operator's logical child operator.
-   * @param orderbyElements ArrayList of columns to order the tuples from the
-   *                        child by.
+   * @param child The scan operator's logical child operator.
+   * @param orderbyElements ArrayList of columns to order the tuples from the child by.
    */
   public Sort(LogicalOperator child, List<Column> orderbyElements) {
     this.child = child;

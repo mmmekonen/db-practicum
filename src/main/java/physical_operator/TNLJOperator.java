@@ -3,7 +3,6 @@ package physical_operator;
 import common.Tuple;
 import java.util.ArrayList;
 import java.util.List;
-
 import net.sf.jsqlparser.expression.Expression;
 import visitors.SelectExpressionVisitor;
 

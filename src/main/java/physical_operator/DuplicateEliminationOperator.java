@@ -1,9 +1,8 @@
 package physical_operator;
 
+import common.Tuple;
 import java.util.ArrayList;
 import java.util.List;
-
-import common.Tuple;
 
 /**
  * A class to represent a duplicate elimination operator on a relation. Eliminates duplicate tuples
@@ -59,5 +58,4 @@ public class DuplicateEliminationOperator extends Operator {
     temp.add(child);
     return temp;
   }
-
 }

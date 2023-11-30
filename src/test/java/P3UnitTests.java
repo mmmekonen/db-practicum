@@ -1,7 +1,6 @@
 import common.DBCatalog;
 import common.QueryPlanBuilder;
 import common.Tuple;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -14,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
 import jdk.jshell.spi.ExecutionControl;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -51,7 +49,8 @@ public class P3UnitTests {
     gatherStats(path, DBCatalog.getInstance());
     DBCatalog.getInstance().setStats();
 
-    String queriesFile = Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
+    String queriesFile =
+        Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();
     // for windows machine
     if (queriesFile.contains(":")) {
       queriesFile = queriesFile.substring(3);
@@ -62,8 +61,7 @@ public class P3UnitTests {
     statementList = statements.getStatements();
 
     outputDir = new File("src/test/resources/samples/output");
-    for (File file : (outputDir.listFiles()))
-      file.delete(); // clean output directory
+    for (File file : (outputDir.listFiles())) file.delete(); // clean output directory
   }
 
   private void testHelper(Operator planIndex, Operator planNoIndex, int queryNum) {
@@ -102,7 +100,7 @@ public class P3UnitTests {
 
     System.out.println("inputDir is " + inputDir);
 
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(inputDir + "/db/stats.txt"));) {
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(inputDir + "/db/stats.txt")); ) {
       // DBCatalog db = DBCatalog.getInstance();
       Set<String> tableNames = db.getTableNames();
 
@@ -122,10 +120,16 @@ public class P3UnitTests {
         int pid = -1;
         while ((tuple = op.getNextTuple()) != null) {
           for (int i = 0; i < columns.size(); i++) {
-            min.put(i,
-                min.get(i) == null ? tuple.getElementAtIndex(i) : Math.min(min.get(i), tuple.getElementAtIndex(i)));
-            max.put(i,
-                max.get(i) == null ? tuple.getElementAtIndex(i) : Math.max(max.get(i), tuple.getElementAtIndex(i)));
+            min.put(
+                i,
+                min.get(i) == null
+                    ? tuple.getElementAtIndex(i)
+                    : Math.min(min.get(i), tuple.getElementAtIndex(i)));
+            max.put(
+                i,
+                max.get(i) == null
+                    ? tuple.getElementAtIndex(i)
+                    : Math.max(max.get(i), tuple.getElementAtIndex(i)));
           }
           len++;
           pid = tuple.getPID();

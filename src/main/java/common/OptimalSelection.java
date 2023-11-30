@@ -1,10 +1,8 @@
 package common;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -44,8 +42,8 @@ public class OptimalSelection {
     return binaryExpressions;
   }
 
-  public ArrayList<Object> getOptimalColumn(Expression expression, String tableName,
-      HashMap<String, ArrayList<Integer>> indexInfo) {
+  public ArrayList<Object> getOptimalColumn(
+      Expression expression, String tableName, HashMap<String, ArrayList<Integer>> indexInfo) {
 
     this.tableName = tableName;
     ArrayList<Expression> binaryExpressions = getBinaryExpressions(expression);
@@ -178,8 +176,7 @@ public class OptimalSelection {
       System.out.println(r2);
       System.out.println(colMax + " " + colMin);
 
-      if (!hasIndex)
-        reductionInfo.put(column, ((1.0 * r2) / (1.0 * (colMax - colMin + 1))));
+      if (!hasIndex) reductionInfo.put(column, ((1.0 * r2) / (1.0 * (colMax - colMin + 1))));
 
       // non index cost
       double nonIndexCost = 0;
@@ -284,5 +281,4 @@ public class OptimalSelection {
 
     columnInfo.put(column, range);
   }
-
 }

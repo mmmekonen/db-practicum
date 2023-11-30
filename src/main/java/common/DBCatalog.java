@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -12,24 +11,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
-
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Class to contain information about database - names of tables, schema of each
- * table and file
+ * Class to contain information about database - names of tables, schema of each table and file
  * where each table is located. Uses singleton pattern.
  *
- * <p>
- * Assumes dbDirectory has a schema.txt file and a /data subdirectory containing
- * one file per
+ * <p>Assumes dbDirectory has a schema.txt file and a /data subdirectory containing one file per
  * relation, named "relname".
  *
- * <p>
- * Call by using DBCatalog.getInstance();
+ * <p>Call by using DBCatalog.getInstance();
  */
 public class DBCatalog {
   private final Logger logger = LogManager.getLogger();
@@ -53,8 +47,7 @@ public class DBCatalog {
   }
 
   /**
-   * Instance getter for singleton pattern, lazy initialization on first
-   * invocation
+   * Instance getter for singleton pattern, lazy initialization on first invocation
    *
    * @return unique DB catalog instance
    */
@@ -98,10 +91,14 @@ public class DBCatalog {
         String[] params = s.nextLine().split(" ");
         if (indexInfo.containsKey(params[0])) {
           HashMap<String, ArrayList<Integer>> colmap = indexInfo.get(params[0]);
-          colmap.put(params[1], new ArrayList<>(List.of(Integer.valueOf(params[2]), Integer.valueOf(params[3]))));
+          colmap.put(
+              params[1],
+              new ArrayList<>(List.of(Integer.valueOf(params[2]), Integer.valueOf(params[3]))));
         } else {
           HashMap<String, ArrayList<Integer>> colmap = new HashMap<>();
-          colmap.put(params[1], new ArrayList<>(List.of(Integer.valueOf(params[2]), Integer.valueOf(params[3]))));
+          colmap.put(
+              params[1],
+              new ArrayList<>(List.of(Integer.valueOf(params[2]), Integer.valueOf(params[3]))));
           indexInfo.put(params[0], colmap);
         }
       }
@@ -111,8 +108,7 @@ public class DBCatalog {
   }
 
   /**
-   * Returns the hashmap of ArrayLists of Strings of the column, cluster flag, and
-   * tree order for
+   * Returns the hashmap of ArrayLists of Strings of the column, cluster flag, and tree order for
    * the index on each of the tables.
    *
    * @return a hashmap containing the index info.
@@ -121,9 +117,7 @@ public class DBCatalog {
     return indexInfo;
   }
 
-  /**
-   * Sets the statistics for all the relations in the databse.
-   */
+  /** Sets the statistics for all the relations in the databse. */
   public void setStats() {
     try {
       System.out.println("setting stats");
@@ -150,7 +144,7 @@ public class DBCatalog {
 
   /**
    * Returns the statistics for all the relations in the database.
-   * 
+   *
    * @return a hash map of a table to its stats, all in strings.
    */
   public HashMap<String, ArrayList<String>> getStats() {
@@ -205,7 +199,7 @@ public class DBCatalog {
 
   /**
    * Returns the names of all the tables in the database.
-   * 
+   *
    * @return a set of strings of table names.
    */
   public Set<String> getTableNames() {
@@ -228,10 +222,9 @@ public class DBCatalog {
   }
 
   /**
-   * Finds the index of a column of a given table, as it is found in the table
-   * schema
+   * Finds the index of a column of a given table, as it is found in the table schema
    *
-   * @param tableName  The table holding the column
+   * @param tableName The table holding the column
    * @param columnName The column whose index is to be located
    * @return The index of the column
    */
@@ -282,7 +275,6 @@ public class DBCatalog {
     }
 
     return numLeaves;
-
   }
 
   public int getAttributesPerTable(String tableName) {
@@ -312,5 +304,4 @@ public class DBCatalog {
     }
     return -1;
   }
-
 }

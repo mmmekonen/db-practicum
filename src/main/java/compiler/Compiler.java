@@ -4,7 +4,6 @@ import common.DBCatalog;
 import common.QueryPlanBuilder;
 import common.TreeIndex;
 import common.Tuple;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Set;
-
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
@@ -111,8 +109,6 @@ public class Compiler {
           Operator plan = queryPlanBuilder.buildPlan(statement);
 
           if (outputToFiles) {
-            long timeElapsed = System.currentTimeMillis();
-
             // output logical plan
             File logicalPlanFile = new File(outputDir, "query" + counter + "_logicalplan");
             FileWriter writer = new FileWriter(logicalPlanFile);
@@ -127,6 +123,7 @@ public class Compiler {
 
             // output data
             File outfile = new File(outputDir, "query" + counter);
+            long timeElapsed = System.currentTimeMillis();
             plan.dump(outfile);
             timeElapsed = System.currentTimeMillis() - timeElapsed;
             logger.info("Query processing time: " + timeElapsed + "ms");
@@ -160,9 +157,7 @@ public class Compiler {
     }
   }
 
-  /**
-   * Computes the statistics for each relation in the database.
-   */
+  /** Computes the statistics for each relation in the database. */
   private static void gatherStats() {
     try (BufferedWriter bw = new BufferedWriter(new FileWriter(inputDir + "/db/stats.txt"));) {
       DBCatalog db = DBCatalog.getInstance();
@@ -182,10 +177,16 @@ public class Compiler {
         Tuple tuple;
         while ((tuple = op.getNextTuple()) != null) {
           for (int i = 0; i < columns.size(); i++) {
-            min.put(i,
-                min.get(i) == null ? tuple.getElementAtIndex(i) : Math.min(min.get(i), tuple.getElementAtIndex(i)));
-            max.put(i,
-                max.get(i) == null ? tuple.getElementAtIndex(i) : Math.max(max.get(i), tuple.getElementAtIndex(i)));
+            min.put(
+                i,
+                min.get(i) == null
+                    ? tuple.getElementAtIndex(i)
+                    : Math.min(min.get(i), tuple.getElementAtIndex(i)));
+            max.put(
+                i,
+                max.get(i) == null
+                    ? tuple.getElementAtIndex(i)
+                    : Math.max(max.get(i), tuple.getElementAtIndex(i)));
           }
           len++;
           pid = tuple.getPID();

@@ -91,10 +91,8 @@ import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 /**
- * A class to spilt a selection condition into a part that can be handled by an
- * IndexScan and the
- * part that cannot. This class uses the visitor pattern to traverse the
- * original expression and
+ * A class to spilt a selection condition into a part that can be handled by an IndexScan and the
+ * part that cannot. This class uses the visitor pattern to traverse the original expression and
  * determines whether each subexpression contains a column that has an index.
  */
 public class IndexExpressionSplitter implements ExpressionVisitor {
@@ -108,8 +106,7 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
   private String indexColumn;
 
   /**
-   * Creates an empty IndexExpressionSplitter object that keeps track of the
-   * expressions that can be
+   * Creates an empty IndexExpressionSplitter object that keeps track of the expressions that can be
    * evaluated with an index and those that can't for a given column of a table.
    *
    * @param column The column with the index on it.
@@ -117,7 +114,6 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
   public IndexExpressionSplitter(String column) {
     indexColumn = column;
   }
-
 
   /**
    * Gets the lowkey for the conditions that can be done by the IndexScan.
@@ -147,17 +143,16 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
   }
 
   /**
-   * A helper function to add an expression to the select expressions. If a
-   * expression already
+   * A helper function to add an expression to the select expressions. If a expression already
    * exists, this function combines the two using a conjunction.
    *
    * @param e the expression to add
    */
   private void concatHelper(Expression e) {
     if (selectConditions != null) {
-      selectConditions = new AndExpression().withLeftExpression(selectConditions).withRightExpression(e);
-    } else
-      selectConditions = e;
+      selectConditions =
+          new AndExpression().withLeftExpression(selectConditions).withRightExpression(e);
+    } else selectConditions = e;
   }
 
   /**
@@ -172,8 +167,7 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
   }
 
   /**
-   * Visits a column and determines whether an index exists for it. If so, it
-   * updates hasIndex to
+   * Visits a column and determines whether an index exists for it. If so, it updates hasIndex to
    * true.
    *
    * @param tableColumn The column to be visited
@@ -201,8 +195,7 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
   }
 
   /**
-   * Visits and evaluates all parts of the expression. If one is a column with an
-   * index on it, add
+   * Visits and evaluates all parts of the expression. If one is a column with an index on it, add
    * this expression to indexConditions, otherwise, add it to selectConditions.
    *
    * @param equalsTo The expression to be visited
@@ -232,8 +225,7 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
   }
 
   /**
-   * Visits and evaluates all parts of the expression. If one is a column with an
-   * index on it, add
+   * Visits and evaluates all parts of the expression. If one is a column with an index on it, add
    * this expression to indexConditions, otherwise, add it to selectConditions.
    *
    * @param greaterThan The expression to be visited
@@ -261,8 +253,7 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
   }
 
   /**
-   * Visits and evaluates all parts of the expression. If one is a column with an
-   * index on it, add
+   * Visits and evaluates all parts of the expression. If one is a column with an index on it, add
    * this expression to indexConditions, otherwise, add it to selectConditions.
    *
    * @param greaterThanEquals The expression to be visited
@@ -290,8 +281,7 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
   }
 
   /**
-   * Visits and evaluates all parts of the expression. If one is a column with an
-   * index on it, add
+   * Visits and evaluates all parts of the expression. If one is a column with an index on it, add
    * this expression to indexConditions, otherwise, add it to selectConditions.
    *
    * @param minorThan The expression to be visited
@@ -319,8 +309,7 @@ public class IndexExpressionSplitter implements ExpressionVisitor {
   }
 
   /**
-   * Visits and evaluates all parts of the expression. If one is a column with an
-   * index on it, add
+   * Visits and evaluates all parts of the expression. If one is a column with an index on it, add
    * this expression to indexConditions, otherwise, add it to selectConditions.
    *
    * @param minorThanEquals The expression to be visited

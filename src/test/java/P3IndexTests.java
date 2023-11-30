@@ -9,13 +9,9 @@ import java.util.HashMap;
 import java.util.Objects;
 import jdk.jshell.spi.ExecutionControl;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import physical_operator.InMemorySortOperator;
-import physical_operator.ScanOperator;
 
 public class P3IndexTests {
   private static String expectedPath;
@@ -45,8 +41,13 @@ public class P3IndexTests {
       for (String col : colmap.keySet()) {
         ArrayList<Integer> info = colmap.get(col);
 
-        TreeIndex t = new TreeIndex("src/test/resources/samples/input", tables.get(i), col,
-            db.findColumnIndex(tables.get(i), col), info);
+        TreeIndex t =
+            new TreeIndex(
+                "src/test/resources/samples/input",
+                tables.get(i),
+                col,
+                db.findColumnIndex(tables.get(i), col),
+                info);
       }
     }
   }

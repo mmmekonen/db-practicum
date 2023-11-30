@@ -10,10 +10,8 @@ import java.util.List;
 import net.sf.jsqlparser.expression.Alias;
 
 /**
- * A class to represent the a scan operator on a table. ScanOperators scan each
- * tuple in a file and
- * return them. The file is specified by the table name. The output schema is
- * the schema of the
+ * A class to represent the a scan operator on a table. ScanOperators scan each tuple in a file and
+ * return them. The file is specified by the table name. The output schema is the schema of the
  * table.
  */
 public class ScanOperator extends Operator {
@@ -24,12 +22,11 @@ public class ScanOperator extends Operator {
 
   // explicit constructor
   /**
-   * Creates a scan operator using a table name and an alias. For each tuple in
-   * the table, the scan
+   * Creates a scan operator using a table name and an alias. For each tuple in the table, the scan
    * operator returns a tuple with the same schema as the table.
    *
    * @param tableName The name of the table to scan.
-   * @param alias     The alias of the table.
+   * @param alias The alias of the table.
    */
   public ScanOperator(String tableName, Alias alias) {
 

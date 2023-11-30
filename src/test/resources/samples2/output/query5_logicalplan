@@ -1,0 +1,2 @@
+Select[Sailors.B >= Sailors.C AND Sailors.B >= Sailors.C]
+-Leaf[Sailors]
