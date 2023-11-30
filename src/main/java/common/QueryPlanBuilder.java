@@ -14,6 +14,7 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import physical_operator.Operator;
+import visitors.ExpressionSplitter;
 
 /**
  * Class to translate a JSQLParser statement into a relational algebra query
@@ -126,25 +127,18 @@ public class QueryPlanBuilder {
    *         table that matches the specified conditions
    */
   private LogicalOperator selectHelper(Table table) {
-    // TODO: is this needed?
-    // if (conditions == null) {
-    // return new logical_operator.Scan(table.getName(), table.getAlias());
-    // }
-    // ExpressionSplitter e = new ExpressionSplitter();
-    // conditions.getWhere(table).accept(e);
-    // Expression c = e.getConditions(table);
-    // if (c == null) {
-    // return new logical_operator.Scan(table.getName(), table.getAlias());
-    // }
-    // return new logical_operator.Select(
-    // new logical_operator.Scan(table.getName(), table.getAlias()),
-    // e.getConditions(table));
-
     if (conditions == null || conditions.getWhere(table) == null) {
       return new logical_operator.Scan(table.getName(), table.getAlias());
     }
+    ExpressionSplitter e = new ExpressionSplitter();
+    conditions.getWhere(table).accept(e);
+    String name = table.getAlias() != null ? table.getAlias().getName() : table.getName();
+    Expression c = e.getConditions(name);
+    if (c == null) {
+      return new logical_operator.Scan(table.getName(), table.getAlias());
+    }
     return new logical_operator.Select(
-        new logical_operator.Scan(table.getName(), table.getAlias()), conditions.getWhere(table));
+        new logical_operator.Scan(table.getName(), table.getAlias()), c);
   }
 
   /**
