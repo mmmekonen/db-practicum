@@ -62,20 +62,25 @@ public class SelectUF {
         if (element.getRemainder() != null)
           conditions.addAll(element.getRemainder());
         if (element.lowerBound != null && element.upperBound != null) {
-          GreaterThanEquals lower = new GreaterThanEquals()
-              .withLeftExpression(c)
-              .withRightExpression(new LongValue(find(c).lowerBound));
-          MinorThanEquals upper = new MinorThanEquals()
-              .withLeftExpression(c)
-              .withRightExpression(new LongValue(find(c).upperBound));
-          conditions.add(lower);
-          conditions.add(upper);
-        } else if (element.lowerBound != null) {
+          if (find(c).lowerBound != Long.MIN_VALUE) {
+            GreaterThanEquals lower = new GreaterThanEquals()
+                .withLeftExpression(c)
+                .withRightExpression(new LongValue(find(c).lowerBound));
+            conditions.add(lower);
+
+          }
+          if (find(c).upperBound != Long.MAX_VALUE) {
+            MinorThanEquals upper = new MinorThanEquals()
+                .withLeftExpression(c)
+                .withRightExpression(new LongValue(find(c).upperBound));
+            conditions.add(upper);
+          }
+        } else if (element.lowerBound != null && find(c).lowerBound != Long.MIN_VALUE) {
           conditions.add(
               new GreaterThanEquals()
                   .withLeftExpression(c)
                   .withRightExpression(new LongValue(find(c).lowerBound)));
-        } else if (element.upperBound != null) {
+        } else if (element.upperBound != null && find(c).upperBound != Long.MAX_VALUE) {
           conditions.add(
               new MinorThanEquals()
                   .withLeftExpression(c)
