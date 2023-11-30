@@ -20,7 +20,7 @@ public class LogicalPlanStringBuilder extends PlanBuilder {
     for (int i = 0; i < depth; i++) {
       plan.append("-");
     }
-    plan.append(scanOp).append("\n");
+    plan.append(scanOp);
   }
 
   public void visit(Select selectOp) {
