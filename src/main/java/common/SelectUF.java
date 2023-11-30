@@ -2,6 +2,8 @@ package common;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -38,7 +40,8 @@ public class SelectUF {
   }
 
   public void union(String att1, String att2) {
-    if (elements.get(att1) == elements.get(att2)) return;
+    if (elements.get(att1) == elements.get(att2))
+      return;
     UFElement result = elements.get(att1);
     ArrayList<String> attrList2 = new ArrayList<>(elements.get(att2).attributes);
 
@@ -51,22 +54,22 @@ public class SelectUF {
 
   public Expression getWhere(Table table) {
     ArrayList<Column> cols = DBCatalog.getInstance().getTableSchema(table.getName());
-    ArrayList<Expression> conditions = new ArrayList<>();
+    HashSet<Expression> conditions = new HashSet<>();
     for (Column c : cols) {
       c.setTable(table);
       if (this.find(c) != null) {
         UFElement element = find(c);
-        if (element.getRemainder() != null) conditions.add(element.getRemainder());
+        if (element.getRemainder() != null)
+          conditions.addAll(element.getRemainder());
         if (element.lowerBound != null && element.upperBound != null) {
-          GreaterThanEquals lower =
-              new GreaterThanEquals()
-                  .withLeftExpression(c)
-                  .withRightExpression(new LongValue(find(c).lowerBound));
-          MinorThanEquals upper =
-              new MinorThanEquals()
-                  .withLeftExpression(c)
-                  .withRightExpression(new LongValue(find(c).upperBound));
-          conditions.add(new AndExpression().withLeftExpression(lower).withRightExpression(upper));
+          GreaterThanEquals lower = new GreaterThanEquals()
+              .withLeftExpression(c)
+              .withRightExpression(new LongValue(find(c).lowerBound));
+          MinorThanEquals upper = new MinorThanEquals()
+              .withLeftExpression(c)
+              .withRightExpression(new LongValue(find(c).upperBound));
+          conditions.add(lower);
+          conditions.add(upper);
         } else if (element.lowerBound != null) {
           conditions.add(
               new GreaterThanEquals()
@@ -81,9 +84,10 @@ public class SelectUF {
       }
     }
     if (!conditions.isEmpty()) {
-      Expression e = conditions.remove(0);
-      while (!conditions.isEmpty()) {
-        e = new AndExpression().withLeftExpression(e).withRightExpression(conditions.remove(0));
+      ArrayList<Expression> conditionsList = new ArrayList<>(conditions);
+      Expression e = conditionsList.remove(0);
+      while (!conditionsList.isEmpty()) {
+        e = new AndExpression().withLeftExpression(e).withRightExpression(conditionsList.remove(0));
       }
       return e;
     }

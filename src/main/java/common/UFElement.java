@@ -31,7 +31,11 @@ public class UFElement {
       return null;
   }
 
-  public Expression getRemainder() {
+  public HashSet<Expression> getRemainder() {
+    return remainder;
+  }
+
+  public Expression getRemainderExpression() {
     Expression e = null;
     ArrayList<Expression> remainderList = new ArrayList<>(remainder);
     if (!remainderList.isEmpty()) {
@@ -79,7 +83,7 @@ public class UFElement {
 
   public boolean satisfied(Tuple tuple, List<Column> schema) {
     SelectExpressionVisitor visitor = new SelectExpressionVisitor(tuple, schema);
-    this.getRemainder().accept(visitor);
+    this.getRemainderExpression().accept(visitor);
     for (int i = 0; i < schema.size(); i++) {
       if (attributes.contains(schema.get(i).toString())) {
         return tuple.getAllElements().get(i) > (lowerBound != null ? lowerBound : Long.MIN_VALUE)
