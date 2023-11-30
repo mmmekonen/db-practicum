@@ -23,8 +23,7 @@ import physical_operator.Operator;
 import physical_operator.ScanOperator;
 
 /**
- * Top level harness class; reads queries from an input file one at a time,
- * processes them and sends
+ * Top level harness class; reads queries from an input file one at a time, processes them and sends
  * output to file or to System depending on flag.
  */
 public class Compiler {
@@ -40,13 +39,10 @@ public class Compiler {
   // to System.out
 
   /**
-   * Reads statements from queriesFile one at a time, builds query plan and
-   * evaluates, dumping
+   * Reads statements from queriesFile one at a time, builds query plan and evaluates, dumping
    * results to files or console as desired.
    *
-   * <p>
-   * If dumping to files result of ith query is in file named queryi, indexed
-   * stating at 1.
+   * <p>If dumping to files result of ith query is in file named queryi, indexed stating at 1.
    */
   public static void main(String[] args) {
 
@@ -61,8 +57,7 @@ public class Compiler {
 
     try {
       if (outputToFiles) {
-        for (File file : (new File(outputDir).listFiles()))
-          file.delete(); // clean output directory
+        for (File file : (new File(outputDir).listFiles())) file.delete(); // clean output directory
       }
 
       // gather statistics
@@ -79,8 +74,9 @@ public class Compiler {
         for (String col : colmap.keySet()) {
           ArrayList<Integer> info = colmap.get(col);
 
-          TreeIndex t = new TreeIndex(
-              inputDir, tables.get(i), col, db.findColumnIndex(tables.get(i), col), info);
+          TreeIndex t =
+              new TreeIndex(
+                  inputDir, tables.get(i), col, db.findColumnIndex(tables.get(i), col), info);
         }
       }
 
@@ -142,10 +138,7 @@ public class Compiler {
     }
   }
 
-  /**
-   * Reads the config file passed through the command line and sets all the
-   * directories.
-   */
+  /** Reads the config file passed through the command line and sets all the directories. */
   private static void readConfigFile() {
     try {
       Scanner s = new Scanner(new File(configFile));
@@ -159,7 +152,7 @@ public class Compiler {
 
   /** Computes the statistics for each relation in the database. */
   private static void gatherStats() {
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(inputDir + "/db/stats.txt"));) {
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(inputDir + "/db/stats.txt")); ) {
       DBCatalog db = DBCatalog.getInstance();
       Set<String> tableNames = db.getTableNames();
 

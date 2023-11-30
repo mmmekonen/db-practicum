@@ -93,8 +93,10 @@ import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 /**
- * A class to evaluate the WHERE clause of queries. Given a tuple and its column schema, it uses a
- * visitor pattern to evaluate the accepted Expression on the current tuple. The final result can be
+ * A class to evaluate the WHERE clause of queries. Given a tuple and its column
+ * schema, it uses a
+ * visitor pattern to evaluate the accepted Expression on the current tuple. The
+ * final result can be
  * accessed through the conditionSatisfied function.
  */
 public class ComparisonExtractor implements ExpressionVisitor {
@@ -108,8 +110,9 @@ public class ComparisonExtractor implements ExpressionVisitor {
   /**
    * Creates an expression visitor using a Tuple and an ArrayList of Columns.
    *
-   * @param tuple a Tuple of integers.
-   * @param schema ArrayList of columns which correspond to the respective tuple values.
+   * @param tuple  a Tuple of integers.
+   * @param schema ArrayList of columns which correspond to the respective tuple
+   *               values.
    */
   public ComparisonExtractor(SelectUF parent) {
     this.parent = parent;
@@ -138,8 +141,10 @@ public class ComparisonExtractor implements ExpressionVisitor {
    */
   @Override
   public void visit(Column tableColumn) {
-    if (att1 != null) att2 = tableColumn;
-    else att1 = tableColumn;
+    if (att1 != null)
+      att2 = tableColumn;
+    else
+      att1 = tableColumn;
   }
 
   /**
@@ -150,7 +155,8 @@ public class ComparisonExtractor implements ExpressionVisitor {
   @Override
   public void visit(LongValue longValue) {
     val = longValue.getValue();
-    if (att1 != null) valOnRight = true;
+    if (att1 != null)
+      valOnRight = true;
   }
 
   private void clear() {
@@ -261,6 +267,7 @@ public class ComparisonExtractor implements ExpressionVisitor {
    */
   @Override
   public void visit(MinorThan minorThan) {
+    clear();
     minorThan.getLeftExpression().accept(this);
     minorThan.getRightExpression().accept(this);
 

@@ -15,9 +15,12 @@ import physical_operator.*;
 import visitors.IndexExpressionSplitter;
 
 /**
- * A class to translate a logical operators into a relational algebra query plan using physical
- * operators. This class uses the visitor pattern to traverse the logical query plan and replaces
- * each logical operator with its corresponding physical operator. The physical operators used
+ * A class to translate a logical operators into a relational algebra query plan
+ * using physical
+ * operators. This class uses the visitor pattern to traverse the logical query
+ * plan and replaces
+ * each logical operator with its corresponding physical operator. The physical
+ * operators used
  * depends on the values in the config file.
  */
 public class PhysicalPlanBuilder extends PlanBuilder {
@@ -42,7 +45,8 @@ public class PhysicalPlanBuilder extends PlanBuilder {
   HashMap<String, HashMap<String, Double>> reductionInfo = new HashMap<>();
 
   /** Creates a PhysicalPlanBuilder. */
-  public PhysicalPlanBuilder() {}
+  public PhysicalPlanBuilder() {
+  }
 
   /**
    * Creates a PhysicalPlanBuilder with the specified join type.
@@ -50,10 +54,11 @@ public class PhysicalPlanBuilder extends PlanBuilder {
    * @param joinType an int value for the join to use.
    */
   public PhysicalPlanBuilder(int joinType) {
-    if (joinType == 0) this.join = JOIN.TNLJ;
-    if (joinType == 1) this.join = JOIN.BNLJ;
-    if (joinType
-        == 2) // DO NOT FUCK WITH THIS! JUST EDIT THE CONFIG FILE OR THE DEFAULTJOIN FIELD IN
+    if (joinType == 0)
+      this.join = JOIN.TNLJ;
+    if (joinType == 1)
+      this.join = JOIN.BNLJ;
+    if (joinType == 2) // DO NOT FUCK WITH THIS! JUST EDIT THE CONFIG FILE OR THE DEFAULTJOIN FIELD IN
       // QUERYPLANBUILDER!
       this.join = JOIN.SMJ;
   }
@@ -95,17 +100,14 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       System.out.println("scanOp.getTableName(): " + scanOp.getTableName());
       System.out.println("indexInfo: " + indexInfo);
 
-      System.out.println("LOOOK: " + scanOp.getTableName());
-      ArrayList<Object> lowestCost =
-          optimalSelection.getOptimalColumn(
-              selectOp.getExpression(), scanOp.getTableName(), indexInfo);
+      ArrayList<Object> lowestCost = optimalSelection.getOptimalColumn(
+          selectOp.getExpression(), scanOp.getTableName(), indexInfo);
 
       boolean useIndex = false;
       if (lowestCost.size() != 1) {
         useIndex = ((double) lowestCost.get(1) == 1.0) ? true : false;
 
-        String tname =
-            (scanOp.getAlias() != null) ? scanOp.getAlias().getName() : scanOp.getTableName();
+        String tname = (scanOp.getAlias() != null) ? scanOp.getAlias().getName() : scanOp.getTableName();
 
         this.reductionInfo.put(tname, (HashMap<String, Double>) lowestCost.get(3));
 
@@ -132,14 +134,12 @@ public class PhysicalPlanBuilder extends PlanBuilder {
           root = new SelectOperator(child, selectExpression);
         } else if (selectExpression == null) {
           // only indexScan operator, no selection
-          root =
-              new IndexScanOperator(
-                  scanOp.getTableName(), scanOp.getAlias(), columnName, lowkey, highkey);
+          root = new IndexScanOperator(
+              scanOp.getTableName(), scanOp.getAlias(), columnName, lowkey, highkey);
         } else {
           // both indexscan and selection
-          Operator indexScanOp =
-              new IndexScanOperator(
-                  scanOp.getTableName(), scanOp.getAlias(), columnName, lowkey, highkey);
+          Operator indexScanOp = new IndexScanOperator(
+              scanOp.getTableName(), scanOp.getAlias(), columnName, lowkey, highkey);
           root = new SelectOperator(indexScanOp, selectExpression);
         }
       } else {
@@ -167,7 +167,8 @@ public class PhysicalPlanBuilder extends PlanBuilder {
   }
 
   /**
-   * Replaces the logical Join operator with a physical operator, being either a TNLJ, BNLJ, or SMJ.
+   * Replaces the logical Join operator with a physical operator, being either a
+   * TNLJ, BNLJ, or SMJ.
    *
    * @param joinOp a logical Join operator.
    */
@@ -179,8 +180,7 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       opChildren.add(root);
     }
 
-    DetermineJoinOrder determineOrder =
-        new DetermineJoinOrder(opChildren, joinOp.getUnionFind(), reductionInfo);
+    DetermineJoinOrder determineOrder = new DetermineJoinOrder(opChildren, joinOp.getUnionFind(), reductionInfo);
     ArrayList<Operator> order = determineOrder.finalOrder();
 
     Operator left = order.get(0);
@@ -191,7 +191,8 @@ public class PhysicalPlanBuilder extends PlanBuilder {
   }
 
   /**
-   * Replaces the logical Sort operator with a physical operator for either an in-memory sort or an
+   * Replaces the logical Sort operator with a physical operator for either an
+   * in-memory sort or an
    * external sort.
    *
    * @param sortOp a logical Sort operator.
@@ -200,7 +201,8 @@ public class PhysicalPlanBuilder extends PlanBuilder {
     sortOp.getChild().accept(this);
     Operator child = root;
 
-    if (sort == SORT.IN_MEMORY) root = new InMemorySortOperator(child, sortOp.getOrderByElements());
+    if (sort == SORT.IN_MEMORY)
+      root = new InMemorySortOperator(child, sortOp.getOrderByElements());
     if (sort == SORT.EXTERNAL)
       root = new ExternalSortOperator(child, sortOp.getOrderByElements(), sortBuffer);
   }
@@ -223,7 +225,8 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       plan.append("-");
     }
     plan.append(op).append("\n");
-    for (Operator child : op.getChildren()) buildString(child, depth + 1, plan);
+    for (Operator child : op.getChildren())
+      buildString(child, depth + 1, plan);
   }
 
   public String toString() {
