@@ -3,7 +3,6 @@ package common;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import logical_operator.DuplicateElimination;
 import logical_operator.Join;
 import logical_operator.LogicalOperator;
@@ -45,15 +44,13 @@ public class PhysicalPlanBuilder extends PlanBuilder {
   int sortBuffer = 3;
   HashMap<String, HashMap<String, Double>> reductionInfo = new HashMap<>();
 
-  /**
-   * Creates a PhysicalPlanBuilder.
-   */
+  /** Creates a PhysicalPlanBuilder. */
   public PhysicalPlanBuilder() {
   }
 
   /**
    * Creates a PhysicalPlanBuilder with the specified join type.
-   * 
+   *
    * @param joinType an int value for the join to use.
    */
   public PhysicalPlanBuilder(int joinType) {
@@ -103,8 +100,9 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       System.out.println("scanOp.getTableName(): " + scanOp.getTableName());
       System.out.println("indexInfo: " + indexInfo);
 
-      ArrayList<Object> lowestCost = optimalSelection.getOptimalColumn(selectOp.getExpression(), scanOp.getTableName(),
-          indexInfo);
+      System.out.println("LOOOK: " + scanOp.getTableName());
+      ArrayList<Object> lowestCost = optimalSelection.getOptimalColumn(
+          selectOp.getExpression(), scanOp.getTableName(), indexInfo);
 
       boolean useIndex = false;
       if (lowestCost.size() != 1) {
@@ -155,7 +153,6 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       Operator child = root;
       root = new SelectOperator(child, selectOp.getExpression());
     }
-
   }
 
   /**
@@ -184,14 +181,12 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       opChildren.add(root);
     }
 
-    DetermineJoinOrder determineOrder = new DetermineJoinOrder(opChildren, joinOp.getUnionFind(),
-        reductionInfo);
+    DetermineJoinOrder determineOrder = new DetermineJoinOrder(opChildren, joinOp.getUnionFind(), reductionInfo);
     ArrayList<Operator> order = determineOrder.finalOrder();
 
     Operator left = order.get(0);
     for (int i = 1; i < order.size(); i++) {
-      left = new BNLJOperator(left, order.get(i), joinOp.getExpression(),
-          joinBuffer);
+      left = new BNLJOperator(left, order.get(i), joinOp.getExpression(), joinBuffer);
     }
     root = left;
   }
@@ -241,5 +236,4 @@ public class PhysicalPlanBuilder extends PlanBuilder {
     buildString(root, depth, plan);
     return plan.toString();
   }
-
 }

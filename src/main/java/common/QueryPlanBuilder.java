@@ -99,7 +99,8 @@ public class QueryPlanBuilder {
 
   /**
    * Top level method to create physical plan from logical plan, determining join
-   * type from data statistics.
+   * type from data
+   * statistics.
    *
    * @param stmnt statement to be translated
    * @return the root of the query plan
@@ -125,11 +126,11 @@ public class QueryPlanBuilder {
    *         table that matches the specified conditions
    */
   private LogicalOperator selectHelper(Table table) {
-    if (conditions == null) {
+    if (conditions == null || conditions.getWhere(table) == null) {
       return new logical_operator.Scan(table.getName(), table.getAlias());
     }
-    return new logical_operator.Select(new logical_operator.Scan(table.getName(), table.getAlias()),
-        conditions.getWhere(table));
+    return new logical_operator.Select(
+        new logical_operator.Scan(table.getName(), table.getAlias()), conditions.getWhere(table));
   }
 
   /**
@@ -187,8 +188,8 @@ public class QueryPlanBuilder {
    * specified in the statement
    *
    * @param joins The tables to be joined onto the original table
-   * @param where An expression that specifies the conditions by which to join
-   *              the tables together
+   * @param where An expression that specifies the conditions by which to join the
+   *              tables together
    * @return A Join logical operator that represents a physical operator that
    *         returns the next tuple
    *         in the joined tables
