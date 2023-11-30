@@ -64,7 +64,10 @@ public class OptimalSelection {
 
       System.out.println('"' + left.toString() + '"' + " " + '"' + right.toString() + '"');
 
-      if (left instanceof Column) {
+      if (right instanceof Column && left instanceof Column) {
+        System.out.println("both are columns");
+        continue;
+      } else if (left instanceof Column) {
 
         System.out.println("left is column");
         System.out.println("right is " + right.toString());
