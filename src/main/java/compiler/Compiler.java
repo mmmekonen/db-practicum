@@ -65,6 +65,9 @@ public class Compiler {
       db.setStats();
       logger.info("Created database statistics");
 
+      for (File file : (new File(inputDir + "/db/indexes").listFiles()))
+        file.delete(); // clean index directory
+
       // Set up indexes
       logger.info("Building indexes...");
       ArrayList<String> tables = new ArrayList<>();
