@@ -69,7 +69,15 @@ public class LogicalPlanStringBuilder extends PlanBuilder {
     }
     plan.append(joinOp).append("\n");
     depth++;
-    for (LogicalOperator op : joinOp.getChildren()) op.accept(this);
+    boolean first = true;
+    for (LogicalOperator op : joinOp.getChildren()) {
+      if (!first) {
+        plan.append("\n");
+      } else {
+        first = false;
+      }
+      op.accept(this);
+    }
     depth--;
   }
 }

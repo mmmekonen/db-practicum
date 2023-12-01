@@ -5,8 +5,10 @@ import java.util.*;
 import net.sf.jsqlparser.expression.Expression;
 
 /**
- * A class to represent a join. This is the logical representation of the physical join operator.
- * The physical join operator can either be a tuple-nested loop join, a block-nested loop join, or a
+ * A class to represent a join. This is the logical representation of the
+ * physical join operator.
+ * The physical join operator can either be a tuple-nested loop join, a
+ * block-nested loop join, or a
  * sort-merge join.
  */
 public class Join extends LogicalOperator {
@@ -20,11 +22,13 @@ public class Join extends LogicalOperator {
   private SelectUF uf;
 
   /**
-   * Creates a logical join operator that concatenates two other operators together using a
+   * Creates a logical join operator that concatenates two other operators
+   * together using a
    * tuple-nested loop join.
    *
-   * @param children One logical operator to be joined.
-   * @param expression An expression that dictates what combinations of tuples are valid.
+   * @param children   One logical operator to be joined.
+   * @param expression An expression that dictates what combinations of tuples are
+   *                   valid.
    */
   public Join(Collection<LogicalOperator> children, Expression expression, SelectUF uf) {
     this.children = new ArrayList<>(children);
@@ -60,9 +64,12 @@ public class Join extends LogicalOperator {
   }
 
   /**
-   * @return A string representation of the operator (does not include the union-find elements)
+   * @return A string representation of the operator (does not include the
+   *         union-find elements)
    */
   public String toString() {
-    return "Join[" + expression + "]\n" + uf;
+    // not sure if this is correct
+    Expression r = uf.getRemainder();
+    return "Join[" + (r != null ? r : "") + "]\n" + uf;
   }
 }

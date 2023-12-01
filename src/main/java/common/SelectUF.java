@@ -3,7 +3,6 @@ package common;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -40,8 +39,7 @@ public class SelectUF {
   }
 
   public void union(String att1, String att2) {
-    if (elements.get(att1) == elements.get(att2))
-      return;
+    if (elements.get(att1) == elements.get(att2)) return;
     UFElement result = elements.get(att1);
     ArrayList<String> attrList2 = new ArrayList<>(elements.get(att2).attributes);
 
@@ -52,6 +50,22 @@ public class SelectUF {
     }
   }
 
+  public Expression getRemainder() {
+    HashSet<Expression> allRemainders = new HashSet<>();
+    for (UFElement e : elements.values()) {
+      allRemainders.addAll(e.getRemainder());
+    }
+    if (!allRemainders.isEmpty()) {
+      ArrayList<Expression> remainderList = new ArrayList<>(allRemainders);
+      Expression e = remainderList.remove(0);
+      while (!remainderList.isEmpty()) {
+        e = new AndExpression().withLeftExpression(e).withRightExpression(remainderList.remove(0));
+      }
+      return e;
+    }
+    return null;
+  }
+
   public Expression getWhere(Table table) {
     ArrayList<Column> cols = DBCatalog.getInstance().getTableSchema(table.getName());
     HashSet<Expression> conditions = new HashSet<>();
@@ -59,20 +73,20 @@ public class SelectUF {
       c.setTable(table);
       if (this.find(c) != null) {
         UFElement element = find(c);
-        if (element.getRemainder() != null)
-          conditions.addAll(element.getRemainder());
+        if (element.getRemainder() != null) conditions.addAll(element.getRemainder());
         if (element.lowerBound != null && element.upperBound != null) {
           if (find(c).lowerBound != Long.MIN_VALUE) {
-            GreaterThanEquals lower = new GreaterThanEquals()
-                .withLeftExpression(c)
-                .withRightExpression(new LongValue(find(c).lowerBound));
+            GreaterThanEquals lower =
+                new GreaterThanEquals()
+                    .withLeftExpression(c)
+                    .withRightExpression(new LongValue(find(c).lowerBound));
             conditions.add(lower);
-
           }
           if (find(c).upperBound != Long.MAX_VALUE) {
-            MinorThanEquals upper = new MinorThanEquals()
-                .withLeftExpression(c)
-                .withRightExpression(new LongValue(find(c).upperBound));
+            MinorThanEquals upper =
+                new MinorThanEquals()
+                    .withLeftExpression(c)
+                    .withRightExpression(new LongValue(find(c).upperBound));
             conditions.add(upper);
           }
         } else if (element.lowerBound != null && find(c).lowerBound != Long.MIN_VALUE) {
@@ -101,8 +115,14 @@ public class SelectUF {
 
   public String toString() {
     StringBuilder result = new StringBuilder();
+    boolean first = true;
     for (UFElement e : elements.values()) {
-      result.append(e).append("\n");
+      if (!first) {
+        result.append("\n");
+      } else {
+        first = false;
+      }
+      result.append(e);
     }
     return result.toString();
   }
