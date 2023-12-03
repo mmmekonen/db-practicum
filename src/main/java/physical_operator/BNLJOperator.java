@@ -89,6 +89,7 @@ public class BNLJOperator extends Operator {
       }
       if (satisfied) {
         advance();
+        //System.out.println(tuple);
         return tuple;
       }
 

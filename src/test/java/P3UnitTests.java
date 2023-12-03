@@ -47,7 +47,7 @@ public class P3UnitTests {
     DBCatalog.getInstance().setIndexInfo();
 
     gatherStats(path, DBCatalog.getInstance());
-    DBCatalog.getInstance().setStats();
+    DBCatalog.getInstance().setStats(false);
 
     String queriesFile =
         Objects.requireNonNull(classLoader.getResource("samples/input/queries.sql")).getPath();

@@ -1,6 +1,7 @@
 package common;
 
 import java.util.*;
+
 import logical_operator.*;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
@@ -229,10 +230,18 @@ public class QueryPlanBuilder {
       return child;
   }
 
-  public String stringBuilder(Statement stmnt) {
+  public String logicalString(Statement stmnt) {
     LogicalOperator lop = logicalPlan(stmnt);
     LogicalPlanStringBuilder sb = new LogicalPlanStringBuilder();
     lop.accept(sb);
     return sb.toString();
+  }
+
+  public String physicalString(Statement stmnt) {
+    LogicalOperator rootOperator = logicalPlan(stmnt);
+
+    PhysicalPlanBuilder builder = new PhysicalPlanBuilder();
+    rootOperator.accept(builder);
+    return builder.toString();
   }
 }

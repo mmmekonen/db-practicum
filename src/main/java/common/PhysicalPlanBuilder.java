@@ -96,9 +96,11 @@ public class PhysicalPlanBuilder extends PlanBuilder {
     if (indexInfo != null) {
       OptimalSelection optimalSelection = new OptimalSelection();
 
+      /* 
       System.out.println("selectOp.getExpression(): " + selectOp.getExpression());
       System.out.println("scanOp.getTableName(): " + scanOp.getTableName());
       System.out.println("indexInfo: " + indexInfo);
+      */
 
       ArrayList<Object> lowestCost = optimalSelection.getOptimalColumn(
           selectOp.getExpression(), scanOp.getTableName(), indexInfo);
@@ -225,10 +227,12 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       plan.append("-");
     }
     plan.append(op).append("\n");
-    for (Operator child : op.getChildren())
+    for (Operator child : op.getChildren()) {
       buildString(child, depth + 1, plan);
+    }
   }
 
+  @Override
   public String toString() {
     StringBuilder plan = new StringBuilder();
     int depth = 0;

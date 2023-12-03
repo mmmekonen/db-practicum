@@ -62,7 +62,7 @@ public class Compiler {
 
       // gather statistics
       gatherStats();
-      db.setStats();
+      db.setStats(true);
       logger.info("Created database statistics");
 
       for (File file : (new File(inputDir + "/db/indexes").listFiles()))
@@ -111,7 +111,7 @@ public class Compiler {
             // output logical plan
             File logicalPlanFile = new File(outputDir, "query" + counter + "_logicalplan");
             FileWriter writer = new FileWriter(logicalPlanFile);
-            writer.write(queryPlanBuilder.stringBuilder(statement));
+            writer.write(queryPlanBuilder.logicalString(statement));
             writer.close();
 
             // output physical plan

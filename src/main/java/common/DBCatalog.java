@@ -118,9 +118,9 @@ public class DBCatalog {
   }
 
   /** Sets the statistics for all the relations in the databse. */
-  public void setStats() {
+  public void setStats(boolean verbose) {
     try {
-      System.out.println("setting stats");
+      if (verbose) System.out.println("setting stats");
       Scanner s = new Scanner(new File(dbDirectory + "/stats.txt"));
       while (s.hasNextLine()) {
         String[] params = s.nextLine().split("[, ]");
@@ -134,11 +134,11 @@ public class DBCatalog {
       System.out.println(e + ": Could not find stats file");
     }
 
-    System.out.println("stats1: " + stats);
+    if (verbose) System.out.println("stats1: " + stats);
   }
 
   public ArrayList<String> getTableStats(String tableName) {
-    System.out.println("stats: " + stats);
+    //System.out.println("stats: " + stats);
     return stats.get(tableName);
   }
 
@@ -293,7 +293,7 @@ public class DBCatalog {
         buffer.flip();
         fileInputStream.close();
         int att = buffer.getInt();
-        System.out.println("att: " + att);
+        //System.out.println("att: " + att);
         return att;
       } else {
         fileInputStream.close();

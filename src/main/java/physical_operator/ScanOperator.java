@@ -74,6 +74,7 @@ public class ScanOperator extends Operator {
     }
   }
 
+  @Override
   public String toString() {
     return "TableScan[" + tableName + "]";
   }
