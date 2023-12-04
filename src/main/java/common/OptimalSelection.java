@@ -15,6 +15,9 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 
+/**
+ * A class to find the optimal selection for a given query.
+ */
 public class OptimalSelection {
 
   private HashMap<String, ArrayList<Double>> costs;
@@ -23,6 +26,9 @@ public class OptimalSelection {
   public String tableName;
   private DBCatalog dbCatalog;
 
+  /**
+   * Creates an OptimalSelection object.
+   */
   public OptimalSelection() {
     this.costs = new HashMap<>();
     this.columnInfo = new HashMap<>();
@@ -30,6 +36,13 @@ public class OptimalSelection {
     this.dbCatalog = DBCatalog.getInstance();
   }
 
+  /**
+   * Helper function that returns an ArrayList of all the binary expressions in
+   * the given expression.
+   * 
+   * @param Expression e the expression to get the binary expressions from.
+   * @return an ArrayList of all the binary expressions in the given expression.
+   */
   public ArrayList<Expression> getBinaryExpressions(Expression e) {
     ArrayList<Expression> binaryExpressions = new ArrayList<>();
     if (e instanceof AndExpression) {
@@ -42,72 +55,40 @@ public class OptimalSelection {
     return binaryExpressions;
   }
 
+  /**
+   * Returns the optimal column to use for the given expression.
+   * 
+   * @param expression the expression to find the optimal column for.
+   * @param tableName  the name of the table the expression is in.
+   * @param indexInfo  the index information for the table.
+   * @return an ArrayList containing the optimal column, whether to use an index
+   *         or not, and the cost of the optimal column.
+   */
   public ArrayList<Object> getOptimalColumn(
       Expression expression, String tableName, HashMap<String, ArrayList<Integer>> indexInfo) {
 
     this.tableName = tableName;
     ArrayList<Expression> binaryExpressions = getBinaryExpressions(expression);
 
-    /*
-    for (Expression e : binaryExpressions) {
-      if (e == null) {
-        System.out.println("null");
-      } else {
-        System.out.println(e.toString());
-      }
-    }
-    */
-
     for (Expression e : binaryExpressions) {
       Expression left = ((BinaryExpression) e).getLeftExpression();
       Expression right = ((BinaryExpression) e).getRightExpression();
 
-      //System.out.println('"' + left.toString() + '"' + " " + '"' + right.toString() + '"');
-
       if (right instanceof Column && left instanceof Column) {
-        //System.out.println("both are columns");
         continue;
       } else if (left instanceof Column) {
-
-        /*
-        System.out.println("left is column");
-        System.out.println("right is " + right.toString());
-
-        System.out.println(right.getClass());
-        */
-
         int value = (int) ((LongValue) right).getValue();
-
-        //System.out.println("value: " + value);
-
         updateRange(left.toString(), value, e);
       } else if (right instanceof Column) {
-
-        //System.out.println("right is column");
-        //System.out.println("left is " + left.toString());
         int value = (int) ((LongValue) left).getValue();
-
-        //System.out.println("value: " + value);
-
         updateRange(right.toString(), value, e);
       }
     }
 
-    //System.out.println("columnInfo: " + columnInfo);
-
-    //System.out.println("ENTERING FOR LOOP");
-
     for (String column : columnInfo.keySet()) {
-
-      //System.out.println("column: " + column);
-
       String c1 = column.split("\\.")[1];
 
       boolean hasIndex = indexInfo.containsKey(c1);
-
-      //System.out.println(indexInfo);
-
-      //System.out.println("hasIndex: " + hasIndex);
 
       double indexCost = 0;
 
@@ -148,20 +129,12 @@ public class OptimalSelection {
         // clustered
         boolean clustered = indexInfo.get(c1).get(0) == 1;
 
-        /*
-        System.out.println("p: " + p);
-        System.out.println("t: " + t);
-        System.out.println("l: " + l);
-        System.out.println("r: " + r);
-        System.out.println("range: " + range);
-        System.out.println("clustered: " + clustered);
-        */
-
         // index cost
         if (clustered) {
           indexCost = 3 + p * r;
         } else {
-          indexCost = 3 + l * r + p * r;
+          // changed from 3 + l * r + t * r to 3 + l * r + t * r
+          indexCost = 3 + l * r + t * r;
         }
       } else {
         indexCost = Integer.MAX_VALUE;
@@ -172,29 +145,17 @@ public class OptimalSelection {
       // tuples in base table
       int tb = (int) Double.parseDouble(tableStats.get(0));
 
-      //System.out.println("s: " + s);
-      //System.out.println("tb: " + tb);
-
       ArrayList<Integer> allRange2 = columnInfo.get(column);
-      //System.out.println(allRange2);
+      // System.out.println(allRange2);
       double r2 = allRange2.get(1) - allRange2.get(0) + 1;
 
-      //System.out.println(r2);
-      //System.out.println(colMax + " " + colMin);
-
-      if (!hasIndex) reductionInfo.put(column, ((1.0 * r2) / (1.0 * (colMax - colMin + 1))));
+      if (!hasIndex)
+        reductionInfo.put(column, ((1.0 * r2) / (1.0 * (colMax - colMin + 1))));
 
       // non index cost
       double nonIndexCost = 0;
 
       nonIndexCost = ((double) (tb * s)) / ((double) 4096);
-
-      /* 
-      System.out.println("______________________");
-      System.out.println("indexCost: " + indexCost);
-      System.out.println("nonIndexCost: " + nonIndexCost);
-      System.out.println("______________________");
-      */
 
       // if the non index cost is higher
       if (nonIndexCost > indexCost) {
@@ -226,25 +187,21 @@ public class OptimalSelection {
     }
 
     lowestCost.add(reductionInfo);
-
-    //System.out.println(lowestCost);
-    //System.out.println("RETURNING");
     return lowestCost;
   }
 
+  /**
+   * Updates the range of the given column based on the given value and
+   * expression.
+   * 
+   * @param column
+   * @param value
+   * @param expression
+   */
   public void updateRange(String column, Integer value, Expression expression) {
 
-    // ArrayList<String> tableStats =
-    // DBCatalog.getInstance().getTableStats(tableName);
     ArrayList<String> tableStats = dbCatalog.getTableStats(tableName);
     ArrayList<Integer> range = new ArrayList<>();
-    /* 
-    System.out.println("updateRange(column, value, expression");
-    System.out.println("ts: " + tableStats);
-    System.out.println(columnInfo);
-    System.out.println(column);
-    */
-
     if (columnInfo.containsKey(column)) {
       range = columnInfo.get(column);
     } else {
@@ -258,8 +215,6 @@ public class OptimalSelection {
         }
       }
     }
-
-    System.out.println("range: " + range);
 
     if (expression instanceof GreaterThan) {
       if (value > range.get(0)) {
@@ -285,9 +240,6 @@ public class OptimalSelection {
         range.set(0, value);
       }
     }
-
-    //System.out.println(range);
-    //System.out.println(expression.getClass());
 
     columnInfo.put(column, range);
   }
