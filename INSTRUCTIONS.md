@@ -10,6 +10,9 @@ an explanation of where the implementation is found (i.e. which classes/methods 
 ## Implementation For Each Logical Selection Operator
 an explanation of where the implementation is found (i.e. which classes/methods perform it), as well as an explanation of your logic
 
+## Index/Non-index Choice
+The code determines whether or not to choose an index based on the cost function described in 3.3. (Tuples in base * size of tuple / 4096 for full scan, 3 + p * r for clustered index and 3 + l * r + p * r). Then, the best path is chosen based on which provides the lowest cost.
+
 ## Join Order
 The code that determines the optimal Join order can be found in DetermineJoinOrder.java. There, above the class definition, is a comment explaining all of the logic for determining the join order.
 
