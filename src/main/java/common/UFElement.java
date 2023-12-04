@@ -6,6 +6,9 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.schema.Column;
 import visitors.SelectExpressionVisitor;
 
+/**
+ * An element of a union-find data structure
+ */
 public class UFElement {
 
   public enum BoundType {
@@ -14,26 +17,42 @@ public class UFElement {
     EQUALS
   }
 
+  
   ArrayList<String> attributes;
   HashSet<Expression> remainder;
   Long upperBound;
   Long lowerBound;
 
+  /**
+   * A basic constructor for the element
+   */
   public UFElement() {
     this.attributes = new ArrayList<>();
     this.remainder = new HashSet<>();
   }
 
+  /**
+   * Returns the equality condition of the element, if there is one
+   * @return a Long corresponding to the equality condition of the element
+   */
   public Long getEqualityCon() {
     if (upperBound != null && lowerBound != null && upperBound.equals(lowerBound))
       return upperBound;
     else return null;
   }
 
-  public HashSet<Expression> getRemainder() {
+  /**
+   * Returns the set of remainder expressions in the element
+   * @return A set of binary expressions
+   */
+  public Set<Expression> getRemainder() {
     return remainder;
   }
 
+  /**
+   * Concatenates the remainder expressions into a single expression
+   * @return A single expression corresponding to the remainders held by the element
+   */
   public Expression getRemainderExpression() {
     Expression e = null;
     ArrayList<Expression> remainderList = new ArrayList<>(remainder);
@@ -44,10 +63,20 @@ public class UFElement {
     return e;
   }
 
+  /**
+   * Adds an expression to the set of remainders held by the element
+   * @param e The expression to be added
+   */
   public void addRemainder(Expression e) {
     remainder.add(e);
   }
 
+  /**
+   * A method to add an attribute to the element
+   * @param attr The attribute to be added
+   * @param bound A bound corresponding with that attribute
+   * @param type The type of bound
+   */
   public void addAttribute(Column attr, long bound, BoundType type) {
     attributes.add(attr.toString());
     if (type == BoundType.UPPER)
@@ -60,10 +89,19 @@ public class UFElement {
     }
   }
 
+  /**
+   * A method to add an attribute to the element
+   * @param attr The attribute to be added
+   */
   public void addAttribute(Column attr) {
     attributes.add(attr.toString());
   }
 
+  /**
+   * A method to merge this element with another, preserving data across 
+   * both elememnts
+   * @param other The element to be merged with
+   */
   public void union(UFElement other) {
     this.attributes.addAll(other.attributes);
     this.upperBound =
@@ -81,6 +119,12 @@ public class UFElement {
     this.remainder.addAll(other.remainder);
   }
 
+  /**
+   * A method to determine if a tuple satisfies the bounds set by this element
+   * @param tuple the tuple to be checked
+   * @param schema the schema of the tuple
+   * @return true iff the tuple satisfies the bounds stored in this element
+   */
   public boolean satisfied(Tuple tuple, List<Column> schema) {
     SelectExpressionVisitor visitor = new SelectExpressionVisitor(tuple, schema);
     this.getRemainderExpression().accept(visitor);
@@ -94,6 +138,10 @@ public class UFElement {
     return false;
   }
 
+
+  /**
+   * A method to return a string representation of this element
+   */
   public String toString() {
     return "["
         + attributes

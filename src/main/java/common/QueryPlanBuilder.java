@@ -110,7 +110,7 @@ public class QueryPlanBuilder {
   public Operator buildPlan(Statement stmnt) {
     LogicalOperator rootOperator = logicalPlan(stmnt);
     PhysicalPlanBuilder builder = new PhysicalPlanBuilder();
-    System.out.println(physicalString(stmnt));
+    //physicalString(stmnt);
     rootOperator.accept(builder);
     return builder.getRoot();
   }
@@ -229,16 +229,27 @@ public class QueryPlanBuilder {
       return child;
   }
 
+  /**
+   * A method to create the string representation of the logical plan corresponding with a statement
+   * @param stmnt The statement from which the plan will be created
+   * @return A string representation of the logical plan
+   */
   public String logicalString(Statement stmnt) {
+
     LogicalOperator lop = logicalPlan(stmnt);
+    
     LogicalPlanStringBuilder sb = new LogicalPlanStringBuilder();
     lop.accept(sb);
     return sb.toString();
   }
 
+  /**
+   * A method to create the string representation of the physical plan corresponding with a statement
+   * @param stmnt The statement from which the plan will be created
+   * @return A string representation of the physical plan
+   */
   public String physicalString(Statement stmnt) {
     LogicalOperator rootOperator = logicalPlan(stmnt);
-
     PhysicalPlanBuilder builder = new PhysicalPlanBuilder();
     rootOperator.accept(builder);
     return builder.toString();

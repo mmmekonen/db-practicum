@@ -12,16 +12,29 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import visitors.ComparisonExtractor;
 
+/**
+ * A union-find object to determine bounds on the tables in a statement, for
+ * use in pushing bounds across joins
+ */
 public class SelectUF {
 
+  //The elements of the union-find data structure
   private HashMap<String, UFElement> elements;
 
+  /**
+   * A constructor to create a union-find data structure from an expression
+   * @param e An expression which will be read into the union-find
+   */
   public SelectUF(Expression e) {
     elements = new HashMap<>();
     ComparisonExtractor c = new ComparisonExtractor(this);
     e.accept(c);
   }
 
+  /**
+   * Adds an expression, and all the bounds therein, to the union-find
+   * @param e the expression to be added to the union-find
+   */
   public void add(UFElement e) {
     ArrayList<String> temp = new ArrayList<>(e.attributes);
     for (String s : temp) {
@@ -34,10 +47,20 @@ public class SelectUF {
     }
   }
 
+  /**
+   * Searches for an element within the union-find
+   * @param attr A column used to search the data structure
+   * @return A union-find element, containing a list of attributes and bounds
+   */
   public UFElement find(Column attr) {
     return elements.get(attr.toString());
   }
 
+  /**
+   * A method to merge two elements of the union-find data structure
+   * @param att1 An attribute of one of the elements to be merged
+   * @param att2 An attribute of another element to be merged
+   */
   public void union(String att1, String att2) {
     if (elements.get(att1) == elements.get(att2)) return;
     UFElement result = elements.get(att1);
@@ -50,6 +73,10 @@ public class SelectUF {
     }
   }
 
+  /**
+   * A method to get the expressions not captured by the elements of the union-find
+   * @return An expression derived from those added to the union-find data structure
+   */
   public Expression getRemainder() {
     HashSet<Expression> allRemainders = new HashSet<>();
     for (UFElement e : elements.values()) {
@@ -66,6 +93,11 @@ public class SelectUF {
     return null;
   }
 
+  /**
+   * A usable expression that can be used on the table provided to the method
+   * @param table A table from which to build the predicate 
+   * @return An expression that can be used as the "where" clause in an SQL query
+   */
   public Expression getWhere(Table table) {
     ArrayList<Column> cols = DBCatalog.getInstance().getTableSchema(table.getName());
     HashSet<Expression> conditions = new HashSet<>();
@@ -113,6 +145,9 @@ public class SelectUF {
     return null;
   }
 
+  /**
+   * A method to return the string representation of the union-find data structure
+  */
   public String toString() {
     StringBuilder result = new StringBuilder();
     boolean first = true;

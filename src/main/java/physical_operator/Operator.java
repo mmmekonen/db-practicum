@@ -106,5 +106,6 @@ public abstract class Operator {
     }
   }
 
+  
   public abstract List<Operator> getChildren();
 }

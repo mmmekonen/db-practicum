@@ -2,6 +2,9 @@ package common;
 
 import logical_operator.*;
 
+/**
+ * An abstract class for visitor objects operating on logical plans
+ */
 public abstract class PlanBuilder {
 
   public abstract void visit(Scan scanOp);

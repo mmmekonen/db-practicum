@@ -108,6 +108,13 @@ public class Compiler {
           Operator plan = queryPlanBuilder.buildPlan(statement);
 
           if (outputToFiles) {
+            // output data
+            File outfile = new File(outputDir, "query" + counter);
+            long timeElapsed = System.currentTimeMillis();
+            plan.dump(outfile);
+            timeElapsed = System.currentTimeMillis() - timeElapsed;
+            logger.info("Query processing time: " + timeElapsed + "ms");
+
             // output logical plan
             File logicalPlanFile = new File(outputDir, "query" + counter + "_logicalplan");
             FileWriter writer = new FileWriter(logicalPlanFile);
@@ -120,12 +127,6 @@ public class Compiler {
             writer.write(plan.toString());
             writer.close();
 
-            // output data
-            File outfile = new File(outputDir, "query" + counter);
-            long timeElapsed = System.currentTimeMillis();
-            plan.dump(outfile);
-            timeElapsed = System.currentTimeMillis() - timeElapsed;
-            logger.info("Query processing time: " + timeElapsed + "ms");
           } // else {
           // plan.dump(System.out);
           // }

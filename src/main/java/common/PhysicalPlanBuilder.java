@@ -222,6 +222,12 @@ public class PhysicalPlanBuilder extends PlanBuilder {
     root = new DuplicateEliminationOperator(child);
   }
 
+  /**
+   * A helper method to walk a stringbuilder object down a chain of operators
+   * @param op The operator the stringbuilder is on
+   * @param depth The number of operators previously visited
+   * @param plan The stringbuilder object
+   */
   private void buildString(Operator op, int depth, StringBuilder plan) {
     for (int i = 0; i < depth; i++) {
       plan.append("-");
@@ -232,6 +238,10 @@ public class PhysicalPlanBuilder extends PlanBuilder {
     }
   }
 
+  /**
+   * A generic toString method for the physical plan
+   * @return the last physical plan built by this object
+   */
   @Override
   public String toString() {
     StringBuilder plan = new StringBuilder();

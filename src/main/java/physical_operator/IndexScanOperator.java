@@ -176,10 +176,16 @@ public class IndexScanOperator extends Operator {
     super.reset(0);
   }
 
+  /**
+   * returns a string representation of this operator
+   */
   public String toString() {
     return "IndexScan[" + tableName + "," + attribute + "," + highkey + "," + lowkey + "]";
   }
 
+  /**
+   * Returns the list of children belonging to this operator
+   */
   public List<Operator> getChildren() {
     ArrayList<Operator> temp = new ArrayList<>();
     temp.add(scanner);

@@ -74,11 +74,17 @@ public class ScanOperator extends Operator {
     }
   }
 
+  /**
+   * returns a string representation of this operator
+   */
   @Override
   public String toString() {
     return "TableScan[" + tableName + "]";
   }
 
+  /**
+   * Returns the list of children belonging to this operator
+   */
   public List<Operator> getChildren() {
     return new ArrayList<>();
   }

@@ -49,10 +49,16 @@ public class DuplicateEliminationOperator extends Operator {
     return null;
   }
 
+  /**
+   * Returns a string representation of this operator
+   */
   public String toString() {
     return "DupElim";
   }
 
+  /**
+   * Returns the list of children belonging to this operator
+   */
   public List<Operator> getChildren() {
     ArrayList<Operator> temp = new ArrayList<>();
     temp.add(child);

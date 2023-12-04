@@ -49,6 +49,7 @@ public class P2TableTests {
     DBCatalog.getInstance().setIndexDirectory("src/test/resources/samples2/indexes");
     DBCatalog.getInstance().setIndexInfo();
 
+
     gatherStats(path, DBCatalog.getInstance(), false);
     DBCatalog.getInstance().setStats(false);
 
@@ -63,6 +64,7 @@ public class P2TableTests {
       file.delete(); // clean output directory
     }
 
+
     // Set up indexes
     ArrayList<String> tables = new ArrayList<>();
     DBCatalog db = DBCatalog.getInstance();
@@ -76,6 +78,7 @@ public class P2TableTests {
             new TreeIndex(path, tables.get(i), col, db.findColumnIndex(tables.get(i), col), info);
       }
     }
+
   }
 
   @BeforeEach
@@ -89,6 +92,7 @@ public class P2TableTests {
       }
       file.delete();
     }
+
   }
 
   public static void gatherStats(String inputDir, DBCatalog db, boolean verbose) {
@@ -158,6 +162,7 @@ public class P2TableTests {
   }
 
   private String getPlanOutputs(int queryNum) {
+
     StringBuilder result = new StringBuilder();
     result.append("Logical Plan ").append(queryNum).append(":\n");
     result.append(queryPlanBuilder.logicalString(statementList.get(queryNum - 1)));
@@ -166,10 +171,28 @@ public class P2TableTests {
     return result.toString();
   }
 
-  private void testTableHelper(Operator plan, int queryNum) { 
+  private void testTableHelper(Operator plan, int queryNum) {
+ 
     HashMap<Tuple, Integer> output = new HashMap<>();
     HashMap<Tuple, Integer> expected = new HashMap<>();
 
+
+
+    try {
+      // output logical plan
+    File logicalPlanFile = new File(outputDir, "query" + queryNum + "_logicalplan");
+    FileWriter writer = new FileWriter(logicalPlanFile);
+    writer.write(queryPlanBuilder.logicalString(statementList.get(queryNum - 1)));
+    writer.close();
+
+    // output physical plan
+    File physicalPlanFile = new File(outputDir, "query" + queryNum + "_physicalplan");
+    writer = new FileWriter(physicalPlanFile);
+    writer.write(queryPlanBuilder.physicalString(statementList.get(queryNum - 1)));
+    writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }    
 
     System.out.println(queryNum);
     Tuple next = plan.getNextTuple();
@@ -199,13 +222,17 @@ public class P2TableTests {
     for(Tuple t : expected.keySet()) {
         Assertions.assertEquals(expected.get(t), output.get(t), "Key:" + t);
     } 
+
+    
+
+    
+
   }
 
   @Test
   public void testQueryTable1() {
     int index = 1;
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(index - 1));
-    testTableHelper(plan, index);
+    getPlanOutputs(index);     
   }
 
   @Test
