@@ -44,7 +44,6 @@ import visitors.ExpressionSplitter;
  */
 public class QueryPlanBuilder {
 
-  SelectUF conditions;
 
   /**
    * Method to translate statement to logical query plan
@@ -63,18 +62,17 @@ public class QueryPlanBuilder {
     List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
     Distinct distinct = plainSelect.getDistinct();
     List<Join> joins = plainSelect.getJoins();
-    if (where != null) {
-      this.conditions = new SelectUF(where);
-    } else {
-      conditions = null;
-    }
+    SelectUF conditions = null;
+    if (where != null) conditions = new SelectUF(where);
+    //System.out.println(conditions);
+    
 
     // make logical query plan
     LogicalOperator rootOperator;
     if (joins == null)
-      rootOperator = selectHelper(table);
+      rootOperator = selectHelper(table, conditions);
     else
-      rootOperator = joinHelper(table, joins, where);
+      rootOperator = joinHelper(table, joins, where, conditions);
     rootOperator = projectionHelper(rootOperator, selects);
     rootOperator = sortHelper(rootOperator, orderByElements, distinct);
     rootOperator = distinctHelper(rootOperator, distinct);
@@ -127,7 +125,7 @@ public class QueryPlanBuilder {
    *         next tuple in the
    *         table that matches the specified conditions
    */
-  private LogicalOperator selectHelper(Table table) {
+  private LogicalOperator selectHelper(Table table, SelectUF conditions) {
     if (conditions == null || conditions.getWhere(table) == null) {
       return new logical_operator.Scan(table.getName(), table.getAlias());
     }
@@ -203,11 +201,11 @@ public class QueryPlanBuilder {
    *         returns the next tuple
    *         in the joined tables
    */
-  private LogicalOperator joinHelper(Table original, List<Join> joins, Expression where) {
+  private LogicalOperator joinHelper(Table original, List<Join> joins, Expression where, SelectUF conditions) {
     ArrayList<LogicalOperator> children = new ArrayList<>();
-    children.add(selectHelper(original));
+    children.add(selectHelper(original, conditions));
     for (Join j : joins)
-      children.add(selectHelper((Table) j.getRightItem()));
+      children.add(selectHelper((Table) j.getRightItem(), conditions));
     return new logical_operator.Join(children, where, conditions);
   }
 

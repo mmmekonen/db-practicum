@@ -259,7 +259,7 @@ public class P2TableTests {
   public void testQueryTable9() {
     int index = 9;
     Operator plan = queryPlanBuilder.buildPlan(statementList.get(index - 1));
-    //testTableHelper(plan, index);
+    testTableHelper(plan, index);
   }
 
   @Test
