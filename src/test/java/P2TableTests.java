@@ -20,6 +20,7 @@ import jdk.jshell.spi.ExecutionControl;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Synonym;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 import org.junit.jupiter.api.Assertions;
@@ -82,9 +83,9 @@ public class P2TableTests {
     // clean temp directory before each query
     for (File file : (new File(tempDir).listFiles())) {
       if (file.isDirectory()) {
-        for (File f : file.listFiles()) {
+        /*for (File f : file.listFiles()) {
           f.delete();
-        }
+        }*/
       }
       file.delete();
     }
@@ -170,6 +171,7 @@ public class P2TableTests {
     HashMap<Tuple, Integer> expected = new HashMap<>();
 
 
+    System.out.println(queryNum);
     Tuple next = plan.getNextTuple();
     while (next != null) {
         Integer temp = output.putIfAbsent(next, 1);
@@ -190,7 +192,7 @@ public class P2TableTests {
         e.printStackTrace();
     }
 
-    System.out.println(getPlanOutputs(queryNum));
+    //System.out.println(getPlanOutputs(queryNum));
 
     Assertions.assertEquals(expected.keySet().size(), output.keySet().size());
 
@@ -287,22 +289,25 @@ public class P2TableTests {
   @Test
   public void testQueryTable13() {
     int index = 13;
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(index - 1));
+    QueryPlanBuilder qpb = new QueryPlanBuilder();
+    Operator plan = qpb.buildPlan(statementList.get(index - 1));
     testTableHelper(plan, index);
   }
 
   @Test
   public void testQueryTable14() {
     int index = 14;
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(index - 1));
+    QueryPlanBuilder qpb = new QueryPlanBuilder();
+    Operator plan = qpb.buildPlan(statementList.get(index - 1));
     testTableHelper(plan, index);
   }
 
   @Test
   public void testQueryTable15() {
     int index = 15;
-  
-    Operator plan = queryPlanBuilder.buildPlan(statementList.get(index - 1));
+
+    QueryPlanBuilder qpb = new QueryPlanBuilder();
+    Operator plan = qpb.buildPlan(statementList.get(index - 1));
     testTableHelper(plan, index);
     
   } 

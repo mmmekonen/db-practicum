@@ -5,6 +5,7 @@ import java.util.*;
 import logical_operator.*;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Synonym;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -108,8 +109,8 @@ public class QueryPlanBuilder {
    */
   public Operator buildPlan(Statement stmnt) {
     LogicalOperator rootOperator = logicalPlan(stmnt);
-
     PhysicalPlanBuilder builder = new PhysicalPlanBuilder();
+    System.out.println(physicalString(stmnt));
     rootOperator.accept(builder);
     return builder.getRoot();
   }
