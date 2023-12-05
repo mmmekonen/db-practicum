@@ -131,7 +131,6 @@ public class QueryPlanBuilder {
     conditions.getWhere(table).accept(e);
     String name = table.getAlias() != null ? table.getAlias().getName() : table.getName();
     Expression c = e.getConditions(name);
-    System.out.println(c);
     if (c == null) {
       return new logical_operator.Scan(table.getName(), table.getAlias());
     }

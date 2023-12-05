@@ -265,7 +265,7 @@ public class DBCatalog {
     buffer.flip();
     int numLeaves = buffer.getInt(4);
 
-    System.out.println("leaves: " + numLeaves);
+    // System.out.println("leaves: " + numLeaves);
 
     // close the file
     try {

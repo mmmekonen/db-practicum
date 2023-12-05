@@ -1,3 +1,0 @@
-BNLJ[Sailors.A = Reserves.G]
--TableScan[Sailors]
--TableScan[Reserves]

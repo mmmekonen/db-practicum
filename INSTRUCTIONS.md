@@ -11,7 +11,7 @@ Selection pushing is found in the **QueryPlanBuilder.java** file, using the **Se
 Logical operators are contained in the **logical_operator** folder. The only information they contain is their child (or children) operators, and the data necessary to perform their operation, such as a WHERE expression for selection and join operators, and a list of columns for sort or projection operators.
 
 ## Index/Non-index Choice
-The code determines whether or not to choose an index based on the cost function described in 3.3. (Tuples in base * size of tuple / 4096 for full scan, 3 + p * r for clustered index and 3 + l * r + p * r). Then, the best path is chosen based on which provides the lowest cost.
+The code determines whether or not to choose an index based on the cost function described in 3.3 and can be found in **OptimalSelection.java** and **QueryPlanBuilder.java** under the select visitor method. (Tuples in base * size of tuple / 4096 for full scan, 3 + p * r for clustered index and 3 + l * r + p * r). Then, the best path is chosen based on which provides the lowest cost.
 
 ## Join Order
 The code that determines the optimal Join order can be found in **DetermineJoinOrder.java**. There, above the class definition, is a comment explaining all of the logic for determining the join order.

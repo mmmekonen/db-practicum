@@ -92,10 +92,10 @@ public class PhysicalPlanBuilder extends PlanBuilder {
       OptimalSelection optimalSelection = new OptimalSelection();
 
       /*
-      System.out.println("selectOp.getExpression(): " + selectOp.getExpression());
-      System.out.println("scanOp.getTableName(): " + scanOp.getTableName());
-      System.out.println("indexInfo: " + indexInfo);
-      */
+       * System.out.println("selectOp.getExpression(): " + selectOp.getExpression());
+       * System.out.println("scanOp.getTableName(): " + scanOp.getTableName());
+       * System.out.println("indexInfo: " + indexInfo);
+       */
 
       ArrayList<Object> lowestCost =
           optimalSelection.getOptimalColumn(

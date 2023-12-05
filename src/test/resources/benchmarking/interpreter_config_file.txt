@@ -1,5 +1,3 @@
 src/test/resources/benchmarking/input
 src/test/resources/benchmarking/output
 src/test/resources/benchmarking/temp
-0
-1

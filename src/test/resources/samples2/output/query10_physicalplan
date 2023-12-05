@@ -1,6 +1,0 @@
-BNLJ[Sailors.A = Reserves.G AND Reserves.H = Boats.D AND Sailors.B < 150]
--BNLJ[Sailors.A = Reserves.G AND Reserves.H = Boats.D AND Sailors.B < 150]
---Select[Sailors.B <= 149]
----TableScan[Sailors]
---TableScan[Boats]
--TableScan[Reserves]

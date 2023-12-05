@@ -41,7 +41,7 @@ public class P2TableTests {
 
     DBCatalog.getInstance().setDataDirectory(path + "/db");
     DBCatalog.getInstance().setSortDirectory(tempDir);
-    DBCatalog.getInstance().setIndexDirectory("src/test/resources/samples2/indexes");
+    DBCatalog.getInstance().setIndexDirectory("src/test/resources/samples2/input/db/indexes");
     DBCatalog.getInstance().setIndexInfo();
 
     gatherStats(path, DBCatalog.getInstance(), false);
