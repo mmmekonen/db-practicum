@@ -151,13 +151,17 @@ public class SelectUF {
   public String toString() {
     StringBuilder result = new StringBuilder();
     boolean first = true;
+    HashSet<String> used = new HashSet<>();
     for (UFElement e : elements.values()) {
       if (!first) {
         result.append("\n");
       } else {
         first = false;
       }
-      result.append(e);
+      if (!used.contains(e.toString())) {
+        result.append(e);
+        used.add(e.toString());
+      }
     }
     return result.toString();
   }
