@@ -155,13 +155,17 @@ public class SelectUF {
   public String toString() {
     StringBuilder result = new StringBuilder();
     boolean first = true;
-    for (UFElement e : new HashSet<>(elements.values())) {
-      if (!first) {
-        result.append("\n");
-      } else {
-        first = false;
+    HashSet<String> used = new HashSet<>();
+    for (UFElement e : elements.values()) {
+      if (!used.contains(e.toString())) {
+        if (!first) {
+          result.append("\n");
+        } else {
+          first = false;
+        }
+        result.append(e);
+        used.add(e.toString());
       }
-      result.append(e);
     }
     return result.toString();
   }
