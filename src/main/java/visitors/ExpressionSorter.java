@@ -25,7 +25,8 @@ public class ExpressionSorter implements ExpressionVisitor {
   }
 
   /**
-   * The ExpressionSorter will keep track of how many tables it references, and can return this
+   * The ExpressionSorter will keep track of how many tables it references, and
+   * can return this
    * boolean
    *
    * @return true iff the expression references a single table
@@ -35,25 +36,33 @@ public class ExpressionSorter implements ExpressionVisitor {
   }
 
   /**
-   * If the expression only references one table, this will return that table's name, otherwise it
+   * If the expression only references one table, this will return that table's
+   * name, otherwise it
    * will return null
    *
    * @return null or a string
    */
   public String getTableName() {
-    if (onSingleTable()) return latestTable.getName();
-    else return null;
+    if (onSingleTable()) {
+      String name = latestTable.getAlias() != null ? latestTable.getAlias().getName()
+          : latestTable.getName();
+      return name;
+    } else
+      return null;
   }
 
   /**
-   * If the expression only references one table, this will return that table, otherwise it will
+   * If the expression only references one table, this will return that table,
+   * otherwise it will
    * return null
    *
    * @return null or a table
    */
   public Table getTable() {
-    if (onSingleTable()) return latestTable;
-    else return null;
+    if (onSingleTable())
+      return latestTable;
+    else
+      return null;
   }
 
   /**
@@ -69,13 +78,16 @@ public class ExpressionSorter implements ExpressionVisitor {
   }
 
   /**
-   * Adds the table from which the column originates to the set of tables tracked by the object
+   * Adds the table from which the column originates to the set of tables tracked
+   * by the object
    *
    * @param tableColumn The column to be visited
    */
   @Override
   public void visit(Column tableColumn) {
-    tables.add(tableColumn.getTable().getName());
+    Table t = tableColumn.getTable();
+    String name = t.getAlias() != null ? t.getAlias().getName() : t.getName();
+    tables.add(name);
     latestTable = tableColumn.getTable();
   }
 
