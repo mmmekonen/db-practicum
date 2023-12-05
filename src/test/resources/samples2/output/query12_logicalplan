@@ -1,0 +1,4 @@
+Join[S1.A < S2.A]
+[[S1.A, S2.A], equals null, min null, max null]
+-Leaf[Sailors]
+-Leaf[Sailors]

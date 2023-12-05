@@ -8,8 +8,7 @@ import net.sf.jsqlparser.expression.Expression;
 import visitors.SelectExpressionVisitor;
 
 /**
- * A class to represent a select operator on a relation. Takes a tuple from its
- * child operator and
+ * A class to represent a select operator on a relation. Takes a tuple from its child operator and
  * returns it if it satisfies the respective predicate in the WHERE clause.
  */
 public class SelectOperator extends Operator {
@@ -23,11 +22,10 @@ public class SelectOperator extends Operator {
   private UFElement element;
 
   /**
-   * Creates a select operator using an Operator as its child and an Expression to
-   * evaluate each
+   * Creates a select operator using an Operator as its child and an Expression to evaluate each
    * tuple by.
    *
-   * @param child      The select operator's child operator.
+   * @param child The select operator's child operator.
    * @param expression Expression from the WHERE clause of the query.
    */
   public SelectOperator(Operator child, Expression expression) {
@@ -42,8 +40,7 @@ public class SelectOperator extends Operator {
   }
 
   /**
-   * Iterates over the child operator until it finds a tuple that matches the
-   * conditions specified
+   * Iterates over the child operator until it finds a tuple that matches the conditions specified
    * in the expression
    *
    * @return The next tuple that matches the expression
@@ -73,16 +70,12 @@ public class SelectOperator extends Operator {
     return tuple;
   }
 
-  /**
-   * returns a string representation of this operator
-   */
+  /** returns a string representation of this operator */
   public String toString() {
     return "Select[" + expression + "]";
   }
 
-  /**
-   * Returns the list of children belonging to this operator
-   */
+  /** Returns the list of children belonging to this operator */
   public List<Operator> getChildren() {
     ArrayList<Operator> temp = new ArrayList<>();
     temp.add(child);

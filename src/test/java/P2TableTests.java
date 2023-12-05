@@ -3,24 +3,19 @@ import common.QueryPlanBuilder;
 import common.TreeIndex;
 import common.Tuple;
 import common.TupleReader;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import jdk.jshell.spi.ExecutionControl;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Synonym;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 import org.junit.jupiter.api.Assertions;
@@ -49,7 +44,6 @@ public class P2TableTests {
     DBCatalog.getInstance().setIndexDirectory("src/test/resources/samples2/indexes");
     DBCatalog.getInstance().setIndexInfo();
 
-
     gatherStats(path, DBCatalog.getInstance(), false);
     DBCatalog.getInstance().setStats(false);
 
@@ -64,7 +58,6 @@ public class P2TableTests {
       file.delete(); // clean output directory
     }
 
-
     // Set up indexes
     ArrayList<String> tables = new ArrayList<>();
     DBCatalog db = DBCatalog.getInstance();
@@ -78,7 +71,6 @@ public class P2TableTests {
             new TreeIndex(path, tables.get(i), col, db.findColumnIndex(tables.get(i), col), info);
       }
     }
-
   }
 
   @BeforeEach
@@ -86,13 +78,12 @@ public class P2TableTests {
     // clean temp directory before each query
     for (File file : (new File(tempDir).listFiles())) {
       if (file.isDirectory()) {
-        /*for (File f : file.listFiles()) {
+        for (File f : file.listFiles()) {
           f.delete();
-        }*/
+        }
       }
       file.delete();
     }
-
   }
 
   public static void gatherStats(String inputDir, DBCatalog db, boolean verbose) {
@@ -135,8 +126,8 @@ public class P2TableTests {
         }
 
         pid++;
-        if (verbose)System.out.println("there are " + pid + " pages in " + table);
-        if (verbose)System.out.println("there are " + len + " tuples in " + table);
+        if (verbose) System.out.println("there are " + pid + " pages in " + table);
+        if (verbose) System.out.println("there are " + len + " tuples in " + table);
 
         DBCatalog.getInstance().setNumPages(table, pid, len);
 
@@ -172,67 +163,65 @@ public class P2TableTests {
   }
 
   private void testTableHelper(Operator plan, int queryNum) {
- 
+
     HashMap<Tuple, Integer> output = new HashMap<>();
     HashMap<Tuple, Integer> expected = new HashMap<>();
 
+    // try {
+    // // output logical plan
+    // File logicalPlanFile = new File(outputDir, "query" + queryNum +
+    // "_logicalplan");
+    // FileWriter writer = new FileWriter(logicalPlanFile);
+    // writer.write(queryPlanBuilder.logicalString(statementList.get(queryNum -
+    // 1)));
+    // writer.close();
 
-
-    try {
-      // output logical plan
-    File logicalPlanFile = new File(outputDir, "query" + queryNum + "_logicalplan");
-    FileWriter writer = new FileWriter(logicalPlanFile);
-    writer.write(queryPlanBuilder.logicalString(statementList.get(queryNum - 1)));
-    writer.close();
-
-    // output physical plan
-    File physicalPlanFile = new File(outputDir, "query" + queryNum + "_physicalplan");
-    writer = new FileWriter(physicalPlanFile);
-    writer.write(queryPlanBuilder.physicalString(statementList.get(queryNum - 1)));
-    writer.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }    
+    // // output physical plan
+    // File physicalPlanFile = new File(outputDir, "query" + queryNum +
+    // "_physicalplan");
+    // writer = new FileWriter(physicalPlanFile);
+    // writer.write(queryPlanBuilder.physicalString(statementList.get(queryNum -
+    // 1)));
+    // writer.close();
+    // } catch (IOException e) {
+    // e.printStackTrace();
+    // }
 
     System.out.println(queryNum);
     Tuple next = plan.getNextTuple();
     while (next != null) {
-        Integer temp = output.putIfAbsent(next, 1);
-        if (temp != null) output.put(next, temp + 1);
-        next = plan.getNextTuple();
+      Integer temp = output.putIfAbsent(next, 1);
+      if (temp != null) output.put(next, temp + 1);
+      next = plan.getNextTuple();
     }
 
     try {
-        TupleReader reader = new TupleReader(expectedPath + "/query" + queryNum);
+      TupleReader reader = new TupleReader(expectedPath + "/query" + queryNum);
+      next = reader.readNextTuple();
+      while (next != null) {
+        Integer temp = expected.putIfAbsent(next, 1);
+        if (temp != null) expected.put(next, temp + 1);
         next = reader.readNextTuple();
-        while (next != null) {
-            Integer temp = expected.putIfAbsent(next, 1);
-            if (temp != null) expected.put(next, temp + 1);
-            next = reader.readNextTuple();
-        }
-    
+      }
+
     } catch (IOException e) {
-        e.printStackTrace();
+      e.printStackTrace();
     }
 
-    //System.out.println(getPlanOutputs(queryNum));
+    // System.out.println(getPlanOutputs(queryNum));
 
     Assertions.assertEquals(expected.keySet().size(), output.keySet().size());
 
-    for(Tuple t : expected.keySet()) {
-        Assertions.assertEquals(expected.get(t), output.get(t), "Key:" + t);
-    } 
-
-    
-
-    
-
+    for (Tuple t : expected.keySet()) {
+      Assertions.assertEquals(expected.get(t), output.get(t), "Key:" + t);
+    }
   }
 
   @Test
   public void testQueryTable1() {
     int index = 1;
-    getPlanOutputs(index);     
+    Operator plan = queryPlanBuilder.buildPlan(statementList.get(index - 1));
+    testTableHelper(plan, index);
   }
 
   @Test
@@ -312,7 +301,6 @@ public class P2TableTests {
     testTableHelper(plan, index);
   }
 
-  
   @Test
   public void testQueryTable13() {
     int index = 13;
@@ -336,7 +324,5 @@ public class P2TableTests {
     QueryPlanBuilder qpb = new QueryPlanBuilder();
     Operator plan = qpb.buildPlan(statementList.get(index - 1));
     testTableHelper(plan, index);
-    
-  } 
-  
+  }
 }

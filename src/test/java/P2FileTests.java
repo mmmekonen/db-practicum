@@ -2,8 +2,6 @@ import common.DBCatalog;
 import common.QueryPlanBuilder;
 import common.TreeIndex;
 import common.Tuple;
-import common.TupleReader;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -210,8 +208,7 @@ public class P2FileTests {
     }
   }
 
-
-  /* 
+  /*
   @Test
   public void testQueryFile1() throws ExecutionControl.NotImplementedException {
     Operator plan = queryPlanBuilder.buildPlan(statementList.get(0));
@@ -253,7 +250,7 @@ public class P2FileTests {
   public void testQueryFile7() throws ExecutionControl.NotImplementedException {
     Operator plan = queryPlanBuilder.buildPlan(statementList.get(6));
     testFileHelper(plan, 7);
-  } 
+  }
   */
 
   @Test

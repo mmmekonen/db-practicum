@@ -70,6 +70,6 @@ public class Join extends LogicalOperator {
   public String toString() {
     // not sure if this is correct
     Expression r = uf.getRemainder();
-    return "Join[" + (r != null ? r : "") + "]\n" + uf;
+    return "Join" + (r != null ? "[" + r + "]" : "") + "\n" + uf;
   }
 }

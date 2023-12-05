@@ -1,0 +1,3 @@
+ExternalSort[B.D]
+-Project[B.F, B.D]
+--TableScan[Boats]

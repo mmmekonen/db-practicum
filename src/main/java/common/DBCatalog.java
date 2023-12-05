@@ -138,7 +138,7 @@ public class DBCatalog {
   }
 
   public ArrayList<String> getTableStats(String tableName) {
-    //System.out.println("stats: " + stats);
+    // System.out.println("stats: " + stats);
     return stats.get(tableName);
   }
 
@@ -293,7 +293,7 @@ public class DBCatalog {
         buffer.flip();
         fileInputStream.close();
         int att = buffer.getInt();
-        //System.out.println("att: " + att);
+        // System.out.println("att: " + att);
         return att;
       } else {
         fileInputStream.close();

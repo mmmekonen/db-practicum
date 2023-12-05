@@ -103,8 +103,7 @@ public class OrderByElementExtractor implements ExpressionVisitor {
   /**
    * basic constructor for this class
    *
-   * @param schema the schema of the table is referenced by the statement this
-   *               visitor operates on
+   * @param schema the schema of the table is referenced by the statement this visitor operates on
    */
   public OrderByElementExtractor(ArrayList<Column> schema) {
     this.schema = schema;
@@ -144,11 +143,10 @@ public class OrderByElementExtractor implements ExpressionVisitor {
   }
 
   /**
-   * Function to get the index of a column, given its name, by iterating over the
-   * volumns and
+   * Function to get the index of a column, given its name, by iterating over the volumns and
    * checking each one
    *
-   * @param columns    an arraylist of columns to be checked against
+   * @param columns an arraylist of columns to be checked against
    * @param columnName the name of the column whose index is desired
    * @return
    */
@@ -162,23 +160,21 @@ public class OrderByElementExtractor implements ExpressionVisitor {
   }
 
   /**
-   * Helper function to create a conjunction a sub-expression and the expression
-   * held in the visitor
+   * Helper function to create a conjunction a sub-expression and the expression held in the visitor
    *
    * @param e The expression to be concatenated
    * @param t The table referenced by said expression
    */
   private void concatHelper(Expression e, Table t) {
     if (conditions.containsKey(t)) {
-      Expression newExpression = new AndExpression().withLeftExpression(conditions.get(t)).withRightExpression(e);
+      Expression newExpression =
+          new AndExpression().withLeftExpression(conditions.get(t)).withRightExpression(e);
       conditions.put(t, newExpression);
-    } else
-      conditions.put(t, e);
+    } else conditions.put(t, e);
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references
-   * one table, and
+   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
    * visits its sub-expressions if it does not
    *
    * @param andExpression The expression to be evaluated
@@ -188,8 +184,7 @@ public class OrderByElementExtractor implements ExpressionVisitor {
     ExpressionSorter visitor = new ExpressionSorter();
     andExpression.accept(visitor);
 
-    if (visitor.onSingleTable())
-      concatHelper(andExpression, visitor.getTable());
+    if (visitor.onSingleTable()) concatHelper(andExpression, visitor.getTable());
     else {
       andExpression.getLeftExpression().accept(this);
       andExpression.getRightExpression().accept(this);
@@ -311,8 +306,7 @@ public class OrderByElementExtractor implements ExpressionVisitor {
   }
 
   @Override
-  public void visit(LongValue longValue) {
-  }
+  public void visit(LongValue longValue) {}
 
   @Override
   public void visit(HexValue hexValue) {

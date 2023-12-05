@@ -96,16 +96,12 @@ public class InMemorySortOperator extends Operator {
     return null;
   }
 
-  /**
-   * returns a string representation of this operator
-   */
+  /** returns a string representation of this operator */
   public String toString() {
     return "InMemorySort" + orderByElements;
   }
 
-  /**
-   * Returns the list of children belonging to this operator
-   */
+  /** Returns the list of children belonging to this operator */
   public List<Operator> getChildren() {
     ArrayList<Operator> temp = new ArrayList<>();
     temp.add(child);

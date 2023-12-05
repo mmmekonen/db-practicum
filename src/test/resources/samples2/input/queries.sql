@@ -1,4 +1,4 @@
-SELECT DISTINCT R.G FROM Reserves R, Boats B WHERE R.H <> B.D AND R.H < 100 ORDER BY S.A;
+SELECT * FROM Sailors;
 SELECT Sailors.A FROM Sailors;
 SELECT Boats.F, Boats.D FROM Boats;
 SELECT Reserves.G, Reserves.H FROM Reserves;

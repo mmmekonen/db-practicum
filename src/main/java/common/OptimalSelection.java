@@ -15,9 +15,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 
-/**
- * A class to find the optimal selection for a given query.
- */
+/** A class to find the optimal selection for a given query. */
 public class OptimalSelection {
 
   private HashMap<String, ArrayList<Double>> costs;
@@ -26,9 +24,7 @@ public class OptimalSelection {
   public String tableName;
   private DBCatalog dbCatalog;
 
-  /**
-   * Creates an OptimalSelection object.
-   */
+  /** Creates an OptimalSelection object. */
   public OptimalSelection() {
     this.costs = new HashMap<>();
     this.columnInfo = new HashMap<>();
@@ -37,9 +33,9 @@ public class OptimalSelection {
   }
 
   /**
-   * Helper function that returns an ArrayList of all the binary expressions in
-   * the given expression.
-   * 
+   * Helper function that returns an ArrayList of all the binary expressions in the given
+   * expression.
+   *
    * @param Expression e the expression to get the binary expressions from.
    * @return an ArrayList of all the binary expressions in the given expression.
    */
@@ -57,12 +53,12 @@ public class OptimalSelection {
 
   /**
    * Returns the optimal column to use for the given expression.
-   * 
+   *
    * @param expression the expression to find the optimal column for.
-   * @param tableName  the name of the table the expression is in.
-   * @param indexInfo  the index information for the table.
-   * @return an ArrayList containing the optimal column, whether to use an index
-   *         or not, and the cost of the optimal column.
+   * @param tableName the name of the table the expression is in.
+   * @param indexInfo the index information for the table.
+   * @return an ArrayList containing the optimal column, whether to use an index or not, and the
+   *     cost of the optimal column.
    */
   public ArrayList<Object> getOptimalColumn(
       Expression expression, String tableName, HashMap<String, ArrayList<Integer>> indexInfo) {
@@ -149,8 +145,7 @@ public class OptimalSelection {
       // System.out.println(allRange2);
       double r2 = allRange2.get(1) - allRange2.get(0) + 1;
 
-      if (!hasIndex)
-        reductionInfo.put(column, ((1.0 * r2) / (1.0 * (colMax - colMin + 1))));
+      if (!hasIndex) reductionInfo.put(column, ((1.0 * r2) / (1.0 * (colMax - colMin + 1))));
 
       // non index cost
       double nonIndexCost = 0;
@@ -191,9 +186,8 @@ public class OptimalSelection {
   }
 
   /**
-   * Updates the range of the given column based on the given value and
-   * expression.
-   * 
+   * Updates the range of the given column based on the given value and expression.
+   *
    * @param column
    * @param value
    * @param expression

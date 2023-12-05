@@ -124,9 +124,8 @@ public class Compiler {
             // output physical plan
             File physicalPlanFile = new File(outputDir, "query" + counter + "_physicalplan");
             writer = new FileWriter(physicalPlanFile);
-            writer.write(plan.toString());
+            writer.write(queryPlanBuilder.physicalString(statement));
             writer.close();
-
           } // else {
           // plan.dump(System.out);
           // }

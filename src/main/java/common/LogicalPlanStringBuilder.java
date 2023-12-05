@@ -2,27 +2,23 @@ package common;
 
 import logical_operator.*;
 
-
-/**
- * A visitor class to build a string from a logical plan
- */
+/** A visitor class to build a string from a logical plan */
 public class LogicalPlanStringBuilder extends PlanBuilder {
 
   StringBuilder plan;
   int depth;
 
-  /**
-   * Basic constructor for the object
-   */
+  /** Basic constructor for the object */
   public LogicalPlanStringBuilder() {
     plan = new StringBuilder();
     depth = 0;
   }
 
   /**
-   * toString method that outputs the string in the stringbuilder, which will 
-   * be the logical plan after the visitor has been accepted/
-   * @return the string representation of the last visited logical plan 
+   * toString method that outputs the string in the stringbuilder, which will be the logical plan
+   * after the visitor has been accepted/
+   *
+   * @return the string representation of the last visited logical plan
    */
   public String toString() {
     return plan.toString();

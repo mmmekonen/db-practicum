@@ -87,17 +87,12 @@ public class ProjectionOperator extends Operator {
     return new Tuple(tupleValues);
   }
 
-  /**
-   * returns a string representation of this operator
-   */
+  /** returns a string representation of this operator */
   public String toString() {
     return "Project" + selectItems;
   }
 
-
-/**
-   * Returns the list of children belonging to this operator
-   */
+  /** Returns the list of children belonging to this operator */
   public List<Operator> getChildren() {
     ArrayList<Operator> temp = new ArrayList<>();
     temp.add(child);
