@@ -17,8 +17,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
   private HashMap<String, Expression> conditions;
 
   /**
-   * Creates an empty ExpressionSplitter object that keeps track of the
-   * expressions it visits using
+   * Creates an empty ExpressionSplitter object that keeps track of the expressions it visits using
    * a hashmap
    */
   public ExpressionSplitter() {
@@ -36,8 +35,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
   }
 
   /**
-   * A helper function to add an expression to the associated hashmap entry. If a
-   * hashmap entry
+   * A helper function to add an expression to the associated hashmap entry. If a hashmap entry
    * already exists, this function combines the two using a conjunction.
    *
    * @param e An expression to be tracked
@@ -45,15 +43,14 @@ public class ExpressionSplitter implements ExpressionVisitor {
    */
   private void concatHelper(Expression e, String t) {
     if (conditions.containsKey(t)) {
-      Expression newExpression = new AndExpression().withLeftExpression(conditions.get(t)).withRightExpression(e);
+      Expression newExpression =
+          new AndExpression().withLeftExpression(conditions.get(t)).withRightExpression(e);
       conditions.put(t, newExpression);
-    } else
-      conditions.put(t, e);
+    } else conditions.put(t, e);
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references
-   * one table, and
+   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
    * visits its sub-expressions if it does not
    *
    * @param andExpression The expression to be evaluated
@@ -63,8 +60,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
     ExpressionSorter visitor = new ExpressionSorter();
     andExpression.accept(visitor);
 
-    if (visitor.onSingleTable())
-      concatHelper(andExpression, visitor.getTableName());
+    if (visitor.onSingleTable()) concatHelper(andExpression, visitor.getTableName());
     else {
       andExpression.getLeftExpression().accept(this);
       andExpression.getRightExpression().accept(this);
@@ -84,8 +80,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references
-   * one table, and
+   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
    * visits its sub-expressions if it does not
    *
    * @param equalsTo The expression to be evaluated
@@ -95,13 +90,11 @@ public class ExpressionSplitter implements ExpressionVisitor {
     ExpressionSorter visitor = new ExpressionSorter();
     equalsTo.accept(visitor);
 
-    if (visitor.onSingleTable())
-      concatHelper(equalsTo, visitor.getTableName());
+    if (visitor.onSingleTable()) concatHelper(equalsTo, visitor.getTableName());
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references
-   * one table, and
+   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
    * visits its sub-expressions if it does not
    *
    * @param notEqualsTo The expression to be evaluated
@@ -111,13 +104,11 @@ public class ExpressionSplitter implements ExpressionVisitor {
     ExpressionSorter visitor = new ExpressionSorter();
     notEqualsTo.accept(visitor);
 
-    if (visitor.onSingleTable())
-      concatHelper(notEqualsTo, visitor.getTableName());
+    if (visitor.onSingleTable()) concatHelper(notEqualsTo, visitor.getTableName());
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references
-   * one table, and
+   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
    * visits its sub-expressions if it does not
    *
    * @param greaterThan The expression to be evaluated
@@ -127,13 +118,11 @@ public class ExpressionSplitter implements ExpressionVisitor {
     ExpressionSorter visitor = new ExpressionSorter();
     greaterThan.accept(visitor);
 
-    if (visitor.onSingleTable())
-      concatHelper(greaterThan, visitor.getTableName());
+    if (visitor.onSingleTable()) concatHelper(greaterThan, visitor.getTableName());
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references
-   * one table, and
+   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
    * visits its sub-expressions if it does not
    *
    * @param greaterThanEquals The expression to be evaluated
@@ -143,13 +132,11 @@ public class ExpressionSplitter implements ExpressionVisitor {
     ExpressionSorter visitor = new ExpressionSorter();
     greaterThanEquals.accept(visitor);
 
-    if (visitor.onSingleTable())
-      concatHelper(greaterThanEquals, visitor.getTableName());
+    if (visitor.onSingleTable()) concatHelper(greaterThanEquals, visitor.getTableName());
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references
-   * one table, and
+   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
    * visits its sub-expressions if it does not
    *
    * @param minorThan The expression to be evaluated
@@ -159,13 +146,11 @@ public class ExpressionSplitter implements ExpressionVisitor {
     ExpressionSorter visitor = new ExpressionSorter();
     minorThan.accept(visitor);
 
-    if (visitor.onSingleTable())
-      concatHelper(minorThan, visitor.getTableName());
+    if (visitor.onSingleTable()) concatHelper(minorThan, visitor.getTableName());
   }
 
   /**
-   * Adds the expression to the appropriate hashmap entry iff it only references
-   * one table, and
+   * Adds the expression to the appropriate hashmap entry iff it only references one table, and
    * visits its sub-expressions if it does not
    *
    * @param minorThanEquals The expression to be evaluated
@@ -175,8 +160,7 @@ public class ExpressionSplitter implements ExpressionVisitor {
     ExpressionSorter visitor = new ExpressionSorter();
     minorThanEquals.accept(visitor);
 
-    if (visitor.onSingleTable())
-      concatHelper(minorThanEquals, visitor.getTableName());
+    if (visitor.onSingleTable()) concatHelper(minorThanEquals, visitor.getTableName());
   }
 
   // unused operators
