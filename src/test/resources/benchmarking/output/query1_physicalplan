@@ -1,2 +1,4 @@
-Select[T1.A <= 4]
+BNLJ[T1.A = T2.B AND T2.A < 50]
+-Select[T2.A <= 49]
+--TableScan[Test1]
 -TableScan[Test1]

@@ -1,2 +1,6 @@
-Select[T1.A <= 99]
+Join[]
+[[Test2.B], equals null, min 100, max null]
+[[Test1.A, Test2.C], equals null, min null, max null]
 -Leaf[Test1]
+-Select[Test2.B >= 100]
+--Leaf[Test2]

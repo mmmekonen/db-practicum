@@ -1,2 +1,4 @@
-Select[T1.A <= 99]
+BNLJ[Test1.A = Test2.C AND Test2.B >= 100]
+-Select[Test2.B >= 100]
+--TableScan[Test2]
 -TableScan[Test1]

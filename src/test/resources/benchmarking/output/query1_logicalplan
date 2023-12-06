@@ -1,2 +1,6 @@
-Select[T1.A <= 4]
+Join[]
+[[T1.A, T2.B], equals null, min null, max null]
+[[T2.A], equals null, min null, max 49]
 -Leaf[Test1]
+-Select[T2.A <= 49]
+--Leaf[Test1]
