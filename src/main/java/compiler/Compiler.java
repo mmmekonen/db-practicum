@@ -49,6 +49,7 @@ public class Compiler {
     tempDir = args[2];
     setConfig();
     DBCatalog.getInstance().setDataDirectory(inputDir + "/db");
+    DBCatalog.getInstance().setSortDirectory(tempDir);
     try {
       String str = Files.readString(Path.of(inputDir + "/queries.sql"));
       Statements statements = CCJSqlParserUtil.parseStatements(str);
